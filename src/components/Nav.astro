@@ -1,0 +1,50 @@
+---
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'About' },
+  { href: '/case-studies', label: 'Case Studies' },
+  { href: '/writing', label: 'Writing' },
+  { href: '/contact', label: 'Contact' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header class="border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
+  <nav
+    class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between"
+    aria-label="Primary navigation"
+  >
+    <a
+      href="/"
+      class="text-gray-900 font-semibold tracking-tight hover:text-blue-600"
+      aria-label="Javier Cruz — Home"
+    >
+      Javier Cruz
+    </a>
+
+    <ul class="flex items-center gap-6 list-none m-0 p-0" role="list">
+      {navLinks.map(({ href, label }) => {
+        const isActive =
+          href === '/'
+            ? currentPath === '/'
+            : currentPath.startsWith(href);
+        return (
+          <li>
+            <a
+              href={href}
+              class={`text-sm font-medium transition-colors ${
+                isActive
+                  ? 'text-blue-600'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+              aria-current={isActive ? 'page' : undefined}
+            >
+              {label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  </nav>
+</header>
