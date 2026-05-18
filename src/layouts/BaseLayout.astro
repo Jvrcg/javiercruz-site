@@ -23,6 +23,17 @@ const {
 
 const siteUrl = 'https://javiercruz.com';
 const canonical = canonicalUrl ?? new URL(Astro.url.pathname, siteUrl).href;
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Javier Cruz',
+  url: siteUrl,
+  sameAs: ['https://linkedin.com/in/javiercruz'],
+  jobTitle: 'Senior B2B SaaS Performance Marketer',
+  description:
+    'Performance marketer writing honestly about dashboards, A/B testing, and operational workflows — and running this site as a public SEO/GEO experiment.',
+};
 ---
 
 <!doctype html>
@@ -61,6 +72,9 @@ const canonical = canonicalUrl ?? new URL(Astro.url.pathname, siteUrl).href;
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Person JSON-LD (sitewide) -->
+    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
 
     <slot name="head" />
   </head>

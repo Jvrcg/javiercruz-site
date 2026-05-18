@@ -1,138 +1,94 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-
-const personSchema = {
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Javier Cruz",
-  "url": "https://javiercruz.com",
-  "sameAs": [
-    "https://linkedin.com/in/javiercruz"
-  ],
-  "jobTitle": "Senior B2B SaaS Digital Marketing Professional",
-  "description": "Senior digital marketer specializing in B2B SaaS demand generation, paid media, and full-funnel strategy.",
-  "knowsAbout": [
-    "B2B SaaS Marketing",
-    "Paid Search",
-    "LinkedIn Advertising",
-    "Demand Generation",
-    "Marketing Operations",
-    "Pipeline Growth"
-  ]
-};
 ---
 
 <BaseLayout
   title="About — Javier Cruz"
-  description="Senior B2B SaaS digital marketer with [X]+ years in demand generation and paid media. My story, point of view on the industry, and what I'm looking for next."
+  description="Javier Cruz is a senior B2B SaaS performance marketer writing honestly about dashboards, A/B testing, and operational workflows — and running this site as a public SEO and GEO experiment."
 >
-  <Fragment slot="head">
-    <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
-  </Fragment>
 
   <article class="max-w-2xl mx-auto px-6 py-20">
 
-    <!-- Header -->
-    <header class="mb-16">
+    <header class="mb-12">
       <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-3">About</p>
-      <h1 class="text-4xl font-bold text-gray-900 leading-tight mb-6">
-        I'm Javier Cruz — a B2B marketer who thinks in pipelines, not campaigns.
+      <h1 class="text-4xl font-bold text-gray-900 leading-tight">
+        Javier Cruz
       </h1>
-      <p class="text-lg text-gray-600">
-        [X]+ years helping SaaS companies build demand generation engines that connect
-        marketing investment to closed revenue.
-      </p>
     </header>
 
-    <!-- My Story -->
-    <section aria-labelledby="story-heading" class="mb-14">
-      <h2 id="story-heading" class="text-xl font-semibold text-gray-900 mb-4">My story</h2>
-      <div class="prose prose-gray max-w-none text-gray-700 space-y-4">
-        <p>
-          [Write your origin story here — where you started, what pulled you toward B2B SaaS,
-          a pivotal moment or company that shaped how you think about marketing.]
-        </p>
-        <p>
-          [Describe the progression: roles, industries, scale of programs you've run.
-          Be specific — numbers build credibility.]
-        </p>
-        <p>
-          [What you've learned along the way that most marketers get wrong. This is
-          where you start to differentiate your perspective.]
-        </p>
-      </div>
-    </section>
+    <div class="text-gray-700 space-y-6 leading-relaxed">
 
-    <!-- POV on B2B Paid Media -->
-    <section aria-labelledby="pov-heading" class="mb-14 border-l-4 border-blue-600 pl-6">
-      <h2 id="pov-heading" class="text-xl font-semibold text-gray-900 mb-4">
-        My take on B2B paid media
-      </h2>
-      <div class="text-gray-700 space-y-4">
-        <p>
-          [Your honest, specific point of view — what you think the industry gets wrong,
-          what you've seen work that surprises people, a framework or mental model you
-          rely on. This section is what makes your site worth reading.]
-        </p>
-        <p>
-          Example starters:
-        </p>
-        <ul class="list-disc list-inside space-y-2 text-gray-600">
-          <li>"Most B2B paid programs are optimizing for the wrong thing…"</li>
-          <li>"The obsession with MQLs is costing SaaS companies real revenue…"</li>
-          <li>"LinkedIn is underpriced for enterprise if you know how to use it…"</li>
-        </ul>
-        <p>
-          [Replace the above with your actual perspective.]
-        </p>
-      </div>
-    </section>
-
-    <!-- What I'm Looking For -->
-    <section aria-labelledby="looking-for-heading" class="mb-14">
-      <h2 id="looking-for-heading" class="text-xl font-semibold text-gray-900 mb-4">
-        What I'm looking for
-      </h2>
-      <div class="text-gray-700 space-y-4">
-        <p>
-          [Be direct about the type of role, company stage, team, or engagement that
-          excites you. Specificity here filters in the right conversations and filters
-          out the wrong ones — both are valuable.]
-        </p>
-        <p>For example:</p>
-        <ul class="list-disc list-inside space-y-2 text-gray-600 mt-2">
-          <li>Series B–D SaaS companies with a defined ICP and sales motion</li>
-          <li>Founding or senior individual contributor roles with ownership of paid strategy</li>
-          <li>Teams that treat marketing as a revenue function, not a cost center</li>
-        </ul>
-        <p class="text-gray-700">
-          [Adjust to match your actual criteria.]
-        </p>
-      </div>
-    </section>
-
-    <!-- CTA -->
-    <footer class="border-t border-gray-100 pt-10">
-      <p class="text-gray-600 mb-6">
-        If that sounds like a fit — or you just want to compare notes on B2B marketing — I'd love to connect.
+      <p>
+        I'm a senior B2B SaaS performance marketer. I've spent the better part of a decade
+        running paid search, paid social, and demand generation programs for software companies —
+        the kind of work that lives in dashboards, attribution debates, and Friday afternoon
+        conversations about why the pipeline number looks the way it does.
       </p>
-      <div class="flex flex-wrap gap-4">
-        <a
-          href="https://linkedin.com/in/javiercruz"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-        >
-          Connect on LinkedIn
-        </a>
-        <a
-          href="/contact"
-          class="border border-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:border-gray-400 transition-colors"
-        >
-          Get in touch
-        </a>
-      </div>
-    </footer>
+
+      <p>
+        This site exists because I got tired of how performance marketing gets written about.
+        Most of it is either too shallow to be useful or too polished to be honest. The hard
+        parts — building a reporting stack that finance actually believes in, designing a test
+        that holds up when someone asks how you handled seasonality, figuring out which
+        operational workflows scale and which just relocate the bottleneck — those parts
+        rarely get written down. By the time you know them, you've mostly forgotten what
+        it felt like not to.
+      </p>
+
+      <p>
+        So I'm writing them down here.
+      </p>
+
+      <section aria-labelledby="focus-heading">
+        <h2 id="focus-heading" class="text-lg font-semibold text-gray-900 mb-3">
+          What I write about
+        </h2>
+        <p class="mb-4">Three areas, all connected:</p>
+        <ul class="space-y-3 list-none p-0">
+          <li class="flex gap-3">
+            <span class="text-blue-600 font-medium flex-shrink-0">Dashboards and reporting</span>
+            <span>— building measurement systems that change decisions, not just document what happened</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-blue-600 font-medium flex-shrink-0">A/B testing</span>
+            <span>— experiment design, statistical validity, and what to do when the data is inconclusive but someone still needs an answer</span>
+          </li>
+          <li class="flex gap-3">
+            <span class="text-blue-600 font-medium flex-shrink-0">Operational workflows</span>
+            <span>— the systems and processes behind the metrics; how high-performing marketing teams actually run</span>
+          </li>
+        </ul>
+      </section>
+
+      <section aria-labelledby="lab-heading">
+        <h2 id="lab-heading" class="text-lg font-semibold text-gray-900 mb-3">
+          The lab
+        </h2>
+        <p>
+          The site itself is an experiment. I'm treating it as a public SEO and GEO lab —
+          optimizing posts with real hypotheses, tracking rankings and AI-engine visibility,
+          and documenting what happens in <a href="/lab-notes" class="text-blue-600 hover:text-blue-700 transition-colors">Lab Notes</a>.
+          That includes the things that don't work.
+        </p>
+      </section>
+
+      <section aria-labelledby="newsletter-heading-about">
+        <h2 id="newsletter-heading-about" class="text-lg font-semibold text-gray-900 mb-3">
+          The newsletter
+        </h2>
+        <p>
+          <a href="/newsletter" class="text-blue-600 hover:text-blue-700 transition-colors">Notes from Page 2</a>
+          is where I share what I'm learning — from the writing, from the lab, and from the work.
+          Monthly, no filler.
+        </p>
+      </section>
+
+      <p class="pt-2 border-t border-gray-100">
+        If something I've written has been useful, or if you want to argue about attribution
+        models, I'm on <a href="https://linkedin.com/in/javiercruz" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 transition-colors">LinkedIn</a>.
+      </p>
+
+    </div>
 
   </article>
 </BaseLayout>

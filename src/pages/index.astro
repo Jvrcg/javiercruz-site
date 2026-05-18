@@ -4,132 +4,78 @@ import Subscribe from '../components/Subscribe.astro';
 ---
 
 <BaseLayout
-  title="Javier Cruz — B2B SaaS Digital Marketing Leader"
-  description="Senior B2B SaaS marketing professional specializing in demand generation, paid media, and pipeline growth. Helping SaaS companies turn ad spend into revenue."
+  title="Javier Cruz — Performance marketing, in the open."
+  description="Practitioner writing on dashboards, A/B testing, and the operational reality of performance marketing — plus an open SEO/GEO experiment tracking how this site ranks and gets cited."
 >
+
   <!-- Hero -->
   <section class="max-w-4xl mx-auto px-6 pt-24 pb-20">
     <div class="max-w-2xl">
-      <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-4">
-        B2B SaaS Digital Marketing
-      </p>
-      <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight mb-6">
-        I help SaaS companies turn paid media into predictable pipeline.
+      <h1 class="text-4xl sm:text-5xl font-bold text-gray-900 leading-tight mb-8">
+        Performance marketing, in the open.
       </h1>
       <p class="text-lg text-gray-600 mb-10 leading-relaxed">
-        Senior digital marketer with [X]+ years driving demand generation for B2B SaaS companies.
-        Specializing in paid search, paid social, and full-funnel strategy that connects ad spend
-        to closed revenue — not just clicks.
+        Most of what I know about this work I did not figure out alone. I had managers and senior
+        operators who were generous with their time and ruthless with their feedback. They taught
+        me that the work is only as good as the decision it changes, and that a test you cannot
+        defend is not really a test. This site is me writing those lessons down and passing them
+        forward.
       </p>
       <div class="flex flex-wrap gap-4">
         <a
-          href="https://linkedin.com/in/javiercruz"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          href="/writing"
+          class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
         >
-          Connect on LinkedIn
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-          </svg>
+          Read the Writing
         </a>
         <a
-          href="/case-studies"
-          class="inline-flex items-center gap-2 border border-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:border-gray-400 hover:text-gray-900 transition-colors"
+          href="/lab-notes"
+          class="border border-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:border-gray-400 hover:text-gray-900 transition-colors"
         >
-          View Case Studies
+          See the Lab Notes
         </a>
       </div>
     </div>
   </section>
 
-  <!-- Social Proof / Credibility Bar -->
-  <section class="border-y border-gray-100 bg-gray-50 py-12" aria-label="Career highlights">
+  <!-- What this site is -->
+  <section class="border-y border-gray-100 bg-gray-50 py-16" aria-labelledby="about-site-heading">
     <div class="max-w-4xl mx-auto px-6">
-      <p class="text-xs font-semibold text-gray-400 uppercase tracking-widest text-center mb-8">
-        Career Highlights
-      </p>
-      <dl class="grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
-        <div>
-          <dt class="text-sm text-gray-500 mb-1">Ad Spend Managed</dt>
-          <dd class="text-2xl font-bold text-gray-900">$[X]M+</dd>
-        </div>
-        <div>
-          <dt class="text-sm text-gray-500 mb-1">Pipeline Generated</dt>
-          <dd class="text-2xl font-bold text-gray-900">$[X]M</dd>
-        </div>
-        <div>
-          <dt class="text-sm text-gray-500 mb-1">Years in B2B SaaS</dt>
-          <dd class="text-2xl font-bold text-gray-900">[X]+</dd>
-        </div>
-        <div>
-          <dt class="text-sm text-gray-500 mb-1">Avg. CAC Reduction</dt>
-          <dd class="text-2xl font-bold text-gray-900">[X]%</dd>
-        </div>
-      </dl>
-    </div>
-  </section>
+      <h2 id="about-site-heading" class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-10">
+        What this site is
+      </h2>
+      <div class="grid sm:grid-cols-2 gap-10">
 
-  <!-- What I Do -->
-  <section class="max-w-4xl mx-auto px-6 py-20" aria-labelledby="services-heading">
-    <h2 id="services-heading" class="text-2xl font-bold text-gray-900 mb-12">
-      Where I focus
-    </h2>
-    <div class="grid sm:grid-cols-3 gap-8">
-      <article class="border border-gray-100 rounded-xl p-6">
-        <h3 class="font-semibold text-gray-900 mb-2">Paid Search & Social</h3>
-        <p class="text-sm text-gray-600">
-          Full-funnel Google Ads and LinkedIn campaigns built around pipeline targets,
-          not vanity metrics.
-        </p>
-      </article>
-      <article class="border border-gray-100 rounded-xl p-6">
-        <h3 class="font-semibold text-gray-900 mb-2">Demand Generation Strategy</h3>
-        <p class="text-sm text-gray-600">
-          Connecting marketing motions to revenue outcomes — from ICP definition
-          through to closed-won attribution.
-        </p>
-      </article>
-      <article class="border border-gray-100 rounded-xl p-6">
-        <h3 class="font-semibold text-gray-900 mb-2">Marketing Operations</h3>
-        <p class="text-sm text-gray-600">
-          CRM hygiene, attribution modeling, and reporting infrastructure that
-          gives sales and leadership clarity.
-        </p>
-      </article>
-    </div>
-  </section>
+        <article>
+          <h3 class="font-semibold text-gray-900 mb-3">The craft</h3>
+          <p class="text-gray-600 leading-relaxed">
+            Dashboards and reporting that drive decisions, not just describe what happened.
+            A/B testing done in a way you can actually defend. The operational workflows behind
+            the metrics — the parts of performance marketing nobody writes about honestly.
+          </p>
+          <a
+            href="/writing"
+            class="inline-block mt-4 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            Read the writing →
+          </a>
+        </article>
 
-  <!-- Featured Case Studies -->
-  <section class="bg-gray-50 py-20" aria-labelledby="case-studies-heading">
-    <div class="max-w-4xl mx-auto px-6">
-      <div class="flex items-center justify-between mb-12">
-        <h2 id="case-studies-heading" class="text-2xl font-bold text-gray-900">
-          Selected work
-        </h2>
-        <a href="/case-studies" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
-          All case studies →
-        </a>
-      </div>
-      <div class="grid sm:grid-cols-2 gap-6">
-        <a href="/case-studies/saas-pipeline-growth" class="group block bg-white border border-gray-100 rounded-xl p-6 hover:border-blue-200 hover:shadow-sm transition-all">
-          <p class="text-xs font-medium text-blue-600 uppercase tracking-wide mb-2">Paid Search</p>
-          <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors mb-2">
-            [Company A]: 3x Pipeline from Google Ads
-          </h3>
-          <p class="text-sm text-gray-600">
-            Rebuilt a fragmented paid search program to generate $[X]M in qualified pipeline within 6 months.
+        <article>
+          <h3 class="font-semibold text-gray-900 mb-3">The lab</h3>
+          <p class="text-gray-600 leading-relaxed">
+            This site is the experiment. Every post is optimized with a real hypothesis.
+            Rankings, traffic, and AI-engine visibility are tracked. Results — including
+            the things that don't work — are posted openly in Lab Notes.
           </p>
-        </a>
-        <a href="/case-studies/linkedin-cac-reduction" class="group block bg-white border border-gray-100 rounded-xl p-6 hover:border-blue-200 hover:shadow-sm transition-all">
-          <p class="text-xs font-medium text-blue-600 uppercase tracking-wide mb-2">Paid Social</p>
-          <h3 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors mb-2">
-            [Company B]: 40% LinkedIn CAC Reduction
-          </h3>
-          <p class="text-sm text-gray-600">
-            Restructured audience segmentation and creative testing to dramatically lower cost per opportunity.
-          </p>
-        </a>
+          <a
+            href="/lab-notes"
+            class="inline-block mt-4 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            See the lab notes →
+          </a>
+        </article>
+
       </div>
     </div>
   </section>
@@ -137,28 +83,4 @@ import Subscribe from '../components/Subscribe.astro';
   <!-- Newsletter -->
   <Subscribe variant="full" />
 
-  <!-- CTA -->
-  <section class="max-w-4xl mx-auto px-6 py-24 text-center" aria-labelledby="cta-heading">
-    <h2 id="cta-heading" class="text-3xl font-bold text-gray-900 mb-4">
-      Let's talk about your pipeline.
-    </h2>
-    <p class="text-gray-600 mb-8 max-w-xl mx-auto">
-      Whether you're scaling an existing program or building from scratch, I'd love to
-      hear what you're working on.
-    </p>
-    <div class="flex flex-wrap justify-center gap-4">
-      <a
-        href="/contact"
-        class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-      >
-        Get in touch
-      </a>
-      <a
-        href="/about"
-        class="border border-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:border-gray-400 transition-colors"
-      >
-        More about me
-      </a>
-    </div>
-  </section>
 </BaseLayout>

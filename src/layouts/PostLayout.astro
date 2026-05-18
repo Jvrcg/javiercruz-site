@@ -1,0 +1,116 @@
+---
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  publishDate: Date;
+  updatedDate?: Date;
+  tags?: string[];
+  canonicalURL?: string;
+  collection: 'writing' | 'lab-notes';
+}
+
+const {
+  title,
+  description,
+  publishDate,
+  updatedDate,
+  tags = [],
+  canonicalURL,
+  collection,
+} = Astro.props;
+
+const siteUrl = 'https://javiercruz.com';
+const canonical = canonicalURL ?? new URL(Astro.url.pathname, siteUrl).href;
+
+const datePublished = publishDate.toISOString();
+const dateModified = (updatedDate ?? publishDate).toISOString();
+
+const displayDate = publishDate.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+const articleSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: title,
+  description,
+  author: {
+    '@type': 'Person',
+    name: 'Javier Cruz',
+    url: siteUrl,
+  },
+  publisher: {
+    '@type': 'Person',
+    name: 'Javier Cruz',
+    url: siteUrl,
+  },
+  datePublished,
+  dateModified,
+  url: canonical,
+};
+
+const backHref = collection === 'writing' ? '/writing' : '/lab-notes';
+const backLabel = collection === 'writing' ? 'Writing' : 'Lab Notes';
+---
+
+<BaseLayout
+  title={`${title} — Javier Cruz`}
+  description={description}
+  canonicalUrl={canonical}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+  </Fragment>
+
+  <article class="max-w-2xl mx-auto px-6 py-20">
+
+    <nav class="mb-12" aria-label="Breadcrumb">
+      <a href={backHref} class="text-sm text-gray-500 hover:text-gray-700 transition-colors">
+        ← {backLabel}
+      </a>
+    </nav>
+
+    <header class="mb-12">
+      {tags.length > 0 && (
+        <ul class="flex flex-wrap gap-2 list-none p-0 mb-4" role="list" aria-label="Tags">
+          {tags.map(tag => (
+            <li>
+              <span class="text-xs font-medium text-blue-600 uppercase tracking-wide">{tag}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+      <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4">
+        {title}
+      </h1>
+      <p class="text-gray-600 text-lg mb-6">{description}</p>
+      <time
+        datetime={datePublished}
+        class="text-sm text-gray-400"
+      >
+        {displayDate}
+        {updatedDate && (
+          <span> · Updated <time datetime={dateModified}>{updatedDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</time></span>
+        )}
+      </time>
+    </header>
+
+    <div class="prose prose-gray max-w-none">
+      <slot />
+    </div>
+
+    <footer class="mt-20 border-t border-gray-100 pt-10">
+      <a
+        href={backHref}
+        class="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors"
+      >
+        ← Back to {backLabel}
+      </a>
+    </footer>
+
+  </article>
+</BaseLayout>
