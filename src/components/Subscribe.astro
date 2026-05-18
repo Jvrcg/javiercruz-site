@@ -1,0 +1,48 @@
+---
+interface Props {
+  variant?: 'full' | 'compact';
+}
+
+const { variant = 'full' } = Astro.props;
+---
+
+{variant === 'full' ? (
+  <section
+    class="bg-gray-50 border-y border-gray-100 py-16"
+    aria-labelledby="newsletter-heading"
+  >
+    <div class="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-8">
+      <div>
+        <h2 id="newsletter-heading" class="text-xl font-bold text-gray-900 mb-2">
+          Notes from Page 2
+        </h2>
+        <p class="text-gray-600 max-w-md">
+          A monthly field report on performance marketing, dashboards, and what I'm learning running this site as an SEO lab.
+        </p>
+      </div>
+      <a
+        href="https://notesfrompage2.beehiiv.com/subscribe"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="flex-shrink-0 bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center"
+      >
+        Subscribe
+      </a>
+    </div>
+  </section>
+) : (
+  <div class="border-t border-gray-100 pt-6 pb-2">
+    <p class="text-xs font-semibold text-gray-900 mb-1">Notes from Page 2</p>
+    <p class="text-xs text-gray-500 mb-3">
+      A monthly field report on performance marketing, dashboards, and what I'm learning running this site as an SEO lab.
+    </p>
+    <a
+      href="https://notesfrompage2.beehiiv.com/subscribe"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="inline-block text-xs font-medium text-blue-600 hover:text-blue-700 transition-colors"
+    >
+      Subscribe →
+    </a>
+  </div>
+)}
