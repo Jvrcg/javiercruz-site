@@ -3,7 +3,7 @@ import { getCollection, render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
 
 export async function getStaticPaths() {
-  const posts = await getCollection('writing');
+  const posts = await getCollection('playbooks');
   return posts.map(post => ({
     params: { slug: post.id },
     props: { post },
@@ -21,7 +21,7 @@ const { Content } = await render(post);
   updatedDate={post.data.updatedDate}
   tags={post.data.tags}
   canonicalURL={post.data.canonicalURL}
-  collection="writing"
+  collection="playbooks"
 >
   <Content />
 </PostLayout>

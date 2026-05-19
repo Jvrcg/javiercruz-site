@@ -11,8 +11,8 @@ const postSchema = z.object({
 });
 
 export const collections = {
-  writing: defineCollection({
-    loader: glob({ pattern: '**/*.md', base: './src/content/writing' }),
+  playbooks: defineCollection({
+    loader: glob({ pattern: '**/*.md', base: './src/content/playbooks' }),
     schema: postSchema,
   }),
   'lab-notes': defineCollection({

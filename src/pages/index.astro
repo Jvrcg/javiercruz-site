@@ -1,11 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Subscribe from '../components/Subscribe.astro';
 ---
 
 <BaseLayout
-  title="Javier Cruz — Performance marketing, in the open."
-  description="Practitioner writing on dashboards, A/B testing, and the operational reality of performance marketing — plus an open SEO/GEO experiment tracking how this site ranks and gets cited."
+  title="Javier Cruz: Performance marketing, in the open."
+  description="Practitioner writing on performance marketing reporting, A/B testing, and operational workflows, plus an open SEO/GEO experiment tracking how this site ranks and gets cited."
 >
 
   <!-- Hero -->
@@ -23,10 +22,10 @@ import Subscribe from '../components/Subscribe.astro';
       </p>
       <div class="flex flex-wrap gap-4">
         <a
-          href="/writing"
+          href="/playbooks"
           class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
         >
-          Read the Writing
+          Read the Playbooks
         </a>
         <a
           href="/lab-notes"
@@ -51,13 +50,13 @@ import Subscribe from '../components/Subscribe.astro';
           <p class="text-gray-600 leading-relaxed">
             Dashboards and reporting that drive decisions, not just describe what happened.
             A/B testing done in a way you can actually defend. The operational workflows behind
-            the metrics — the parts of performance marketing nobody writes about honestly.
+            the numbers. These are the parts of performance marketing nobody writes about honestly.
           </p>
           <a
-            href="/writing"
+            href="/playbooks"
             class="inline-block mt-4 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
           >
-            Read the writing →
+            Read the playbooks →
           </a>
         </article>
 
@@ -65,8 +64,8 @@ import Subscribe from '../components/Subscribe.astro';
           <h3 class="font-semibold text-gray-900 mb-3">The lab</h3>
           <p class="text-gray-600 leading-relaxed">
             This site is the experiment. Every post is optimized with a real hypothesis.
-            Rankings, traffic, and AI-engine visibility are tracked. Results — including
-            the things that don't work — are posted openly in Lab Notes.
+            Rankings, traffic, and AI-engine visibility are tracked. Results are posted openly
+            in Lab Notes, including the things that don't work.
           </p>
           <a
             href="/lab-notes"
@@ -79,8 +78,5 @@ import Subscribe from '../components/Subscribe.astro';
       </div>
     </div>
   </section>
-
-  <!-- Newsletter -->
-  <Subscribe variant="full" />
 
 </BaseLayout>

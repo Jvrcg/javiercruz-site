@@ -8,7 +8,7 @@ interface Props {
   updatedDate?: Date;
   tags?: string[];
   canonicalURL?: string;
-  collection: 'writing' | 'lab-notes';
+  collection: 'playbooks' | 'lab-notes';
 }
 
 const {
@@ -53,12 +53,12 @@ const articleSchema = {
   url: canonical,
 };
 
-const backHref = collection === 'writing' ? '/writing' : '/lab-notes';
-const backLabel = collection === 'writing' ? 'Writing' : 'Lab Notes';
+const backHref = collection === 'playbooks' ? '/playbooks' : '/lab-notes';
+const backLabel = collection === 'playbooks' ? 'Playbooks' : 'Lab Notes';
 ---
 
 <BaseLayout
-  title={`${title} — Javier Cruz`}
+  title={`${title} | Javier Cruz`}
   description={description}
   canonicalUrl={canonical}
 >

@@ -7,6 +7,9 @@ import tailwindcss from '@tailwindcss/vite';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://javiercruz.com',
+  redirects: {
+    '/writing': '/playbooks',
+  },
   integrations: [sitemap()],
 
   vite: {
