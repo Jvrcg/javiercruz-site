@@ -84,18 +84,5 @@ const personSchema = {
       <slot />
     </main>
     <Footer />
-    <!--
-      beehiiv v3 loader — placed at end of body so the full DOM
-      (including all [data-beehiiv-form] mount targets) is already
-      parsed when the script runs. async is preserved from the
-      original embed; at this position in the document it fires
-      after all content above is rendered.
-    -->
-    <script
-      is:inline
-      async
-      src="https://subscribe-forms.beehiiv.com/v3/loader.js"
-      data-beehiiv-form="26f9d689-97d8-4cbc-b827-3a4661fd40e1"
-    ></script>
   </body>
 </html>

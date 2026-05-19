@@ -1,21 +1,5 @@
 @import "tailwindcss";
 
-/*
-  Constrain the beehiiv v3 embed within its mount container.
-  The loader may inject absolutely-positioned or iframe elements;
-  these rules keep them in normal document flow.
-*/
-.beehiiv-mount {
-  position: relative;
-  overflow: hidden;
-}
-
-.beehiiv-mount iframe,
-.beehiiv-mount > * {
-  max-width: 100% !important;
-  position: static !important;
-}
-
 @layer base {
   html {
     scroll-behavior: smooth;
