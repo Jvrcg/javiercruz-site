@@ -18,13 +18,8 @@ const { variant = 'full' } = Astro.props;
       <p class="text-gray-600 mb-6 max-w-xl">
         A monthly field report on performance marketing, experimentation, and what I'm learning running this site as an SEO lab.
       </p>
-      <div class="max-w-xl w-full overflow-x-hidden">
-        <script
-          is:inline
-          async
-          src="https://subscribe-forms.beehiiv.com/v3/loader.js"
-          data-beehiiv-form="26f9d689-97d8-4cbc-b827-3a4661fd40e1"
-        ></script>
+      <div class="beehiiv-mount max-w-xl w-full">
+        <div data-beehiiv-form="26f9d689-97d8-4cbc-b827-3a4661fd40e1"></div>
       </div>
     </div>
   </section>
@@ -34,13 +29,8 @@ const { variant = 'full' } = Astro.props;
     <p class="text-xs text-gray-500 mb-4">
       A monthly field report on performance marketing, experimentation, and what I'm learning running this site as an SEO lab.
     </p>
-    <div class="w-full overflow-x-hidden">
-      <script
-        is:inline
-        async
-        src="https://subscribe-forms.beehiiv.com/v3/loader.js"
-        data-beehiiv-form="26f9d689-97d8-4cbc-b827-3a4661fd40e1"
-      ></script>
+    <div class="beehiiv-mount w-full">
+      <div data-beehiiv-form="26f9d689-97d8-4cbc-b827-3a4661fd40e1"></div>
     </div>
   </div>
 )}
