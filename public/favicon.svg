@@ -1,12 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <!-- Black square frame -->
+  <!-- Full black square: serves as frame border and J fill color -->
   <rect width="100" height="100" fill="#000"/>
-  <!-- White inner field -->
-  <rect x="7" y="7" width="86" height="86" fill="#fff"/>
-  <!-- J top crossbar -->
-  <rect x="16" y="14" width="68" height="14" fill="#000"/>
-  <!-- J vertical stem: right edge flush with white area, merging into right frame border -->
-  <rect x="70" y="14" width="23" height="70" fill="#000"/>
-  <!-- J hook: left portion and curve -->
-  <path d="M16,70 L16,80 Q16,93 40,93 Q62,93 70,80 L70,70 Z" fill="#000"/>
+  <!--
+    White negative-space cutout:
+    - Rectangular void from top-left (3,3) to where the J stem begins (84,3),
+      down the left side to hook entry (84,65)
+    - Then the inner arc of the J hook: semicircle center=(63,65) r=21,
+      sweeping clockwise from (84,65) down through (63,86) to (42,65)
+    - Back left across the bottom of the void to (3,65)
+    - Up the left edge to (3,3)
+    The right strip (x 84-100) stays black = the J stem / right frame border.
+    The hook outer arc sweeps below the frame, extending to y≈98.
+  -->
+  <path d="M 3 3 L 84 3 L 84 65 A 21 21 0 0 1 42 65 L 3 65 Z" fill="#fff"/>
 </svg>
