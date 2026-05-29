@@ -19,28 +19,78 @@
   }
 }
 
-/* Explicit prose heading hierarchy — non-layered so it beats preflight's
-   font-size:inherit reset regardless of @layer ordering. */
+/*
+  Article prose typography — non-layered so it beats Tailwind's preflight
+  h2{font-size:inherit} in @layer base regardless of specificity.
+  All sizes in rem so they are immune to em-chain inheritance.
+*/
+.prose {
+  font-size: 1.125rem;   /* 18px body text */
+  line-height: 1.7;
+  color: #1f2937;
+}
+
+.prose p {
+  margin-bottom: 1.25em;
+}
+
 .prose h2 {
-  font-size: 1.5em;
+  font-size: 1.75rem;    /* ~28px */
   font-weight: 700;
-  line-height: 1.333;
-  margin-top: 2em;
-  margin-bottom: 1em;
+  line-height: 1.25;
+  margin-top: 2.5rem;
+  margin-bottom: 0.75rem;
+  color: #111827;
 }
 
 .prose h3 {
-  font-size: 1.25em;
+  font-size: 1.375rem;   /* ~22px */
   font-weight: 600;
-  line-height: 1.6;
-  margin-top: 1.6em;
-  margin-bottom: 0.6em;
+  line-height: 1.35;
+  margin-top: 2rem;
+  margin-bottom: 0.5rem;
+  color: #111827;
 }
 
 .prose h4 {
-  font-size: 1em;
+  font-size: 1.125rem;   /* 18px — same size as body but bold */
   font-weight: 600;
   line-height: 1.5;
-  margin-top: 1.5em;
+  margin-top: 1.5rem;
+  margin-bottom: 0.375rem;
+  color: #111827;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.5rem;
+  margin-bottom: 1.25em;
+}
+
+.prose li {
   margin-bottom: 0.5em;
+}
+
+.prose a {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.prose a:hover {
+  color: #1d4ed8;
+}
+
+.prose blockquote {
+  border-left: 4px solid #d1d5db;
+  padding-left: 1.25rem;
+  margin-left: 0;
+  font-style: italic;
+  color: #4b5563;
+}
+
+.prose img {
+  border-radius: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
 }
