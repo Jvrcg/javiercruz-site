@@ -4,11 +4,7 @@ description: "An audience-overlap analysis mapping where the AI-infra buyer enga
 publishDate: 2026-05-29
 updatedDate: 2026-05-29
 tags: ["audience research", "channel strategy", "hacker news", "B2B SaaS"]
----
-
-# Where Does the AI Infrastructure Buyer Actually Live? A Hacker News Audience Map
-
-![HN Audience Overlap Map](/hn_audience_map.png)
+---![HN Audience Overlap Map](/hn_audience_map.png)
 
 Baseten's job description mentioned Reddit as a channel they're exploring to reach their audience. I wanted to understand that opportunity before discussing it in the interviews, so I built a Reddit audience overlap analysis. Unfortunately, Reddit has updated its API restrictions, which made it impossible without enterprise access, so I pivoted to the closest high-signal channel for a technical/infra focused audience, which is how I landed at Hacker News.
 

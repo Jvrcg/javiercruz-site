@@ -4,11 +4,7 @@ description: "A practical walkthrough for digital, growth, and performance marke
 publishDate: 2026-05-29
 updatedDate: 2026-05-29
 tags: ["tutorial", "audience research", "channel strategy", "hacker news"]
----
-
-# Building an Audience Map for Channel Expansion: Hacker News
-
-*A practical walkthrough for digital, growth, and performance marketers who want to know whether a new channel is worth their time and spend (before they spend).*
+---*A practical walkthrough for digital, growth, and performance marketers who want to know whether a new channel is worth their time and spend (before they spend).*
 
 ---
 

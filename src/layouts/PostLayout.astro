@@ -1,5 +1,6 @@
 ---
 import BaseLayout from './BaseLayout.astro';
+import 'github-markdown-css/github-markdown-light.css';
 
 interface Props {
   title: string;
@@ -99,7 +100,7 @@ const backLabel = collection === 'playbooks' ? 'Playbooks' : 'Lab Notes';
       </time>
     </header>
 
-    <div class="prose prose-gray max-w-none">
+    <div class="markdown-body">
       <slot />
     </div>
 
