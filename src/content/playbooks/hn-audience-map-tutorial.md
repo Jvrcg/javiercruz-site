@@ -50,7 +50,7 @@ If you're following this tutorial: feel free to paste any of the code below into
 
 ---
 
-## Step 1 — Pick your domains (this is the GTM work)
+## 1. Pick your domains (this is the GTM work)
 
 This is the single most important step. The map is only as good as the list you feed it. Spend more time here than you think you need.
 
@@ -75,7 +75,7 @@ Save your list in a Google Sheet with three columns: `domain`, `ring`, `why it m
 
 ---
 
-## Step 2 — Set up your environment
+## 2. Set up your environment
 
 Open Terminal on your Mac (`Cmd + Space`, type `terminal`, hit Enter).
 
@@ -106,7 +106,7 @@ You now have an empty project folder. Time to fill it.
 
 ---
 
-## Step 3 — Pull the data
+## 3. Pull the data
 
 This script asks Hacker News's Algolia API for every story matching each of your domains over the last 12 months, then pulls every commenter on every one of those stories. Output is one JSON file with the raw data.
 
@@ -252,7 +252,7 @@ This will take 30-60 minutes for 30 domains. Some domains (OpenAI, AWS, Microsof
 
 ---
 
-## Step 4 — Compute the overlap matrix
+## 4. Compute the overlap matrix
 
 Now we calculate how many commenters they share for every pair of domains. This is the math that turns "29,000 raw data points" into "Modal and Replicate share 26 commenters, which matters because when I did it, Modal only had 83 total."
 
@@ -324,7 +324,7 @@ This finishes in seconds. The terminal will print the top 15 strongest overlaps 
 
 ---
 
-## Step 5 — Visualize
+## 5. Visualize
 
 Create `visualize_static.py`, edit `FOCUS_DOMAINS` and `ANCHOR_DOMAIN` to match your own list, then run:
 
@@ -344,7 +344,7 @@ Circle size = total HN commenters (audience scale). Bigger circle, bigger audien
 
 ---
 
-## Step 6 — Read the map
+## 6. Read the map
 
 Three things to look at, in order:
 
