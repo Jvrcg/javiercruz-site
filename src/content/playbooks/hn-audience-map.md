@@ -1,6 +1,6 @@
 ---
 title: "Where Does the AI Infrastructure Buyer Actually Live?"
-description: "A Hacker News audience overlap analysis built for Baseten interview prep — mapping which companies share commenters across 31 AI/infra players."
+description: "A Hacker News audience overlap analysis built for Baseten interview prep, mapping which companies share commenters across 31 AI/infra players."
 publishDate: 2026-05-01
 tags: ["Audience Research", "Paid Media", "HN Analysis"]
 collection: playbooks
@@ -9,7 +9,7 @@ collection: playbooks
 
 Baseten's job description mentioned Reddit as a channel they're exploring to reach their audience. I wanted to understand that opportunity before discussing it in the interviews, so I built a Reddit audience overlap analysis. Unfortunately, Reddit has updated its API restrictions, which made it impossible without enterprise access, so I pivoted to the closest high-signal channel for a technical/infra focused audience, which is how I landed at Hacker News.
 
-I pulled 12 months (tried 6 months, but it was not enough) of HN stories across 31 companies in the AI/data stack. The group is made up of Baseten, its direct competitors, the foundation-model providers, and the broader infra layer, then mapped which companies share commenters to get as close as possible to the idea of "subreddit traffic flow". If the same people show up discussing two companies, those companies are competing for (or sharing) the same attention, which, depending on the channel, is how I would start building one of the targeting audiences.
+I pulled 12 months (tried 6 months, but it was not enough) of HN stories across 31 companies in the AI/data stack. The group is made up of Baseten, its direct competitors, the foundation-model providers, and the broader infra layer, and it was mapped to determine which companies share commenters to get as close as possible to the idea of "subreddit traffic flow". If the same people show up discussing two companies, those companies are competing for (or sharing) the same attention, which, depending on the channel, is how I would start building one of the targeting audiences.
 
 ## What I found
 
@@ -25,19 +25,19 @@ As AI adoption matures and intelligence becomes native to products rather than a
 
 ## The AI-search angle (AEO / GEO)
 
-There's a second reason this matters more now than it would have a few years ago. HN discussions are represented in the data that trains LLMs and in the sources that answer engines cite. Showing up on HN isn't just about reaching people — it's about being present in the inputs that determine which names AI tools recommend. While outside a paid media manager role, this would be low-hanging fruit that would support paid media efforts with social proof.
+There's a second reason this matters more now than it would have a few years ago. HN discussions are represented in the data that trains LLMs and in the sources that answer engines cite. Showing up on HN isn't just about reaching people; it's about being present in the inputs that determine which names AI tools recommend. While outside a paid media manager role, this would be low-hanging fruit that would support paid media efforts with social proof.
 
 ## What I'd do about it
 
 1. **Show up where the audience already is.** The infra cluster routes conversations through HuggingFace, Modal, and Replicate, not Baseten's own. Earned presence (technical content, Show HN launches, founder/engineer participation) in that adjacency is the cheapest and easiest way in.
 
-2. **Treat HN as a channel-fit test, not a guarantee.** Modal posts ~2x/month and gets traction. Cadence and content type matter more than channel choice — the audience is there, but the consistent presence isn't.
+2. **Treat HN as a channel-fit test, not a guarantee.** Modal posts ~2x/month and gets traction. Cadence and content type matter more than channel choice; the audience is there, but the consistent presence isn't.
 
-3. **Map before you buy.** This same overlap method works as a pre-spend audit for any channel (Reddit, paid social interest targeting, podcast/newsletter sponsorships) — to find where the buyer already clusters before allocating budget.
+3. **Map before you buy.** This same overlap method works as a pre-spend audit for any channel (Reddit, paid social interest targeting, podcast/newsletter sponsorships) to find where the buyer already clusters before allocating budget.
 
 ## Things to note
 
-Shared commenters approximate shared audience, not causal influence. The 12-month window matters — a 6-month cut missed slower-posting companies entirely. And HN skews toward a specific technical persona; it's one signal, not the whole market. This is a directional map, not an attribution model.
+Shared commenters approximate shared audience, not causal influence. The 12-month window matters, since a 6-month cut would have missed slower-posting companies entirely. And HN skews toward a specific technical persona; it's one signal, not the whole market. This is a directional map, not an attribution model.
 
 ---
 
