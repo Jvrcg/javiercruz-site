@@ -1,6 +1,6 @@
 ---
 title: "Building an Audience Map for Channel Expansion"
-description: "A practical walkthrough for digital, growth, and performance marketers who want to know whether a new channel is worth their time and spend — before they spend."
+description: "A practical walkthrough for digital, growth, and performance marketers who want to know whether a new channel is worth their time and spend (before they spend)."
 publishDate: 2026-05-01
 tags: ["Tutorial", "Audience Research", "HN Analysis"]
 collection: playbooks
@@ -10,11 +10,11 @@ collection: playbooks
 
 ## Why I built this
 
-I was doing channel research on a target company that mentioned Reddit as a place they were exploring. I wanted to understand which competitors share an audience, and the engagement volume.
+I was doing channel research on a target company that mentioned Reddit as a place they were exploring. I wanted to understand which competitors (direct and indirect) share an audience, and the engagement volume.
 
 Thanks to Reddit's 2023+ API restrictions, I had to abandon the idea since I did not have enterprise access. So I pivoted to the closest high-signal channel for a technical, infrastructure buying audience: **Hacker News**. HN has an open Algolia-backed API and the kind of audience that maps cleanly to a B2B buyer journey.
 
-The result is a network map where companies are nodes and shared commenters are edges, indicating which competitors and adjacent tools share an audience. Useful before you decide where to spend.
+The result is a network map where companies are nodes and shared commenters are edges, indicating which competitors and adjacent tools share an audience. Useful before you decide where to spend…
 
 This tutorial walks you through how to build the same thing for your own market. No coding background required. Plan on ~2 hours your first time through.
 
@@ -22,7 +22,7 @@ This tutorial walks you through how to build the same thing for your own market.
 
 ## Who this is for
 
-Digital, growth, and performance marketers who want a methodology for evaluating a new channel before they commit budget to it. If you've ever sat in a planning meeting and someone asked "Should we try Reddit / HN / Product Hunt?" and the answer was a vibe rather than data, this is for you.
+Digital, growth, and performance marketers who want a methodology for evaluating a new channel before they commit budget to it. If you've ever sat in a planning meeting and someone asked "Should we try Reddit / HN / Product Hunt / a new subreddit / X community?" and the answer was a vibe rather than data, this is for you.
 
 You don't need to know how to code. You do need to be willing to copy and paste a few commands into a terminal window.
 
@@ -34,59 +34,66 @@ You don't need to know how to code. You do need to be willing to copy and paste 
 - ~2 hours (the data pull runs in the background)
 - A GitHub account (free)
 - Python 3.9 or newer (free and quick install)
-- A list of 20–40 companies you want to map
+- A list of 20–40 companies (I ended with 31) you want to map (the GTM work, which is the most important step)
 
-No paid tools, no API keys, no scraping. HN's API is open.
+That's it. No paid tools, no API keys, no scraping. HN's API is open.
 
 ---
 
 ## An aside on using AI for this
 
-I built this with Claude as my coding pair. I'm a marketer, not an engineer. My opinion: **marketers should be using AI as much as possible, but they should be driving the strategy, dictating the vision, and reviewing every step and the final output.**
+I built this with Claude as my coding pair. I'm a marketer, not an engineer. So I want to flag my opinion: **marketers should be using AI as much as possible, but they should be driving the strategy, dictating the vision, and reviewing every step and the final output.**
 
-The AI is the leverage, the tool. You are the operator. Use the AI to write the code — don't outsource the thinking.
+The AI is the leverage, the tool. You are the operator. Use the AI to write the code; don't outsource the thinking.
+
+If you're following this tutorial: feel free to paste any of the code below into an LLM and ask "explain what this does" or "modify this to do X instead." That's exactly the workflow. Just make sure you can articulate the *why* at every step.
 
 ---
 
 ## Step 1 — Pick your domains (this is the GTM work)
 
-This is the single most important step. The map is only as good as the list you feed it.
+This is the single most important step. The map is only as good as the list you feed it. Spend more time here than you think you need.
 
 The framework I use is **four concentric rings around your anchor company**:
 
-- **Ring 1 — Direct competitors.** Who does your sales team compete against?
-- **Ring 2 — Adjacent tooling.** What the buyer uses alongside you.
+- **Ring 1 — Direct competitors.** Who does your sales team compete against (keep in mind the PMM and sales answer might vary)?
+- **Ring 2 — Adjacent tooling.** What the buyer uses alongside you. Their workflow.
 - **Ring 3 — Upstream / dependencies.** What sits beneath you in the stack.
-- **Ring 4 — Broader peripheral context.** Where the audience hangs out even when they're not talking about your category.
+- **Ring 4 — Broader peripheral context.** Where the audience hangs out even when they're not talking about your category (think of casting a wider net for contextual targeting).
+
+For a marketer evaluating a channel, the goal is range, not just direct competitors. If your map is only "us and our five competitors," you'll see a tight little cluster and miss the actual adjacency that tells you where the audience already lives.
 
 **Aim for 30–40 domains.** Fewer than 20 = the map looks empty. More than 50 = the visual becomes unreadable.
 
-Practical rules:
+A few practical rules for the list:
 - Use root domains (`example.com`), not subdomains
 - Lowercase everything
-- Be honest about including your own anchor company — if the absence is interesting, leave it in
+- Skip companies that don't have a clear web domain
+- Be honest about including your own employer or anchor (if the absence is interesting, leave it in!)
 
-Save your list in a Google Sheet with three columns: `domain`, `ring`, `why it matters`. The third column forces you to articulate why each domain belongs.
+Save your list in a Google Sheet with three columns: `domain`, `ring`, `why it matters`. The third column is for you, not the script. The approach forces you to articulate why each domain belongs.
 
 ---
 
 ## Step 2 — Set up your environment
 
-Open Terminal (`Cmd + Space`, type `terminal`, hit Enter).
+Open Terminal on your Mac (`Cmd + Space`, type `terminal`, hit Enter).
 
-Check Python:
+Check if you have Python:
 
 ```bash
 python3 --version
 ```
 
-If you see `Python 3.9.x` or higher, you're set. Then install the libraries:
+If you see `Python 3.9.x` or higher, you're set. If you get "command not found" or a pop-up asking to install developer tools, click Install and wait 5-10 minutes.
+
+Then install the libraries we need:
 
 ```bash
 pip3 install requests pandas networkx matplotlib
 ```
 
-Create a GitHub repo, then clone it locally:
+Create a GitHub repo for this project (https://github.com/new), then clone it locally:
 
 ```bash
 cd ~/Documents
@@ -95,11 +102,15 @@ cd YOUR_REPO_NAME
 mkdir data
 ```
 
+You now have an empty project folder. Time to fill it.
+
 ---
 
 ## Step 3 — Pull the data
 
-Create `fetch_hn_data.py` and paste this in:
+This script asks Hacker News's Algolia API for every story matching each of your domains over the last 12 months, then pulls every commenter on every one of those stories. Output is one JSON file with the raw data.
+
+Create a file called `fetch_hn_data.py` and paste this in:
 
 ```python
 import requests
@@ -109,6 +120,7 @@ from urllib.parse import urlparse
 from pathlib import Path
 
 DOMAINS = [
+    # Replace with your own list from Step 1
     "example1.com",
     "example2.com",
     "example3.com",
@@ -226,17 +238,23 @@ if __name__ == "__main__":
     main()
 ```
 
-Run it:
+**What this does, in plain English:** for each domain in your list, it asks HN's API for every story published in the last 12 months that points to that domain. It dedupes resubmissions (HN allows the same URL to be submitted multiple times). Then, for each story, it walks the comment tree and collects every unique commenter. The output is a JSON file with story metadata + commenter lists per domain.
+
+**Run it:**
 
 ```bash
 python3 fetch_hn_data.py
 ```
 
-This takes 30–60 minutes for 30 domains. Walk away — the script prints progress as it goes.
+This will take 30-60 minutes for 30 domains. Some domains (OpenAI, AWS, Microsoft) have hundreds of HN stories each, and we're hitting the API once per story to get the comment thread. Walk away. The script prints progress as it goes. Don't worry — I have included a step to surface what really matters, so those behemoths don't take over the actual research.
+
+**One important quirk to know:** HN's Algolia search treats your domain as a fuzzy query. If you search for `replicate.com`, you'll also get hits for `page-replica.com` and similar. The script filters those out by parsing the actual URL and matching the hostname. If you tune this code, don't break that filter, as false positives will pollute the rest of the analysis.
 
 ---
 
 ## Step 4 — Compute the overlap matrix
+
+Now we calculate how many commenters they share for every pair of domains. This is the math that turns "29,000 raw data points" into "Modal and Replicate share 26 commenters, which matters because when I did it, Modal only had 83 total."
 
 Create `compute_overlap.py`:
 
@@ -290,31 +308,39 @@ if __name__ == "__main__":
     main()
 ```
 
-Run it:
+**Two important things to understand here:**
+
+**Jaccard similarity** measures how much two audiences overlap relative to their combined size. It's the standard. But it has a flaw for this use case: when one domain has 10,000 commenters and another has 80, Jaccard will register very low even if every one of the smaller audience is also in the larger. That undersells real overlap.
+
+**Overlap coefficient** divides shared commenters by the *smaller* set's size. This is much better when audience sizes vary by orders of magnitude — when you're mapping an OpenAI scale company next to a Series B startup. We use this for the visualization.
+
+**Run it:**
 
 ```bash
 python3 compute_overlap.py
 ```
 
-Read the terminal output carefully before moving on. It often surfaces the most interesting structures before you even see the visual.
+This finishes in seconds. The terminal will print the top 15 strongest overlaps in your dataset. Read this carefully before moving on. It often surfaces interesting structures before you even see the visual, such as competitors who share audiences, those that seem isolated, and unexpected adjacencies.
 
 ---
 
 ## Step 5 — Visualize
 
-Create `visualize_static.py`, edit `FOCUS_DOMAINS` and `ANCHOR_DOMAIN` to match your list, then run:
+Create `visualize_static.py`, edit `FOCUS_DOMAINS` and `ANCHOR_DOMAIN` to match your own list, then run:
 
 ```bash
 python3 visualize_static.py
 open audience_map.png
 ```
 
-The map uses:
+You'll see a network where:
 - **Green lines** = audience movement within your focus cluster
-- **Blue circles** = focus cluster companies
-- **Gray circles** = broader market context
+- **Faint gray lines** = connections to the broader context
+- **Blue circles** = focus cluster (your competitors / adjacencies)
+- **Gray circles** = the broader market context
 - **Orange circle** = your anchor company
-- **Circle size** = total HN commenters
+
+Circle size = total HN commenters (audience scale). Bigger circle, bigger audience.
 
 ---
 
@@ -322,32 +348,49 @@ The map uses:
 
 Three things to look at, in order:
 
-**1. Where does your company sit?** If your anchor is isolated, the absence is the finding — the audience exists adjacent to your competitors, but you're not in it.
+**1. Where does YOUR company sit?** If your anchor is connected to several focus nodes by green lines, you're already showing up in the conversation. If it's isolated (like our anchor company in the example map), the absence *is* the finding — the audience exists adjacent to your competitors, but you're not in it.
 
-**2. Where's the gravitational hub?** One or two nodes will have edges to almost everything else. That's the room your audience is already in.
+**2. Where's the gravitational hub?** In most B2B markets, one or two nodes will have edges to almost everything else. That node is the room your audience is already in. If you're going to invest in earned presence on this channel, that's where the conversation routes through.
 
-**3. Which clusters separate?** What looks like one audience is often two. In my example, AI-infra companies clustered separately from the foundation-model giants — same broad market, different rooms. Real implications for content strategy and paid targeting.
+**3. Which clusters separate?** The map often reveals that what looks like one audience is actually two. In my example, the AI-infra companies clustered separately from the foundation-model giants. Same broad market, different rooms. That distinction has real implications for content strategy and paid targeting.
 
 ---
 
-## Caveats
+## Caveats and how to make this better
 
-- Shared commenters approximate shared audience, not causal influence
-- Some commenters are probably the companies themselves (engineers, founders)
-- HN skews technical and US-centric — one signal, not the whole market
-- The 12-month window matters — 6 months missed slower-posting companies entirely
-- Edge thresholds are a choice: lower = denser map, higher = cleaner clusters
+**Shared commenters approximate shared audience, not causal influence.** A commenter showing up in two threads doesn't mean one company influenced the other. It means they read both. That's still useful, but it's correlation, not attribution.
+
+**Some commenters are probably the companies themselves.** Engineers and founders comment on their own posts and sometimes on competitors'. The map slightly inflates the "audience overlap" relative to "internal team participation." For a deeper analysis, you could filter out known company employees (cross-reference HN usernames against LinkedIn/Twitter), but that's a v2 problem.
+
+**HN skews toward a specific persona.** Developer-adjacent, technical, often US-centric. This is one signal, not the whole market. For a B2C consumer brand, this method has limited applicability. For B2B selling to engineers, data teams, DevOps, and security is directly relevant.
+
+**The time window matters.** I started with 6 months, found that slower-posting companies vanished from the data entirely, and then expanded to 12 months. If your category includes high- and low-cadence posters in the same map, longer windows are usually better.
+
+**Edge thresholds are a choice, not a fact.** I set `MIN_OVERLAP_COEF = 0.10`. The smaller of the two audiences has to share at least 10% of its commenters with the other for a line to be drawn. Lower the threshold → denser map. Raise it → cleaner clusters but you'll lose weaker signals. Tune it for your data!
 
 ---
 
 ## Three real ways to use this on the job
 
-**1. Pre-spend channel audit.** Before allocating budget to a new channel, run the audience map first. If your buyer's adjacent communities aren't there, you're paying to reach the wrong audience. Map before you buy.
+**1. Pre-spend channel audit.** Before allocating budget to a new channel (Reddit, podcast sponsorships, newsletter buys, paid social interest targeting), run the audience map first (you can also request it from the AM or AE). If your buyer's adjacent communities aren't on that channel, you're paying to acquire the wrong audience. Map before you buy.
 
-**2. Competitive intel for ABM list-building.** The companies most overlapping with yours are often signaling shared ICP. Use the top overlapping domains as a research input for tier-1 account list refinement.
+**2. Competitive intel for ABM list-building.** The companies most overlapping with yours on a given channel are often signaling shared ICP. Pull the top 10 overlapping domains from your overlap matrix and treat them as a research input for tier-1 account list refinement.
 
-**3. Earned-presence prioritization.** The hub nodes are where the audience already congregates. Show HN launches, technical deep-dives, founder participation in adjacent threads — cheaper than paid, higher signal, compounds over time.
+**3. Earned-presence prioritization.** The "hub" nodes I described in Step 6 are where the audience already congregates. For content programs, that's where you want to show up. Show HN launches, technical deep-dives, founder participation in adjacent threads. Cheaper than paid, higher signal, compounds over time.
 
 ---
 
-*Code, sample data, and the full analysis are in the [hn-audience-map repo](https://github.com/Jvrcg/hn-audience-map). Built with Python and Claude as a coding pair.*
+## What you have now
+
+If you've made it through, you have:
+
+- A working data pipeline that pulls any HN domain's audience
+- A computed overlap matrix you can re-use for any analysis
+- A custom network visualization for your specific market
+- A defensible methodology for channel-fit conversations
+
+Fork it, swap in your own domains, and ship something. The work travels.
+
+---
+
+*Code, sample data, and the full analysis I built for an AI-infrastructure market are in this repo. Built with Python and Claude as a coding pair. Reach out if you have any questions or want to compare.*
