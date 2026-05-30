@@ -1,6 +1,6 @@
 ---
-title: "Building an Audience Map for Channel Expansion"
-description: "A practical walkthrough for digital, growth, and performance marketers who want to know whether a new channel is worth their time and spend (before they spend)."
+title: "6 Steps for Building an Audience Map for Channel Expansion"
+description: "A practical walkthrough for digital, growth, and performance marketers who want to know whether Hacker News is worth their time and spend (before they spend)."
 publishDate: 2026-05-01
 tags: ["Tutorial", "Audience Research", "HN Analysis"]
 collection: playbooks
