@@ -19,5 +19,4 @@
   },
   "devDependencies": {
 "sharp": "^0.34.5",
-"@tailwindcss/typography": "^0.5.15"  }
-}
+"@tailwindcss/typography": "^0.5.15"}
