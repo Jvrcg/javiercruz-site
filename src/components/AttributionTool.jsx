@@ -552,7 +552,7 @@ function DealTab() {
       </div>
       <div>
         <p style={{fontSize:12,color:"#6b6a68",margin:"0 0 6px"}}>Avg sales cycle by tier (days)</p>
-        <SimpleBar height={150} data={senTiers.map(([k,d])=>({label:d.label.split("/")[0].trim(),label2:avgCycleByTier[k]+"d",value:avgCycleByTier[k],color:d.color}))}/>
+        <SimpleBar height={150} data={senTiers.map(([k,d])=>({label:d.label.split("/")[0].trim(),label2:d.cycle+"d",value:d.cycle,color:d.color}))}/>
       </div>
     </div>
     <p style={{fontSize:12,color:"#6b6a68",margin:"0 0 6px"}}>Channel role — context for finance and leadership</p>
