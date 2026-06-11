@@ -30,6 +30,12 @@ const SEN_DEAL = {
   manager:    { label:"Manager",      track:"Both",           avgDeal:16000, cycle:65,  color:"#BA7517" },
   ic_analyst: { label:"IC / Analyst", track:"PLG",            avgDeal:9000,  cycle:35,  color:"#888780" },
 };
+const CH_DEALS = {
+  LinkedIn:     { c_suite_vp: 10000, director: 8000, manager: 6000, ic_analyst: 4000 },
+  "Google Ads": { c_suite_vp: 10000, director: 8000, manager: 6000, ic_analyst: 4000 },
+  G2:           { c_suite_vp: 32000, director: 24000, manager: 16000, ic_analyst: 9000 },
+  Programmatic: { c_suite_vp: 32000, director: 24000, manager: 16000, ic_analyst: 9000 },
+};
 const CAMPAIGNS = {
   LinkedIn:     ["LI-ENT-Awareness-DataPipeline","LI-ENT-Awareness-DataIntegration","LI-MOFU-Demo-DataEngineers","LI-MOFU-Trial-AnalyticsTeams","LI-Retarget-SiteVisitors-30d","LI-Retarget-PricingPage-14d","LI-ABM-Strategic-ENT"],
   "Google Ads": ["GGL-Brand-Syncflow-Exact","GGL-NonBrand-ETL-Tools","GGL-NonBrand-DataPipeline","GGL-Competitor-Pipeform-Alt","GGL-Competitor-Streamlink-Alt","GGL-RLSA-HighIntent-Visitors"],
@@ -77,7 +83,7 @@ CHANNELS.forEach(ch => {
     const isOpp = isMQL && rng() < rates.mql2opp;
     const isClosed = isOpp && rng() < rates.opp2close;
     const dd = SEN_DEAL[sen.tier];
-    const dealSize = isOpp ? Math.round(dd.avgDeal * (0.8 + rng() * 0.4)) : 0;
+    const dealSize = isOpp ? Math.round(CH_DEALS[ch][sen.tier] * (0.8 + rng() * 0.4)) : 0;
     const salesCycle = isOpp ? Math.round(rates.cycle * (0.85 + rng() * 0.3)) : 0;
     const month = Math.floor(pidx / TOTAL_LEADS_COUNT * 12);
     PROSPECTS.push({ id: pidx++, primaryCh: ch, tier: sen.tier, mult: sen.mult, touches, isMQL, isOpp, isClosed, pipeline: dealSize, dealSize, salesCycle, month, track: dd.track });
@@ -158,14 +164,14 @@ function CplCell({ ch }) {
   const v = cplVal(ch);
   const s = cplStatus(ch, v);
   if (!s) return <span className="font-medium">${v}</span>;
-  const tip = s==="green" ? "on benchmark" : s==="yellow" ? "review quality" : "over benchmark";
+  const tip = s==="green" ? "on benchmark" : s==="yellow" ? "below range — review quality" : "over benchmark";
   return <span style={{ background: s==="green"?"#dcfce7":s==="yellow"?"#fef9c3":"#fee2e2", color: s==="green"?"#166534":s==="yellow"?"#854d0e":"#991b1b", padding:"2px 8px", borderRadius:"20px", fontSize:"11px", fontWeight:500 }}>${v} <span style={{fontWeight:400,opacity:.85}}>{tip}</span></span>;
 }
 function RoasCell({ ch, model }) {
   const v = roasNum(ch, model);
   const s = roasStatus(ch, v);
   if (!s) return <span className="font-medium">{v > 0 ? v.toFixed(1)+"x" : "—"}</span>;
-  const tip = s==="green" ? "on benchmark" : s==="yellow" ? "above range" : "below target";
+  const tip = s==="green" ? "on benchmark" : s==="yellow" ? "above range — review" : "below target";
   return <span style={{ background: s==="green"?"#dcfce7":s==="yellow"?"#fef9c3":"#fee2e2", color: s==="green"?"#166534":s==="yellow"?"#854d0e":"#991b1b", padding:"2px 8px", borderRadius:"20px", fontSize:"11px", fontWeight:500 }}>{v.toFixed(1)}x <span style={{fontWeight:400,opacity:.85}}>{tip}</span></span>;
 }
 function Dot({ color }) {
@@ -183,8 +189,8 @@ function NoteBox({ children }) {
 function BenchLegend() {
   return <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:8,fontSize:10,color:"#6b6a68"}}>
     <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,borderRadius:2,background:"#dcfce7",display:"inline-block"}}></span>On benchmark</span>
-    <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,borderRadius:2,background:"#fef9c3",display:"inline-block"}}></span>Below range — review</span>
-    <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,borderRadius:2,background:"#fee2e2",display:"inline-block"}}></span>Over benchmark / below target</span>
+    <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,borderRadius:2,background:"#fef9c3",display:"inline-block"}}></span>CPL: below range — review quality / ROAS: above range — review</span>
+    <span style={{display:"flex",alignItems:"center",gap:4}}><span style={{width:10,height:10,borderRadius:2,background:"#fee2e2",display:"inline-block"}}></span>CPL: over benchmark / ROAS: below target</span>
   </div>;
 }
 
