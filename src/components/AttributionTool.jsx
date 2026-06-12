@@ -218,10 +218,10 @@ function MiniLine({ data, color="#2563EB", height=140 }) {
 function SummaryTab({ model }) {
   const cr = computeAttrib(model);
   const tot = Object.values(cr).reduce((a,b)=>a+b,0);
-  const handleDownload = () => {
+  const handleTemplateDownload = () => {
     const link = document.createElement('a');
-    link.href = '/data/prospects.csv';
-    link.download = 'syncflow_prospects.csv';
+    link.href = '/downloads/syncflow_attribution_template.xlsx';
+    link.download = 'syncflow_attribution_template.xlsx';
     link.click();
   };
   return <div>
@@ -286,13 +286,13 @@ function SummaryTab({ model }) {
     <div style={{marginTop:"1.5rem",paddingTop:"1.5rem",borderTop:"0.5px solid #e5e5e3"}}>
       <p style={{fontSize:14,fontWeight:500,margin:"0 0 6px"}}>Download the dataset</p>
       <p style={{fontSize:12,color:"#6b6a68",margin:"0 0 10px",maxWidth:560}}>
-        Pull the mock dataset into Looker Studio, Google Sheets, or your BI tool of choice. The CSV includes 9,378 prospect journeys with full UTM taxonomy, touch sequences, form types, seniority tiers, and pipeline values.
+        The template includes the full mock dataset alongside pre-built analysis tabs covering channel performance, multi-touch attribution models, monthly pacing, and deal efficiency by seniority tier. Download it, explore the formulas, and replace the raw data tab with your own CRM export to run the same analysis on real numbers.
       </p>
-      <button onClick={handleDownload} style={{
-        padding:"5px 10px",fontSize:11,borderRadius:6,
+      <button onClick={handleTemplateDownload} style={{
+        padding:"4px 9px",fontSize:11,borderRadius:6,
         border:"none",cursor:"pointer",background:"#2563EB",color:"#fff"
-      }}>Download CSV</button>
-      <p style={{fontSize:11,color:"#9b9a97",margin:"6px 0 0"}}>syncflow_prospects.csv — 1.5MB — one row per touch</p>
+      }}>Download Template</button>
+      <p style={{fontSize:11,color:"#9b9a97",margin:"6px 0 0"}}>syncflow_attribution_template.xlsx — 6 tabs — raw data + pre-built analysis</p>
     </div>
   </div>;
 }
