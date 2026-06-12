@@ -605,6 +605,13 @@ export default function AttributionTool() {
   const [tab, setTab] = useState(0);
   const [model, setModel] = useState("u_shaped");
 
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = '/data/prospects.csv';
+    link.download = 'syncflow_prospects.csv';
+    link.click();
+  };
+
   return <div style={{fontFamily:"inherit",maxWidth:"100%"}}>
     <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1rem",flexWrap:"wrap",gap:6}}>
       <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
@@ -614,15 +621,24 @@ export default function AttributionTool() {
           color:tab===i?"#1a1a19":"#6b6a68",whiteSpace:"nowrap"
         }}>{t}</button>)}
       </div>
-      <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
+      <div style={{display:"flex",gap:3,flexWrap:"wrap",marginLeft:"auto"}}>
         {Object.entries(MODEL_LABELS).map(([k,v])=><button key={k} onClick={()=>setModel(k)} style={{
           padding:"4px 9px",fontSize:11,borderRadius:6,
           border:model===k?"0.5px solid #2563EB":"0.5px solid #d1d1d0",
           cursor:"pointer",background:model===k?"#eff6ff":"transparent",
           color:model===k?"#1d4ed8":"#6b6a68"
         }}>{v}</button>)}
+        <button onClick={handleDownload} style={{
+          padding:"4px 9px",fontSize:11,borderRadius:6,
+          border:"0.5px solid #2563EB",
+          cursor:"pointer",background:"#fff",
+          color:"#2563EB"
+        }}>Download CSV</button>
       </div>
     </div>
+    <p style={{fontSize:11,color:"#9b9a97",marginTop:"-0.5rem",marginBottom:"1rem"}}>
+      Download the mock dataset and run your own analysis in Looker Studio, Google Sheets, or your BI tool of choice.
+    </p>
     {tab===0 && <SummaryTab model={model}/>}
     {tab===1 && <ChannelTab model={model}/>}
     {tab===2 && <CampaignTab model={model}/>}
