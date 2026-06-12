@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+const tools = [
+  {
+    label: 'Attribution',
+    title: 'Syncflow Attribution Simulator',
+    description:
+      'A mock B2B paid media attribution and pipeline simulator built on 2024-2026 benchmark data. Toggle between U-shaped, first touch, last touch, and linear models across LinkedIn, Google Ads, G2, and Programmatic.',
+    href: '/tools/attribution',
+    linkText: 'Open the tool',
+  },
+];
+---
+
+<BaseLayout
+  title="Tools"
+  description="Interactive tools built on real B2B paid media frameworks and benchmark data."
+>
+
+  <section class="max-w-4xl mx-auto px-6 py-20">
+
+    <header class="mb-14">
+      <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-3">Tools</p>
+      <h1 class="text-4xl font-bold text-gray-900 leading-tight mb-4">Built in the open.</h1>
+      <p class="text-gray-600 leading-relaxed max-w-2xl">
+        These tools are built on the same frameworks and benchmark data I use in practice. Each
+        one is designed to be used, not just read — pull the data, toggle the models, and
+        stress-test the numbers.
+      </p>
+    </header>
+
+    <div class="grid sm:grid-cols-2 gap-8">
+      {tools.map(tool => (
+        <article class="border border-gray-200 rounded-lg p-6 hover:border-blue-600 transition-colors">
+          <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-3">{tool.label}</p>
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">{tool.title}</h2>
+          <p class="text-gray-600 text-sm leading-relaxed mb-4">{tool.description}</p>
+          <a
+            href={tool.href}
+            class="inline-block text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            {tool.linkText} →
+          </a>
+        </article>
+      ))}
+    </div>
+
+    <p class="text-gray-400 text-sm mt-10">More coming soon.</p>
+
+  </section>
+</BaseLayout>
