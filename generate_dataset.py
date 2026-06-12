@@ -445,7 +445,7 @@ def generate_prospects(n=2000):
 
         is_opp        = is_mql and random.random() < 0.45
         is_closed_won = is_opp and random.random() < 0.35
-        pipeline_value = round(random.randint(35000, 120000) * seniority_mult) if is_opp else 0
+        pipeline_value = round(random.randint(35000, 120000) * seniority_mult * 0.0225) if is_opp else 0
 
         prospects.append({
             "prospect_id":    prospect_id,

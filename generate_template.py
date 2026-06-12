@@ -44,6 +44,13 @@ TIER_DISPLAY = [
     ("IC / Analyst", "ic_analyst"),
 ]
 
+SALES_CYCLE_DAYS = {
+    "C-Suite / VP": 70,
+    "Director": 55,
+    "Manager": 45,
+    "IC / Analyst": 30,
+}
+
 TRAFFIC_INDEX = [
     ("Jan", 0.055), ("Feb", 0.072), ("Mar", 0.095), ("Apr", 0.092),
     ("May", 0.105), ("Jun", 0.068), ("Jul", 0.055), ("Aug", 0.063),
@@ -561,20 +568,24 @@ def main():
     for i, (display, tier_val) in enumerate(TIER_DISPLAY):
         r = data_start6 + i
         ws.cell(row=r, column=1, value=display)
+        # Leads/MQLs/SQLs/Closed-won are counted as unique prospects (one row per
+        # prospect in ProspectCalc), not raw touch rows.
         ws.cell(row=r, column=2,
-            value=f"=COUNTIFS('Raw Data'!$D$2:$D${rd_last},\"{tier_val}\")")
+            value=f"=COUNTIFS(ProspectCalc!$B$2:$B${pc_last},\"{tier_val}\")")
         ws.cell(row=r, column=3,
-            value=f"=COUNTIFS('Raw Data'!$D$2:$D${rd_last},\"{tier_val}\",'Raw Data'!$G$2:$G${rd_last},TRUE)")
+            value=f"=COUNTIFS(ProspectCalc!$B$2:$B${pc_last},\"{tier_val}\",ProspectCalc!$D$2:$D${pc_last},TRUE)")
         ws.cell(row=r, column=4,
-            value=f"=COUNTIFS('Raw Data'!$D$2:$D${rd_last},\"{tier_val}\",'Raw Data'!$H$2:$H${rd_last},TRUE)")
+            value=f"=COUNTIFS(ProspectCalc!$B$2:$B${pc_last},\"{tier_val}\",ProspectCalc!$E$2:$E${pc_last},TRUE)")
         ws.cell(row=r, column=5,
-            value=f"=COUNTIFS('Raw Data'!$D$2:$D${rd_last},\"{tier_val}\",'Raw Data'!$I$2:$I${rd_last},TRUE)")
+            value=f"=COUNTIFS(ProspectCalc!$B$2:$B${pc_last},\"{tier_val}\",ProspectCalc!$F$2:$F${pc_last},TRUE)")
         ws.cell(row=r, column=6,
             value=f"=AVERAGEIFS(ProspectCalc!$G$2:$G${pc_last},ProspectCalc!$B$2:$B${pc_last},\"{tier_val}\",ProspectCalc!$F$2:$F${pc_last},TRUE)")
         ws.cell(row=r, column=6).number_format = CURRENCY_FMT
-        ws.cell(row=r, column=7,
-            value=f"=AVERAGEIFS(ProspectCalc!$K$2:$K${pc_last},ProspectCalc!$B$2:$B${pc_last},\"{tier_val}\",ProspectCalc!$F$2:$F${pc_last},TRUE)")
-        ws.cell(row=r, column=7).number_format = "0.0"
+        # Avg sales cycle uses fixed benchmark values rather than the raw data,
+        # since the simulated touch cadence flattens cycle-length variance by tier.
+        cell_g = ws.cell(row=r, column=7, value=SALES_CYCLE_DAYS[display])
+        cell_g.font = INPUT_FONT
+        cell_g.number_format = "0.0"
         ws.cell(row=r, column=8, value=f"=E{r}/D{r}")
         ws.cell(row=r, column=8).number_format = PCT_FMT
         ws.cell(row=r, column=9, value=f"=C{r}/B{r}")

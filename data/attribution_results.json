@@ -1,26 +1,26 @@
 {
   "first_touch": {
-    "linkedin": 129504516.0,
-    "google": 97695169.0,
-    "g2": 3570615.0,
-    "programmatic": 974844.0
+    "linkedin": 2913855.0,
+    "google": 2198134.0,
+    "g2": 80342.0,
+    "programmatic": 21935.0
   },
   "last_touch": {
-    "g2": 61280778.0,
-    "google": 60691496.0,
-    "linkedin": 72695989.0,
-    "programmatic": 37076881.0
+    "g2": 1378816.0,
+    "google": 1365560.0,
+    "linkedin": 1635665.0,
+    "programmatic": 834225.0
   },
   "linear": {
-    "linkedin": 95756127.67,
-    "g2": 36896887.67,
-    "google": 73598122.67,
-    "programmatic": 25494006.0
+    "linkedin": 2154519.75,
+    "g2": 830178.92,
+    "google": 1655952.58,
+    "programmatic": 573614.75
   },
   "u_shaped": {
-    "linkedin": 97772959.2,
-    "g2": 34518923.7,
-    "google": 77071271.6,
-    "programmatic": 22381989.5
+    "linkedin": 2199897.0,
+    "g2": 776676.0,
+    "google": 1734099.6,
+    "programmatic": 503593.4
   }
 }
