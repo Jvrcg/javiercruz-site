@@ -335,14 +335,16 @@ def main():
     for i, (display, csv_val) in enumerate(CHANNEL_DISPLAY):
         r = start_row + i
         ws.cell(row=r, column=1, value=display)
+        # Leads/MQLs/SQLs/Closed-won are counted as unique prospects (touch_number=1)
+        # whose primary (first-touch) channel is this channel.
         ws.cell(row=r, column=2,
-            value=f"=COUNTIFS('Raw Data'!$L$2:$L${rd_last},\"{csv_val}\")")
+            value=f"=COUNTIFS('Raw Data'!$K$2:$K${rd_last},1,'Raw Data'!$L$2:$L${rd_last},\"{csv_val}\")")
         ws.cell(row=r, column=3,
-            value=f"=COUNTIFS('Raw Data'!$L$2:$L${rd_last},\"{csv_val}\",'Raw Data'!$G$2:$G${rd_last},TRUE)")
+            value=f"=COUNTIFS('Raw Data'!$K$2:$K${rd_last},1,'Raw Data'!$L$2:$L${rd_last},\"{csv_val}\",'Raw Data'!$G$2:$G${rd_last},TRUE)")
         ws.cell(row=r, column=4,
-            value=f"=COUNTIFS('Raw Data'!$L$2:$L${rd_last},\"{csv_val}\",'Raw Data'!$H$2:$H${rd_last},TRUE)")
+            value=f"=COUNTIFS('Raw Data'!$K$2:$K${rd_last},1,'Raw Data'!$L$2:$L${rd_last},\"{csv_val}\",'Raw Data'!$H$2:$H${rd_last},TRUE)")
         ws.cell(row=r, column=5,
-            value=f"=COUNTIFS('Raw Data'!$L$2:$L${rd_last},\"{csv_val}\",'Raw Data'!$I$2:$I${rd_last},TRUE)")
+            value=f"=COUNTIFS('Raw Data'!$K$2:$K${rd_last},1,'Raw Data'!$L$2:$L${rd_last},\"{csv_val}\",'Raw Data'!$I$2:$I${rd_last},TRUE)")
         cell_f = ws.cell(row=r, column=6, value=ANNUAL_SPEND[display])
         cell_f.font = INPUT_FONT
         cell_f.number_format = CURRENCY_FMT

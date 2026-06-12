@@ -171,6 +171,14 @@ def campaign_to_channel(campaign_name):
         return "g2"
     return "programmatic"
 
+# Primary channel (touch 1) distribution — total lead counts per channel
+PRIMARY_CHANNEL_COUNTS = {
+    "linkedin": 5200,
+    "google": 4000,
+    "g2": 140,
+    "programmatic": 38,
+}
+
 # Retargeting campaigns for LinkedIn touch 3
 LI_RETARGET_CAMPAIGNS = [
     "LI-Retarget-SiteVisitors-30d",
@@ -243,10 +251,10 @@ def pick_seniority():
     return last[0], last[2], random.choice(last[3])
 
 
-def pick_channel_for_touch(touch_number, num_touches):
+def pick_channel_for_touch(touch_number, num_touches, primary_channel=None):
     """Return a channel string based on touch sequencing rules."""
     if touch_number == 1:
-        return "linkedin" if random.random() < 0.60 else "google"
+        return primary_channel
     if touch_number == 2:
         all_channels = ["linkedin", "google", "g2", "programmatic"]
         weights = [0.30, 0.30, 0.20, 0.20]
@@ -269,8 +277,8 @@ def pick_channel_for_touch(touch_number, num_touches):
         return random.choice(["linkedin", "programmatic"])
 
 
-def build_touch(touch_number, num_touches, timestamp):
-    channel = pick_channel_for_touch(touch_number, num_touches)
+def build_touch(touch_number, num_touches, timestamp, primary_channel=None):
+    channel = pick_channel_for_touch(touch_number, num_touches, primary_channel)
 
     # Pick campaign
     if touch_number == 3 and channel == "linkedin":
@@ -393,11 +401,17 @@ def compute_attribution(prospects):
 def generate_prospects(n=2000):
     prospects = []
 
+    primary_channels = []
+    for channel, count in PRIMARY_CHANNEL_COUNTS.items():
+        primary_channels.extend([channel] * count)
+    random.shuffle(primary_channels)
+
     for i in range(n):
         if (i + 1) % 500 == 0:
             print(f"  Generated {i + 1} / {n} prospects...")
 
         prospect_id = f"PRO-{i+1:05d}"
+        primary_channel = primary_channels[i]
         first = random.choice(FIRST_NAMES)
         last  = random.choice(LAST_NAMES)
         full_name = f"{first} {last}"
@@ -422,7 +436,7 @@ def generate_prospects(n=2000):
         touches = []
         ts = first_ts
         for tn in range(1, touch_count + 1):
-            touch = build_touch(tn, touch_count, ts)
+            touch = build_touch(tn, touch_count, ts, primary_channel)
             touches.append(touch)
             if tn < touch_count:
                 ts = random_business_datetime(ts)
@@ -520,8 +534,9 @@ def print_summary(prospects, attribution):
 def main():
     os.makedirs("data", exist_ok=True)
 
-    print("Generating 2,000 Syncflow prospects (seed=42)...")
-    prospects = generate_prospects(2000)
+    total_prospects = sum(PRIMARY_CHANNEL_COUNTS.values())
+    print(f"Generating {total_prospects:,} Syncflow prospects (seed=42)...")
+    prospects = generate_prospects(total_prospects)
 
     print("\nSaving data/prospects.json...")
     with open("data/prospects.json", "w", encoding="utf-8") as f:
