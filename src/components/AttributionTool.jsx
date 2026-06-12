@@ -218,6 +218,12 @@ function MiniLine({ data, color="#2563EB", height=140 }) {
 function SummaryTab({ model }) {
   const cr = computeAttrib(model);
   const tot = Object.values(cr).reduce((a,b)=>a+b,0);
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = '/data/prospects.csv';
+    link.download = 'syncflow_prospects.csv';
+    link.click();
+  };
   return <div>
     <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(95px,1fr))",gap:8,marginBottom:"1rem"}}>
       {[
@@ -276,6 +282,17 @@ function SummaryTab({ model }) {
           <td style={{padding:"5px 7px",borderBottom:"0.5px solid #e5e5e3"}}>{pct(chOpps[ch],chMQLs[ch])}</td>
         </tr>)}</tbody>
       </table>
+    </div>
+    <div style={{marginTop:"1.5rem",paddingTop:"1.5rem",borderTop:"0.5px solid #e5e5e3"}}>
+      <p style={{fontSize:14,fontWeight:500,margin:"0 0 6px"}}>Download the dataset</p>
+      <p style={{fontSize:12,color:"#6b6a68",margin:"0 0 10px",maxWidth:560}}>
+        Pull the mock dataset into Looker Studio, Google Sheets, or your BI tool of choice. The CSV includes 9,378 prospect journeys with full UTM taxonomy, touch sequences, form types, seniority tiers, and pipeline values.
+      </p>
+      <button onClick={handleDownload} style={{
+        padding:"5px 10px",fontSize:11,borderRadius:6,
+        border:"none",cursor:"pointer",background:"#2563EB",color:"#fff"
+      }}>Download CSV</button>
+      <p style={{fontSize:11,color:"#9b9a97",margin:"6px 0 0"}}>syncflow_prospects.csv — 1.5MB — one row per touch</p>
     </div>
   </div>;
 }
@@ -605,15 +622,8 @@ export default function AttributionTool() {
   const [tab, setTab] = useState(0);
   const [model, setModel] = useState("u_shaped");
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = '/data/prospects.csv';
-    link.download = 'syncflow_prospects.csv';
-    link.click();
-  };
-
   return <div style={{fontFamily:"inherit",maxWidth:"100%"}}>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"1rem",flexWrap:"wrap",gap:6}}>
+    <div style={{display:"flex",alignItems:"flex-end",justifyContent:"space-between",marginBottom:"1rem",flexWrap:"wrap",gap:6}}>
       <div style={{display:"flex",gap:3,flexWrap:"wrap"}}>
         {TABS.map((t,i)=><button key={t} onClick={()=>setTab(i)} style={{
           padding:"5px 10px",fontSize:11,borderRadius:6,border:tab===i?"0.5px solid #d1d1d0":"0.5px solid transparent",
@@ -621,24 +631,18 @@ export default function AttributionTool() {
           color:tab===i?"#1a1a19":"#6b6a68",whiteSpace:"nowrap"
         }}>{t}</button>)}
       </div>
-      <div style={{display:"flex",gap:3,flexWrap:"wrap",marginLeft:"auto"}}>
-        {Object.entries(MODEL_LABELS).map(([k,v])=><button key={k} onClick={()=>setModel(k)} style={{
-          padding:"4px 9px",fontSize:11,borderRadius:6,
-          border:model===k?"0.5px solid #2563EB":"0.5px solid #d1d1d0",
-          cursor:"pointer",background:model===k?"#eff6ff":"transparent",
-          color:model===k?"#1d4ed8":"#6b6a68"
-        }}>{v}</button>)}
-        <button onClick={handleDownload} style={{
-          padding:"4px 9px",fontSize:11,borderRadius:6,
-          border:"0.5px solid #2563EB",
-          cursor:"pointer",background:"#fff",
-          color:"#2563EB"
-        }}>Download CSV</button>
+      <div style={{display:"flex",flexDirection:"column",gap:3,marginLeft:"auto"}}>
+        <p style={{fontSize:11,color:"#6b6a68",margin:"0 0 2px",textAlign:"right"}}>Attribution model</p>
+        <div style={{display:"flex",gap:3,flexWrap:"wrap",justifyContent:"flex-end"}}>
+          {Object.entries(MODEL_LABELS).map(([k,v])=><button key={k} onClick={()=>setModel(k)} style={{
+            padding:"4px 9px",fontSize:11,borderRadius:6,
+            border:model===k?"0.5px solid #2563EB":"0.5px solid #d1d1d0",
+            cursor:"pointer",background:model===k?"#eff6ff":"transparent",
+            color:model===k?"#1d4ed8":"#6b6a68"
+          }}>{v}</button>)}
+        </div>
       </div>
     </div>
-    <p style={{fontSize:11,color:"#9b9a97",marginTop:"-0.5rem",marginBottom:"1rem"}}>
-      Download the mock dataset and run your own analysis in Looker Studio, Google Sheets, or your BI tool of choice.
-    </p>
     {tab===0 && <SummaryTab model={model}/>}
     {tab===1 && <ChannelTab model={model}/>}
     {tab===2 && <CampaignTab model={model}/>}
