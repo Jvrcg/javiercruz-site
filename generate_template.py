@@ -386,9 +386,9 @@ def main():
 
     note_row = total_row + 1
     note_cell = ws.cell(row=note_row, column=1,
-        value=("G2 and Programmatic CPL/ROAS benchmarks are not comparable to LinkedIn "
-               "and Google Ads — spend dynamics and lead volumes differ structurally. "
-               "See README tab for context."))
+        value=("G2 and Programmatic CPL and ROAS benchmarks are not comparable to "
+               "LinkedIn and Google Ads. Spend dynamics and lead volumes differ "
+               "structurally. See README tab for context."))
     note_cell.font = Font(name=FONT_NAME, size=11, italic=True, color="808080")
     ws.merge_cells(start_row=note_row, start_column=1, end_row=note_row, end_column=len(headers3))
 
