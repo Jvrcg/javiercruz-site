@@ -2,5 +2,33 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "npm install",
-  "framework": "astro"
+  "framework": "astro",
+  "headers": [
+    {
+      "source": "/downloads/(.*).xlsx",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"syncflow_attribution_template.xlsx\""
+        }
+      ]
+    },
+    {
+      "source": "/data/(.*).csv",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/csv"
+        },
+        {
+          "key": "Content-Disposition",
+          "value": "attachment; filename=\"syncflow_prospects.csv\""
+        }
+      ]
+    }
+  ]
 }
