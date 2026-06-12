@@ -325,7 +325,7 @@ def main():
     # ------------------------------------------------------------------
     ws = ws_summary
     headers3 = ["Channel", "Leads", "MQLs", "SQLs", "Closed-won", "Annual Spend",
-                 "CPL", "cpMQL", "Lead to MQL %", "MQL to SQL %", "SQL to Closed %"]
+                 "CPL", "cpMQL", "ROAS", "Lead to MQL %", "MQL to SQL %", "SQL to Closed %"]
     for c, h in enumerate(headers3, start=1):
         ws.cell(row=1, column=c, value=h)
     style_header_row(ws, 1, len(headers3))
@@ -350,12 +350,15 @@ def main():
         cell_f.number_format = CURRENCY_FMT
         ws.cell(row=r, column=7, value=f"=F{r}/B{r}")
         ws.cell(row=r, column=8, value=f"=F{r}/C{r}")
-        ws.cell(row=r, column=9, value=f"=C{r}/B{r}")
-        ws.cell(row=r, column=10, value=f"=D{r}/C{r}")
-        ws.cell(row=r, column=11, value=f"=E{r}/D{r}")
+        ws.cell(row=r, column=9,
+            value=f"=SUMIFS(AttribCalc!$J$2:$J${rd_last},AttribCalc!$B$2:$B${rd_last},\"{csv_val}\")/F{r}")
+        ws.cell(row=r, column=10, value=f"=C{r}/B{r}")
+        ws.cell(row=r, column=11, value=f"=D{r}/C{r}")
+        ws.cell(row=r, column=12, value=f"=E{r}/D{r}")
         for c in (6, 7, 8):
             ws.cell(row=r, column=c).number_format = CURRENCY_FMT
-        for c in (9, 10, 11):
+        ws.cell(row=r, column=9).number_format = '0.0"x"'
+        for c in (10, 11, 12):
             ws.cell(row=r, column=c).number_format = PCT_FMT
 
     total_row = start_row + len(CHANNEL_DISPLAY)
@@ -366,17 +369,29 @@ def main():
         ws.cell(row=total_row, column=c).number_format = CURRENCY_FMT if c >= 6 else "0"
     ws.cell(row=total_row, column=7, value=f"=F{total_row}/B{total_row}")
     ws.cell(row=total_row, column=8, value=f"=F{total_row}/C{total_row}")
-    ws.cell(row=total_row, column=9, value=f"=C{total_row}/B{total_row}")
-    ws.cell(row=total_row, column=10, value=f"=D{total_row}/C{total_row}")
-    ws.cell(row=total_row, column=11, value=f"=E{total_row}/D{total_row}")
+    ws.cell(row=total_row, column=9,
+        value=f"=SUM(AttribCalc!$J$2:$J${rd_last})/F{total_row}")
+    ws.cell(row=total_row, column=10, value=f"=C{total_row}/B{total_row}")
+    ws.cell(row=total_row, column=11, value=f"=D{total_row}/C{total_row}")
+    ws.cell(row=total_row, column=12, value=f"=E{total_row}/D{total_row}")
     for c in (7, 8):
         ws.cell(row=total_row, column=c).number_format = CURRENCY_FMT
-    for c in (9, 10, 11):
+    ws.cell(row=total_row, column=9).number_format = '0.0"x"'
+    for c in (10, 11, 12):
         ws.cell(row=total_row, column=c).number_format = PCT_FMT
     for c in range(1, len(headers3) + 1):
         ws.cell(row=total_row, column=c).font = BOLD_FONT
 
     band_rows(ws, start_row, total_row, len(headers3))
+
+    note_row = total_row + 1
+    note_cell = ws.cell(row=note_row, column=1,
+        value=("G2 and Programmatic CPL/ROAS benchmarks are not comparable to LinkedIn "
+               "and Google Ads — spend dynamics and lead volumes differ structurally. "
+               "See README tab for context."))
+    note_cell.font = Font(name=FONT_NAME, size=11, italic=True, color="808080")
+    ws.merge_cells(start_row=note_row, start_column=1, end_row=note_row, end_column=len(headers3))
+
     autofit(ws, len(headers3))
     ws.freeze_panes = "A2"
 
