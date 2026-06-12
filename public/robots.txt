@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://javiercruz.com/sitemap-index.xml
+Sitemap: https://jjcruzgalera.com/sitemap-index.xml

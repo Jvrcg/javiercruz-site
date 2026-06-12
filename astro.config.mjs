@@ -7,7 +7,7 @@ import react from '@astrojs/react';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://javiercruz.com',
+  site: 'https://jjcruzgalera.com',
   redirects: {
     '/writing': '/playbooks',
   },
