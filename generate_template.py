@@ -196,6 +196,21 @@ def main():
     )).alignment = Alignment(wrap_text=True, vertical="top")
     ws.cell(row=r, column=1).font = BASE_FONT
     ws.row_dimensions[r].height = 45
+    r += 2
+
+    ws.cell(row=r, column=1, value="Known limitations")
+    style_section_row(ws, r, 1)
+    r += 1
+    limitations = [
+        "Avg deal size by seniority tier reflects the mock dataset's pipeline scaling factor and will show lower than real-world B2B SaaS deal sizes. The channel-level ROAS (LinkedIn 3.8x, Google 3.0x) and total pipeline ($5.2M) are the validated benchmark-grounded outputs.",
+        "Lead to MQL rate in the Deal Efficiency tab reflects the mock dataset's MQL assignment logic (~70% overall). Real-world blended MQL rates for B2B SaaS typically run 20-40% depending on lead scoring thresholds. See the Sources tab in the simulator at jjcruzgalera.com/tools/attribution for benchmark citations.",
+        "These limitations do not affect the attribution model, pacing, or channel summary calculations — those are computed correctly from the underlying data.",
+    ]
+    for item in limitations:
+        ws.cell(row=r, column=1, value=item).alignment = Alignment(wrap_text=True, vertical="top")
+        ws.cell(row=r, column=1).font = BASE_FONT
+        ws.row_dimensions[r].height = 60
+        r += 1
 
     ws.column_dimensions["A"].width = 28
     ws.column_dimensions["B"].width = 100
