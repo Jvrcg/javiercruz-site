@@ -9,6 +9,18 @@ const tools = [
       'A mock B2B paid media attribution and pipeline simulator built on 2024-2026 benchmark data. Toggle between U-shaped, first touch, last touch, and linear models across LinkedIn, Google Ads, G2, and Programmatic.',
     href: '/tools/attribution',
     linkText: 'Open the tool',
+    secondaryHref: '/playbooks/build-your-own-attribution-dashboard',
+    secondaryText: 'Read the playbook',
+  },
+  {
+    label: 'Experimentation',
+    title: 'A/B Test Significance Calculator',
+    description:
+      'Know when your test has enough data to call a winner. Enter visitors and conversions for each variation and get a plain-English result with confidence level and sample size guidance.',
+    href: '/tools/ab-test',
+    linkText: 'Open the calculator',
+    secondaryHref: null,
+    secondaryText: null,
   },
 ];
 ---
@@ -42,18 +54,20 @@ const tools = [
           >
             {tool.linkText} →
           </a>
-          <a
-            href="/playbooks/build-your-own-attribution-dashboard"
-            class="block text-xs text-blue-600 hover:text-blue-700 transition-colors mt-2"
-            style="position:relative;z-index:1;"
-          >
-            Read the playbook →
-          </a>
+          {tool.secondaryHref && (
+            <a
+              href={tool.secondaryHref}
+              class="block text-xs text-blue-600 hover:text-blue-700 transition-colors mt-2"
+              style="position:relative;z-index:1;"
+            >
+              {tool.secondaryText} →
+            </a>
+          )}
         </article>
       ))}
     </div>
 
-    <p class="text-gray-400 text-sm mt-10">More coming soon.</p>
+    <p class="text-gray-400 text-sm mt-10">More tools coming soon.</p>
 
   </section>
 </BaseLayout>
