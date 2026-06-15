@@ -32,19 +32,20 @@ const tools = [
 
     <div class="grid sm:grid-cols-2 gap-8">
       {tools.map(tool => (
-        <article class="border border-gray-200 rounded-lg p-6 hover:border-blue-600 transition-colors">
+        <article class="border border-gray-200 rounded-lg p-6 hover:border-blue-600 transition-colors" style="position:relative;cursor:pointer;">
           <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-3">{tool.label}</p>
           <h2 class="text-xl font-semibold text-gray-900 mb-2">{tool.title}</h2>
           <p class="text-gray-600 text-sm leading-relaxed mb-4">{tool.description}</p>
           <a
             href={tool.href}
-            class="inline-block text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+            class="card-link inline-block text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
           >
             {tool.linkText} →
           </a>
           <a
             href="/playbooks/build-your-own-attribution-dashboard"
             class="block text-xs text-blue-600 hover:text-blue-700 transition-colors mt-2"
+            style="position:relative;z-index:1;"
           >
             Read the playbook →
           </a>
@@ -56,3 +57,12 @@ const tools = [
 
   </section>
 </BaseLayout>
+
+<style>
+  .card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+</style>
