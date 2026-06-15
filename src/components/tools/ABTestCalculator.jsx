@@ -14,6 +14,10 @@ function normalCDF(x) {
   return x >= 0 ? cdf : 1 - cdf;
 }
 
+function normalPDF(x) {
+  return Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+}
+
 const Z_THRESHOLDS = { 90: 1.645, 95: 1.960, 99: 2.576 };
 
 function validateInputs(vA, cA, vB, cB) {
@@ -27,7 +31,7 @@ function validateInputs(vA, cA, vB, cB) {
   if (nVB <= 0) errors.vB = 'Visitors must be greater than 0.';
   if (nCA > nVA) errors.cA = 'Conversions cannot exceed visitors.';
   if (nCB > nVB) errors.cB = 'Conversions cannot exceed visitors.';
-  if (nVA < 100 || nVB < 100) errors.sample = 'Not enough data — run at least 100 visitors per variation before checking significance.';
+  if (nVA < 100 || nVB < 100) errors.sample = 'Not enough data. Run at least 100 visitors per variation before checking significance.';
   return errors;
 }
 
@@ -48,6 +52,115 @@ function additionalVisitorsNeeded(zThresh, cvrA, cvrB, pooled) {
   const diff = Math.abs(cvrB - cvrA);
   if (diff === 0) return Infinity;
   return Math.ceil(Math.pow(zThresh / diff, 2) * pooled * (1 - pooled) * 2);
+}
+
+function DistributionCurve({ cvrA, cvrB, nVA, nVB }) {
+  const sdA = Math.sqrt(cvrA * (1 - cvrA) / nVA);
+  const sdB = Math.sqrt(cvrB * (1 - cvrB) / nVB);
+  const maxSd = Math.max(sdA, sdB);
+  const minX = Math.min(cvrA, cvrB) - 4 * maxSd;
+  const maxX = Math.max(cvrA, cvrB) + 4 * maxSd;
+
+  const W = 600, H = 200, BASELINE = 175, PADDING = 20;
+  const plotW = W - PADDING * 2;
+
+  function toSvgX(x) {
+    return PADDING + ((x - minX) / (maxX - minX)) * plotW;
+  }
+
+  const N = 300;
+  const step = (maxX - minX) / N;
+
+  function curvePDF(x, mean, sd) {
+    if (sd === 0) return 0;
+    const z = (x - mean) / sd;
+    return normalPDF(z) / sd;
+  }
+
+  // Sample points and find max y for scaling
+  const xs = Array.from({ length: N + 1 }, (_, i) => minX + i * step);
+  const yA = xs.map(x => curvePDF(x, cvrA, sdA));
+  const yB = xs.map(x => curvePDF(x, cvrB, sdB));
+  const maxY = Math.max(...yA, ...yB);
+  const yScale = maxY > 0 ? (BASELINE - 15) / maxY : 1;
+
+  function toSvgY(y) {
+    return BASELINE - y * yScale;
+  }
+
+  function buildPath(ys) {
+    const pts = xs.map((x, i) => `${toSvgX(x).toFixed(1)},${toSvgY(ys[i]).toFixed(1)}`);
+    const first = `${toSvgX(xs[0]).toFixed(1)},${BASELINE}`;
+    const last = `${toSvgX(xs[xs.length - 1]).toFixed(1)},${BASELINE}`;
+    return `M ${first} L ${pts.join(' L ')} L ${last} Z`;
+  }
+
+  const peakXA = toSvgX(cvrA);
+  const peakXB = toSvgX(cvrB);
+  const peakYA = toSvgY(curvePDF(cvrA, cvrA, sdA));
+  const peakYB = toSvgY(curvePDF(cvrB, cvrB, sdB));
+
+  const labelYA = Math.max(peakYA - 8, 10);
+  const labelYB = Math.max(peakYB - 8, 10);
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', overflow: 'visible' }}>
+        {/* X axis */}
+        <line x1={PADDING} y1={BASELINE} x2={W - PADDING} y2={BASELINE} stroke="#d1d5db" strokeWidth="1" />
+
+        {/* Curve A */}
+        <path d={buildPath(yA)} fill="rgba(37,99,235,0.12)" stroke="#2563EB" strokeWidth="2" />
+        {/* Curve B */}
+        <path d={buildPath(yB)} fill="rgba(29,158,117,0.12)" stroke="#1D9E75" strokeWidth="2" />
+
+        {/* Dashed vertical at A peak */}
+        <line
+          x1={peakXA} y1={peakYA} x2={peakXA} y2={BASELINE}
+          stroke="#2563EB" strokeWidth="1.5" strokeDasharray="4,3"
+        />
+        {/* Dashed vertical at B peak */}
+        <line
+          x1={peakXB} y1={peakYB} x2={peakXB} y2={BASELINE}
+          stroke="#1D9E75" strokeWidth="1.5" strokeDasharray="4,3"
+        />
+
+        {/* Labels at peaks */}
+        <text
+          x={peakXA}
+          y={labelYA}
+          textAnchor="middle"
+          fontSize="11"
+          fill="#2563EB"
+          fontWeight="600"
+        >
+          {(cvrA * 100).toFixed(2)}%
+        </text>
+        <text
+          x={peakXB}
+          y={labelYB}
+          textAnchor="middle"
+          fontSize="11"
+          fill="#1D9E75"
+          fontWeight="600"
+        >
+          {(cvrB * 100).toFixed(2)}%
+        </text>
+      </svg>
+
+      {/* Legend */}
+      <div style={{ display: 'flex', gap: 20, justifyContent: 'center', marginTop: 6 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#6b6a68' }}>
+          <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#2563EB' }} />
+          Variation A
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#6b6a68' }}>
+          <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#1D9E75' }} />
+          Variation B
+        </span>
+      </div>
+    </div>
+  );
 }
 
 export default function ABTestCalculator() {
@@ -75,7 +188,6 @@ export default function ABTestCalculator() {
     focus:outline-none focus:border-[#2563EB] focus:ring-1 focus:ring-[#2563EB]
     placeholder-gray-400
   `;
-  const labelClass = 'block text-xs font-medium text-[#6b6a68] mb-1';
 
   const isSignificant = result && result.confidence >= confidence;
   const zThresh = Z_THRESHOLDS[confidence];
@@ -195,7 +307,7 @@ export default function ABTestCalculator() {
           ))}
         </div>
         <p style={{ fontSize: 11, color: '#9b9a97', lineHeight: 1.5 }}>
-          90% confidence is sufficient for most marketing decisions. 95% and 99% are medical-grade thresholds — overkill for ad campaign optimization.
+          90% confidence is sufficient for most marketing decisions. 95% and 99% are medical-grade thresholds, overkill for ad campaign optimization.
         </p>
       </div>
 
@@ -221,27 +333,34 @@ export default function ABTestCalculator() {
       {/* Results */}
       {result && (
         <div>
-          {/* CVR comparison */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
-            {[
-              { label: 'Variation A CVR', value: `${(result.cvrA * 100).toFixed(2)}%` },
-              { label: 'Variation B CVR', value: `${(result.cvrB * 100).toFixed(2)}%` },
-            ].map(tile => (
-              <div key={tile.label} style={{ background: '#f8f8f7', borderRadius: 6, padding: '14px 16px' }}>
-                <p style={{ fontSize: 11, color: '#6b6a68', marginBottom: 4 }}>{tile.label}</p>
-                <p style={{ fontSize: 22, fontWeight: 700 }}>{tile.value}</p>
-              </div>
-            ))}
-          </div>
-          <div style={{ background: '#f8f8f7', borderRadius: 6, padding: '14px 16px', marginBottom: 24 }}>
-            <p style={{ fontSize: 11, color: '#6b6a68', marginBottom: 4 }}>Relative lift</p>
-            <p style={{
-              fontSize: 22,
-              fontWeight: 700,
-              color: result.relativeLift >= 0 ? '#16a34a' : '#dc2626',
-            }}>
-              {result.relativeLift >= 0 ? '+' : ''}{result.relativeLift.toFixed(1)}%
-            </p>
+          {/* Distribution curve */}
+          <DistributionCurve
+            cvrA={result.cvrA}
+            cvrB={result.cvrB}
+            nVA={result.nVA}
+            nVB={result.nVB}
+          />
+
+          {/* CVR tiles — three in one row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 24 }}>
+            <div style={{ background: '#f8f8f7', borderRadius: 6, padding: '14px 16px' }}>
+              <p style={{ fontSize: 11, color: '#6b6a68', marginBottom: 4 }}>Variation A CVR</p>
+              <p style={{ fontSize: 20, fontWeight: 700 }}>{(result.cvrA * 100).toFixed(2)}%</p>
+            </div>
+            <div style={{ background: '#f8f8f7', borderRadius: 6, padding: '14px 16px' }}>
+              <p style={{ fontSize: 11, color: '#6b6a68', marginBottom: 4 }}>Variation B CVR</p>
+              <p style={{ fontSize: 20, fontWeight: 700 }}>{(result.cvrB * 100).toFixed(2)}%</p>
+            </div>
+            <div style={{ background: '#f8f8f7', borderRadius: 6, padding: '14px 16px' }}>
+              <p style={{ fontSize: 11, color: '#6b6a68', marginBottom: 4 }}>Relative lift</p>
+              <p style={{
+                fontSize: 20,
+                fontWeight: 700,
+                color: result.relativeLift >= 0 ? '#16a34a' : '#dc2626',
+              }}>
+                {result.relativeLift >= 0 ? '+' : ''}{result.relativeLift.toFixed(1)}%
+              </p>
+            </div>
           </div>
 
           {/* Confidence meter */}
@@ -314,7 +433,7 @@ export default function ABTestCalculator() {
                 </p>
               )}
               <p style={{ fontSize: 13, color: '#713f12', lineHeight: 1.6 }}>
-                Your current confidence is {result.confidence.toFixed(1)}% — you need {confidence}% to call a winner.
+                Your current confidence is {result.confidence.toFixed(1)}%. You need {confidence}% to call a winner.
                 {' '}
                 {result.pooled && isFinite(additionalVisitorsNeeded(zThresh, result.cvrA, result.cvrB, result.pooled)) && (
                   <>To reach significance at your selected threshold, you need approximately {additionalVisitorsNeeded(zThresh, result.cvrA, result.cvrB, result.pooled).toLocaleString()} more visitors per variation. Keep running the test.</>
@@ -323,7 +442,7 @@ export default function ABTestCalculator() {
             </div>
           )}
 
-          {/* Methodology */}
+          {/* Methodology — collapsed by default */}
           <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden' }}>
             <button
               onClick={() => setShowMethod(v => !v)}
@@ -342,21 +461,21 @@ export default function ABTestCalculator() {
               }}
             >
               <span>How this is calculated</span>
-              <span style={{ fontSize: 16 }}>{showMethod ? '−' : '+'}</span>
+              <span style={{ fontSize: 16 }}>{showMethod ? '-' : '+'}</span>
             </button>
             {showMethod && (
               <div style={{ padding: '14px 16px', fontSize: 13, color: '#4b5563', lineHeight: 1.7 }}>
                 <p style={{ marginBottom: 10 }}>
-                  This calculator uses a two-tailed frequentist z-test for proportions. Statistical significance tells you the probability that the observed difference between Variation A and Variation B is not due to random chance. A 90% confidence level means there is a 10% chance the result is a false positive — acceptable for most marketing optimization decisions.
+                  This calculator uses a two-tailed frequentist z-test for proportions. Statistical significance tells you the probability that the observed difference between Variation A and Variation B is not due to random chance. A 90% confidence level means there is a 10% chance the result is a false positive, acceptable for most marketing optimization decisions.
                 </p>
                 <p style={{ fontSize: 12, color: '#9b9a97' }}>
                   Sources:{' '}
                   <a href="https://blog.analytics-toolkit.com/2017/statistical-significance-ab-testing-complete-guide/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>
-                    Analytics Toolkit — Complete Guide to Statistical Significance in A/B Testing
+                    Analytics Toolkit: Complete Guide to Statistical Significance in A/B Testing
                   </a>
                   {' '}and{' '}
                   <a href="https://towardsdatascience.com/why-most-a-b-tests-are-lying-to-you/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>
-                    Towards Data Science — Why Most A/B Tests Are Lying to You
+                    Towards Data Science: Why Most A/B Tests Are Lying to You
                   </a>
                 </p>
               </div>
