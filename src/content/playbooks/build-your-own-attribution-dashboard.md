@@ -204,6 +204,6 @@ The template is available at the link below. It includes the full Syncflow mock 
 
 Download it, explore how each tab is constructed, and replace the raw data with your own numbers when you are ready.
 
-[Download the template](/downloads/syncflow_attribution_template.xlsx)
+<a href="/downloads/syncflow_attribution_template.xlsx" download="syncflow_attribution_template.xlsx" style="display:inline-block;background:#2563EB;color:#ffffff;padding:10px 20px;border-radius:6px;font-size:14px;font-weight:500;text-decoration:none;">Download Template</a>
 
 If you want to explore the interactive version first, the live simulator is at [jjcruzgalera.com/tools/attribution](/tools/attribution). Toggle the attribution models, check the pacing tab for your market's seasonality patterns, and come back here when you are ready to build.
