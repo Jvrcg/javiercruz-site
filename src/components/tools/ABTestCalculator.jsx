@@ -19,6 +19,9 @@ function normalPDF(x) {
 
 const Z_THRESHOLDS = { 80: 1.282, 90: 1.645, 95: 1.960, 99: 2.576 };
 
+const X_OPTIONS = ['Clicks', 'Impressions', 'Leads', 'MQLs', 'Sessions', 'Visitors', 'Custom'];
+const Y_OPTIONS = ['Lead', 'MQL', 'SQL', 'Demo request', 'Trial signup', 'Closed-won', 'Opportunity', 'Conversion', 'Custom'];
+
 function validateInputs(vA, cA, vB, cB) {
   const errors = {};
   if (vA === '' || cA === '' || vB === '' || cB === '') {
@@ -26,11 +29,11 @@ function validateInputs(vA, cA, vB, cB) {
     return errors;
   }
   const nVA = Number(vA), nCA = Number(cA), nVB = Number(vB), nCB = Number(cB);
-  if (nVA <= 0) errors.vA = 'Visitors must be greater than 0.';
-  if (nVB <= 0) errors.vB = 'Visitors must be greater than 0.';
-  if (nCA > nVA) errors.cA = 'Conversions cannot exceed visitors.';
-  if (nCB > nVB) errors.cB = 'Conversions cannot exceed visitors.';
-  if (nVA < 100 || nVB < 100) errors.sample = 'Not enough data. Run at least 100 visitors per variation before checking significance.';
+  if (nVA <= 0) errors.vA = 'X must be greater than 0.';
+  if (nVB <= 0) errors.vB = 'X must be greater than 0.';
+  if (nCA > nVA) errors.cA = 'Y cannot exceed X.';
+  if (nCB > nVB) errors.cB = 'Y cannot exceed X.';
+  if (nVA < 100 || nVB < 100) errors.sample = 'Not enough data. Run at least 100 X per variation before checking significance.';
   return errors;
 }
 
@@ -47,13 +50,13 @@ function calculate(vA, cA, vB, cB) {
   return { cvrA, cvrB, relativeLift, pooled, z, confidence, nVA, nCA, nVB, nCB };
 }
 
-function additionalVisitorsNeeded(zThresh, cvrA, cvrB, pooled) {
+function additionalNeeded(zThresh, cvrA, cvrB, pooled) {
   const diff = Math.abs(cvrB - cvrA);
   if (diff === 0) return Infinity;
   return Math.ceil(Math.pow(zThresh / diff, 2) * pooled * (1 - pooled) * 2);
 }
 
-function DistributionCurve({ cvrA, cvrB, nVA, nVB }) {
+function DistributionCurve({ cvrA, cvrB, nVA, nVB, xLabel, yLabel }) {
   const sdA = Math.sqrt(cvrA * (1 - cvrA) / nVA);
   const sdB = Math.sqrt(cvrB * (1 - cvrB) / nVB);
   const maxSd = Math.max(sdA, sdB);
@@ -113,11 +116,11 @@ function DistributionCurve({ cvrA, cvrB, nVA, nVB }) {
       <div style={{ display: 'flex', gap: 20, justifyContent: 'center', marginTop: 6 }}>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#6b6a68' }}>
           <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#2563EB' }} />
-          Variation A
+          Variation A {yLabel} rate
         </span>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#6b6a68' }}>
           <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: '#1D9E75' }} />
-          Variation B
+          Variation B {yLabel} rate
         </span>
       </div>
     </div>
@@ -131,6 +134,17 @@ const STAGE_TABLE = [
   { conf: '99%', stage: 'Medical / Legal / Financial', description: 'Regulatory or liability implications. Not required for marketing campaign optimization.' },
 ];
 
+const selectStyle = {
+  width: '100%',
+  border: '1px solid #e5e7eb',
+  borderRadius: 6,
+  padding: '7px 10px',
+  fontSize: 13,
+  color: '#1a1a19',
+  background: 'white',
+  cursor: 'pointer',
+};
+
 export default function ABTestCalculator() {
   const [vA, setVA] = useState('');
   const [cA, setCA] = useState('');
@@ -141,6 +155,15 @@ export default function ABTestCalculator() {
   const [errors, setErrors] = useState({});
   const [showMethod, setShowMethod] = useState(false);
   const [showStage, setShowStage] = useState(false);
+  const [showContext, setShowContext] = useState(false);
+
+  const [xSelect, setXSelect] = useState('Visitors');
+  const [ySelect, setYSelect] = useState('Conversion');
+  const [xCustom, setXCustom] = useState('');
+  const [yCustom, setYCustom] = useState('');
+
+  const xLabel = xSelect === 'Custom' ? (xCustom || 'X') : xSelect;
+  const yLabel = ySelect === 'Custom' ? (yCustom || 'Y') : ySelect;
 
   function handleCalculate() {
     const errs = validateInputs(vA, cA, vB, cB);
@@ -184,15 +207,15 @@ export default function ABTestCalculator() {
   return (
     <div style={{ fontFamily: 'inherit', color: '#1a1a19' }}>
       {/* Input grid */}
-      <div style={{ marginBottom: 24 }}>
+      <div style={{ marginBottom: 16 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr 1fr', gap: '8px 12px', alignItems: 'end', marginBottom: 8 }}>
           <div />
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#6b6a68', paddingBottom: 4 }}>Visitors</div>
-          <div style={{ fontSize: 12, fontWeight: 600, color: '#6b6a68', paddingBottom: 4 }}>Conversions</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#6b6a68', paddingBottom: 4 }}>X (Input)</div>
+          <div style={{ fontSize: 12, fontWeight: 600, color: '#6b6a68', paddingBottom: 4 }}>Y (Output)</div>
 
           <div style={{ fontSize: 13, fontWeight: 500, paddingBottom: 8 }}>Variation A (Control)</div>
           <div>
-            <input type="number" className={inputClass} placeholder="e.g. 5000" value={vA} onChange={e => setVA(e.target.value)} min="0" style={{ borderColor: errors.vA ? '#dc2626' : undefined }} />
+            <input type="number" className={inputClass} placeholder="e.g. 5,000" value={vA} onChange={e => setVA(e.target.value)} min="0" style={{ borderColor: errors.vA ? '#dc2626' : undefined }} />
             {errors.vA && <p style={{ color: '#dc2626', fontSize: 11, marginTop: 3 }}>{errors.vA}</p>}
           </div>
           <div>
@@ -202,20 +225,70 @@ export default function ABTestCalculator() {
 
           <div style={{ fontSize: 13, fontWeight: 500, paddingTop: 4 }}>Variation B (Test)</div>
           <div>
-            <input type="number" className={inputClass} placeholder="e.g. 5000" value={vB} onChange={e => setVB(e.target.value)} min="0" style={{ borderColor: errors.vB ? '#dc2626' : undefined }} />
+            <input type="number" className={inputClass} placeholder="e.g. 5,000" value={vB} onChange={e => setVB(e.target.value)} min="0" style={{ borderColor: errors.vB ? '#dc2626' : undefined }} />
             {errors.vB && <p style={{ color: '#dc2626', fontSize: 11, marginTop: 3 }}>{errors.vB}</p>}
           </div>
           <div>
-            <input type="number" className={inputClass} placeholder="e.g. 300" value={cB} onChange={e => setCB(e.target.value)} min="0" style={{ borderColor: errors.cB ? '#dc2626' : undefined }} />
+            <input type="number" className={inputClass} placeholder="e.g. 250" value={cB} onChange={e => setCB(e.target.value)} min="0" style={{ borderColor: errors.cB ? '#dc2626' : undefined }} />
             {errors.cB && <p style={{ color: '#dc2626', fontSize: 11, marginTop: 3 }}>{errors.cB}</p>}
           </div>
         </div>
+
+        <p style={{ fontSize: 11, color: '#9b9a97', marginBottom: 8 }}>
+          X and Y can represent any two-step funnel. Examples: clicks and leads, impressions and MQLs, sessions and signups, leads and closed-won.
+        </p>
+
         {errors.sample && (
-          <p style={{ color: '#ca8a04', fontSize: 12, background: '#fefce8', border: '1px solid #fef08a', borderRadius: 6, padding: '8px 12px', marginTop: 8 }}>
+          <p style={{ color: '#ca8a04', fontSize: 12, background: '#fefce8', border: '1px solid #fef08a', borderRadius: 6, padding: '8px 12px', marginTop: 4 }}>
             {errors.sample}
           </p>
         )}
-        {errors.general && <p style={{ color: '#dc2626', fontSize: 12, marginTop: 8 }}>{errors.general}</p>}
+        {errors.general && <p style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>{errors.general}</p>}
+      </div>
+
+      {/* Funnel context (optional) */}
+      <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden', marginBottom: 20 }}>
+        <button
+          onClick={() => setShowContext(v => !v)}
+          style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '10px 14px', fontSize: 13, fontWeight: 500, color: '#6b6a68', cursor: 'pointer' }}
+        >
+          <span>Add funnel context (optional)</span>
+          <span style={{ fontSize: 15 }}>{showContext ? '-' : '+'}</span>
+        </button>
+        {showContext && (
+          <div style={{ padding: '12px 14px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#6b6a68', marginBottom: 5 }}>What is X?</p>
+              <select value={xSelect} onChange={e => setXSelect(e.target.value)} style={selectStyle}>
+                {X_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+              {xSelect === 'Custom' && (
+                <input
+                  type="text"
+                  placeholder="Enter X label"
+                  value={xCustom}
+                  onChange={e => setXCustom(e.target.value)}
+                  style={{ ...selectStyle, marginTop: 6 }}
+                />
+              )}
+            </div>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 600, color: '#6b6a68', marginBottom: 5 }}>What is Y?</p>
+              <select value={ySelect} onChange={e => setYSelect(e.target.value)} style={selectStyle}>
+                {Y_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+              {ySelect === 'Custom' && (
+                <input
+                  type="text"
+                  placeholder="Enter Y label"
+                  value={yCustom}
+                  onChange={e => setYCustom(e.target.value)}
+                  style={{ ...selectStyle, marginTop: 6 }}
+                />
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Confidence selector */}
@@ -259,21 +332,20 @@ export default function ABTestCalculator() {
       {/* Results */}
       {result && (
         <div>
-          {/* Distribution curve */}
-          <DistributionCurve cvrA={result.cvrA} cvrB={result.cvrB} nVA={result.nVA} nVB={result.nVB} />
+          <DistributionCurve cvrA={result.cvrA} cvrB={result.cvrB} nVA={result.nVA} nVB={result.nVB} xLabel={xLabel} yLabel={yLabel} />
 
-          {/* CVR tiles — 3-column */}
+          {/* CVR tiles */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 24 }}>
             <div style={{ background: '#f8f8f7', borderRadius: 6, padding: '14px 16px' }}>
-              <p style={{ fontSize: 11, color: '#6b6a68', marginBottom: 4 }}>Variation A CVR</p>
+              <p style={{ fontSize: 11, color: '#6b6a68', marginBottom: 4 }}>Variation A {yLabel} rate</p>
               <p style={{ fontSize: 20, fontWeight: 700 }}>{(result.cvrA * 100).toFixed(2)}%</p>
             </div>
             <div style={{ background: '#f8f8f7', borderRadius: 6, padding: '14px 16px' }}>
-              <p style={{ fontSize: 11, color: '#6b6a68', marginBottom: 4 }}>Variation B CVR</p>
+              <p style={{ fontSize: 11, color: '#6b6a68', marginBottom: 4 }}>Variation B {yLabel} rate</p>
               <p style={{ fontSize: 20, fontWeight: 700 }}>{(result.cvrB * 100).toFixed(2)}%</p>
             </div>
             <div style={{ background: '#f8f8f7', borderRadius: 6, padding: '14px 16px' }}>
-              <p style={{ fontSize: 11, color: '#6b6a68', marginBottom: 4 }}>Relative lift</p>
+              <p style={{ fontSize: 11, color: '#6b6a68', marginBottom: 4 }}>Relative lift in {yLabel} rate</p>
               <p style={{ fontSize: 20, fontWeight: 700, color: result.relativeLift >= 0 ? '#16a34a' : '#dc2626' }}>
                 {result.relativeLift >= 0 ? '+' : ''}{result.relativeLift.toFixed(1)}%
               </p>
@@ -302,8 +374,8 @@ export default function ABTestCalculator() {
               </p>
               <p style={{ fontSize: 13, color: '#166534', lineHeight: 1.6, marginBottom: 8 }}>
                 {result.cvrB > result.cvrA
-                  ? `Variation B's conversion rate of ${(result.cvrB * 100).toFixed(2)}% is ${Math.abs(result.relativeLift).toFixed(1)}% higher than Variation A's ${(result.cvrA * 100).toFixed(2)}%.`
-                  : `Variation A's conversion rate of ${(result.cvrA * 100).toFixed(2)}% is ${Math.abs(result.relativeLift).toFixed(1)}% higher than Variation B's ${(result.cvrB * 100).toFixed(2)}%.`
+                  ? `Variation B's ${yLabel} rate of ${(result.cvrB * 100).toFixed(2)}% is ${Math.abs(result.relativeLift).toFixed(1)}% higher than Variation A's ${yLabel} rate of ${(result.cvrA * 100).toFixed(2)}%.`
+                  : `Variation A's ${yLabel} rate of ${(result.cvrA * 100).toFixed(2)}% is ${Math.abs(result.relativeLift).toFixed(1)}% higher than Variation B's ${yLabel} rate of ${(result.cvrB * 100).toFixed(2)}%.`
                 }{' '}
                 You can be {result.confidence.toFixed(0)}% confident this difference is not due to chance. At this traffic level, this result would occur by random chance only 1 in {Math.round(1 / (1 - result.confidence / 100))} times.
               </p>
@@ -320,8 +392,8 @@ export default function ABTestCalculator() {
               <p style={{ fontSize: 13, color: '#713f12', lineHeight: 1.6, marginBottom: 8 }}>
                 Your current confidence is {result.confidence.toFixed(1)}%. You need {confidence}% to call a winner.
                 {' '}
-                {result.pooled && isFinite(additionalVisitorsNeeded(zThresh, result.cvrA, result.cvrB, result.pooled)) && (
-                  <>To reach significance at your selected threshold, you need approximately {additionalVisitorsNeeded(zThresh, result.cvrA, result.cvrB, result.pooled).toLocaleString()} more visitors per variation. Keep running the test.</>
+                {result.pooled && isFinite(additionalNeeded(zThresh, result.cvrA, result.cvrB, result.pooled)) && (
+                  <>You need approximately {additionalNeeded(zThresh, result.cvrA, result.cvrB, result.pooled).toLocaleString()} more {xLabel} per variation to reach significance. Keep running the test.</>
                 )}
               </p>
               <p style={{ fontSize: 12, color: '#854d0e', fontStyle: 'italic' }}>{decisionGuidance()}</p>
@@ -340,7 +412,7 @@ export default function ABTestCalculator() {
             {showMethod && (
               <div style={{ padding: '14px 16px', fontSize: 13, color: '#4b5563', lineHeight: 1.7 }}>
                 <p style={{ marginBottom: 10 }}>
-                  This calculator uses a two-tailed frequentist z-test for proportions. Statistical significance tells you the probability that the observed difference between Variation A and Variation B is not due to random chance. A 90% confidence level means there is a 10% chance the result is a false positive, acceptable for most marketing optimization decisions.
+                  This calculator uses a two-tailed frequentist z-test for proportions. It works for any two-step funnel where you are comparing the rate at which {xLabel} converts to {yLabel} across two variations.
                 </p>
                 <p style={{ fontSize: 12, color: '#9b9a97' }}>
                   Sources:{' '}
