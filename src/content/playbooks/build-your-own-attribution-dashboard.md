@@ -1,10 +1,13 @@
 ---
-title: "Build Your Own Attribution Dashboard"
-description: "A step-by-step guide to building a paid media reporting framework in Google Sheets. Starting from raw CRM data and ending with the analysis you need to walk into any senior leadership meeting."
+title: "Build Your Own B2B Paid Media Attribution Dashboard in Google Sheets"
+description: "A step-by-step guide for digital and performance marketers to build a paid media attribution dashboard in Google Sheets, from raw CRM data to channel performance, multi-touch attribution models, and full-year pacing."
+author: "Javier Cruz Galera"
 publishDate: 2026-06-15
-tags: ["Playbook", "Attribution", "Paid Media", "Google Sheets", "Reporting"]
+tags: ["Playbook", "Attribution", "Paid Media", "Google Sheets", "Reporting", "B2B SaaS", "Dashboard", "CRM Export", "CPL", "ROAS"]
 collection: playbooks
 ---
+
+A paid media attribution dashboard tracks which channels generate leads, MQLs, pipeline, and closed-won revenue, and how much credit each channel deserves across the buyer journey. This guide walks you through building one in Google Sheets using a raw CRM export, covering channel performance, multi-touch attribution modeling, seasonality-adjusted pacing, and deal efficiency by buyer seniority.
 
 ## Why I built this
 
@@ -14,7 +17,7 @@ This is not a hypothetical. It happens at well-funded, well-staffed companies wi
 
 I built this guide to ensure you do not grow gray hairs or force yourself into exile.
 
-Starting from a raw CSV export (or working with your MOps team to pull the right fields dynamically into Google Sheets via data syncing) and ending with a framework that covers every conversation you will need to have with senior leadership across a full fiscal year. Channel performance, attribution modeling, monthly pacing, deal efficiency by buyer seniority — all of it, in a Google Sheet you fully control.
+Starting from a raw CSV export (or working with your MOps team to pull the right fields dynamically into Google Sheets via data syncing) and ending with a framework that covers every conversation you will need to have with senior leadership across a full fiscal year. Channel performance, attribution modeling, monthly pacing, deal efficiency by buyer seniority: all of it, in a Google Sheet you fully control.
 
 I built a mock version of this using a fictional B2B SaaS company called Syncflow. You can download the template, explore how the formulas work, and replace the raw data tab with your own CRM export. The live interactive version lives at [jjcruzgalera.com/tools/attribution](/tools/attribution) if you want to explore it before downloading. You likely will not need all the tabs and tiles, so I will also cover what your MVP could look like.
 
@@ -25,9 +28,9 @@ I built a mock version of this using a fictional B2B SaaS company called Syncflo
 Before we get into the build, let me set expectations.
 
 **This framework covers:**
-- Channel-level performance (leads, MQLs, SQLs, closed-won, CPL, ROAS) — this will be part of your MVP
+- Channel-level performance (leads, MQLs (marketing qualified leads), SQLs (sales qualified leads), closed-won, CPL (cost per lead), ROAS (return on ad spend)): this will be part of your MVP
 - Multi-touch attribution modeling with four model types
-- Seasonality-adjusted monthly and quarterly pacing against annual goals — this will be part of your MVP
+- Seasonality-adjusted monthly and quarterly pacing against annual goals: this will be part of your MVP
 - Deal efficiency by buyer seniority and sales motion
 - A channel role reference that explains programmatic and G2 to a CFO without you having to improvise
 
@@ -40,7 +43,7 @@ Think of it as the floor. When your stack is working, you go higher. When it bre
 
 ---
 
-## The data model — what is in the dataset and why
+## The data model: how B2B CRM exports work for attribution
 
 The foundation of this entire framework is a flat CSV with one row per touch per prospect. That structure is intentional. Please do not get hung up on the actual numbers since this is a mock dataset.
 
@@ -58,23 +61,23 @@ If you are pulling from your own CRM, a Salesforce report that joins Activities 
 
 ---
 
-## Your MVP — start here
+## Your MVP: start here
 
 If you are new to performance marketing or building your first reporting framework, do not try to build all six tabs on day one. Start with three.
 
-This dashboard is thorough by design — it covers almost everything you will need to communicate to senior leadership throughout a full fiscal year. But you do not need all of it on day one. You need enough to run your first meeting with confidence.
+This dashboard is thorough by design, and it covers almost everything you will need to communicate to senior leadership throughout a full fiscal year. But you do not need all of it on day one. You need enough to run your first meeting with confidence.
 
-**Tab 1 — Channel Summary (MVP).** This is the table you will be asked to explain in every meeting. Leads, MQLs, SQLs, closed-won, CPL, and ROAS by channel. Depending on your company's growth strategy and goals the focus may shift, but you will most likely be asked about MQLs, SQLs, and ROAS by channel and motion. Keep in mind ROAS should be focused on closed-won, but given long sales cycles you will most likely track it against sales pipeline, which is a leading indicator.
+**Tab 1: Channel Summary (MVP).** This is the table you will be asked to explain in every meeting. Leads, MQLs, SQLs, closed-won, CPL, and ROAS by channel. Depending on your company's growth strategy and goals the focus may shift, but you will most likely be asked about MQLs, SQLs, and ROAS by channel and motion. Keep in mind ROAS should be focused on closed-won, but given long sales cycles you will most likely track it against sales pipeline, which is a leading indicator.
 
-**Tab 2 — Pacing (MVP).** This is the table that saves your quarterly review. Monthly MQL and pipeline actuals versus seasonality-adjusted goals with on track, at risk, and behind indicators. It answers the question "Are we going to hit our goal this quarter?" before anyone has to ask it. I would also recommend linking to any weekly or monthly performance reporting decks that will provide the "why we are pacing at X" context.
+**Tab 2: Pacing (MVP).** This is the table that saves your quarterly review. Monthly MQL and pipeline actuals versus seasonality-adjusted goals with on track, at risk, and behind indicators. It answers the question "Are we going to hit our goal this quarter?" before anyone has to ask it. I would also recommend linking to any weekly or monthly performance reporting decks that will provide the "why we are pacing at X" context.
 
-**Tab 3 — Attribution Model (MVP).** This is the table that makes you sound like a senior marketer: four models, one dropdown, instant toggle. When a CMO asks "How much of this pipeline should we attribute to LinkedIn?" you have a defensible answer regardless of which model they prefer. Keep in mind that depending on the capabilities of your tech stack this may or may not be easy to implement. If you are running incrementality tests you should reference those findings within this section as well.
+**Tab 3: Attribution Model (MVP).** This is the table that makes you sound like a senior marketer: four models, one dropdown, instant toggle. When a CMO asks "How much of this pipeline should we attribute to LinkedIn?" you have a defensible answer regardless of which model they prefer. Keep in mind that depending on the capabilities of your tech stack this may or may not be easy to implement. If you are running incrementality tests you should reference those findings within this section as well.
 
 Build those three tabs first. Get comfortable with the formulas. Then add Deal Efficiency and the README once you understand what each number means.
 
 ---
 
-## Tab by tab — what to build and why it matters
+## Tab by tab: how to build each section of your paid media dashboard
 
 ### Channel Summary
 
@@ -82,9 +85,9 @@ The Channel Summary tab answers the most fundamental question in paid media: whi
 
 The table is built by deduplicating the raw data by prospect ID, assigning each prospect to their primary channel based on first touch, and then counting unique prospects at each funnel stage. CPL is the total channel spend divided by the number of unique leads generated from that channel. At the channel summary level this gives you an efficiency benchmark across your full program, not a campaign-by-campaign view. For campaign-level CPL, drill into the Raw Data tab and filter by campaign name. ROAS is attributed pipeline divided by annual spend.
 
-**Why this matters in a leadership conversation:** CPL without context is just a number. CPL with a benchmark range attached to it — LinkedIn should run $80 to $130, Google Ads $75 to $200 — becomes a decision-making tool. If you walk into a meeting and LinkedIn CPL is $180, the question is not "is this bad?" It is "what changed, and what are we going to do about it?" The benchmark turns a data point into a conversation. Also, some leaders or even other departments will say they do not care about lead volume, but in reality some of these channels will be the life source of your database and there should always be a well thought out nurture program targeting them.
+**Why this matters in a leadership conversation:** CPL without context is just a number. CPL with a benchmark range attached to it (LinkedIn should run $80 to $130, Google Ads $75 to $200) becomes a decision-making tool. If you walk into a meeting and LinkedIn CPL is $180, the question is not "is this bad?" It is "what changed, and what are we going to do about it?" The benchmark turns a data point into a conversation. Also, some leaders or even other departments will say they do not care about lead volume, but in reality some of these channels will be the life source of your database and there should always be a well thought out nurture program targeting them.
 
-The ROAS column uses U-shaped attribution as the default — the same model that anchors the Attribution Model tab. That means the first and last touches each get 40% of the credit, with middle touches splitting the remaining 20%. It is not perfect, but it is the most defensible model for a B2B SaaS business where both demand creation and demand capture matter.
+The ROAS column uses U-shaped attribution as the default, the same model that anchors the Attribution Model tab. That means the first and last touches each get 40% of the credit, with middle touches splitting the remaining 20%. It is not perfect, but it is the most defensible model for a B2B SaaS business where both demand creation and demand capture matter.
 
 **Note:** ROAS and CPL benchmarks apply to LinkedIn and Google Ads only. G2 and programmatic operate on structurally different spend and volume dynamics. Applying the same benchmarks produces misleading conclusions. The note row at the bottom of the table exists to pre-empt that conversation before it starts.
 
@@ -102,7 +105,7 @@ Four models, computed from the same underlying touch data, show how pipeline cre
 
 **Last touch** gives 100% credit to the final interaction before conversion. It favors demand capture channels like Google branded search, G2 retargeting, email, and demo request campaigns because those tend to be the last click before a form fill.
 
-It is also the most dangerous model to rely on for budget decisions. Every channel that was not the final click goes fugazy. The LinkedIn campaign that started the conversation, the programmatic air cover that kept you top of mind — none of it gets credit. If leadership uses last touch to allocate budget, demand generation channels will lose funding every year not because they stopped working, but because the model never showed their contribution. And you will start looking like a cost center more than a revenue-generating engine.
+It is also the most dangerous model to rely on for budget decisions. Every channel that was not the final click goes fugazy. The LinkedIn campaign that started the conversation, the programmatic air cover that kept you top of mind: none of it gets credit. If leadership uses last touch to allocate budget, demand generation channels will lose funding every year not because they stopped working, but because the model never showed their contribution. And you will start looking like a cost center more than a revenue-generating engine.
 
 Use it to understand what triggered conversion. Do not use it to justify where you spend. You can always add a few tiles focusing on the last touch that generated the MQL.
 
@@ -114,11 +117,11 @@ The dropdown in cell B2 controls which model the selected model results table di
 
 The Pacing tab solves a problem most paid media managers do not realize they have: flat monthly goals. Your goals should also follow last year's organic traffic fluctuations and trends.
 
-If you divide your annual MQL goal by 12 and call that your monthly target, you are setting yourself up to look behind in January and March and ahead in May and October — not because performance changed, but because B2B buyer behavior is seasonal. Your audience is not evenly distributed across the calendar.
+If you divide your annual MQL goal by 12 and call that your monthly target, you are setting yourself up to look behind in January and March and ahead in May and October, not because performance changed, but because B2B buyer behavior is seasonal. Your audience is not evenly distributed across the calendar.
 
 This tab weights monthly goals against a traffic index derived from historical organic session patterns. If May historically drives 10.5% of annual traffic and December drives 3%, then May should carry a proportionally larger share of the annual MQL goal. Your paid media targets should reflect the market, not a spreadsheet formula.
 
-The attainment indicators — green for 95% or above, yellow for 80 to 94%, red for below 80% — give you an instant read on where you stand without having to calculate anything. That is the output you want in a monthly business review. Not a table of numbers. A table of numbers with a clear signal.
+The attainment indicators (green for 95% or above, yellow for 80 to 94%, red for below 80%) give you an instant read on where you stand without having to calculate anything. That is the output you want in a monthly business review. Not a table of numbers. A table of numbers with a clear signal.
 
 ### Deal Efficiency
 
@@ -136,15 +139,15 @@ The channel role reference table at the bottom is not a computed output. It is a
 
 The Raw Data tab is designed to be replaced. Here is how to do it without breaking the downstream formulas.
 
-**Step 1 — Pull your CRM export.** From Salesforce, run a report that joins Contacts or Leads to Campaign Members or Activities, with Opportunities joined via the Contact ID. You want one row per campaign touch for each contact, including opportunity stage and amount.
+**Step 1: Pull your CRM export.** From Salesforce, run a report that joins Contacts or Leads to Campaign Members or Activities, with Opportunities joined via the Contact ID. You want one row per campaign touch for each contact, including opportunity stage and amount.
 
-**Step 2 — Map your columns to the template schema.** The columns the downstream tabs depend on are: a unique prospect identifier, a primary channel field, MQL status, opportunity status, closed-won status, pipeline value, seniority or job level, and a month or date field. Rename your columns to match the template headers exactly.
+**Step 2: Map your columns to the template schema.** The columns the downstream tabs depend on are: a unique prospect identifier, a primary channel field, MQL status, opportunity status, closed-won status, pipeline value, seniority or job level, and a month or date field. Rename your columns to match the template headers exactly.
 
-**Step 3 — Paste over the Raw Data tab.** Delete the existing data, paste yours in, and keep the header row intact. The formulas in the other tabs reference named ranges or column letters, so as long as your data starts in row 2 with headers in row 1, everything will recalculate automatically.
+**Step 3: Paste over the Raw Data tab.** Delete the existing data, paste yours in, and keep the header row intact. The formulas in the other tabs reference named ranges or column letters, so as long as your data starts in row 2 with headers in row 1, everything will recalculate automatically.
 
-**Step 4 — Update the spend inputs.** The Channel Summary tab has annual spend values hardcoded for each channel. Update those cells to reflect your actual budget allocation. CPL and ROAS will update immediately.
+**Step 4: Update the spend inputs.** The Channel Summary tab has annual spend values hardcoded for each channel. Update those cells to reflect your actual budget allocation. CPL and ROAS will update immediately.
 
-**Step 5 — Update the annual goals.** The Pacing tab has annual MQL and pipeline goals at the top. Replace those with your actual targets. The monthly breakdown will recalculate based on your seasonality index.
+**Step 5: Update the annual goals.** The Pacing tab has annual MQL and pipeline goals at the top. Replace those with your actual targets. The monthly breakdown will recalculate based on your seasonality index.
 
 If your data is clean and your column mapping is correct, the whole dashboard updates in under five minutes. At minimum make sure your MVP tabs are displaying correctly and you can slowly build the rest back up.
 
@@ -152,7 +155,7 @@ If your data is clean and your column mapping is correct, the whole dashboard up
 
 ## What a full fiscal year looks like using this framework
 
-I would advise against trying to build the entire dashboard in one run — it is not a one-time build. It is a recurring artifact that you will have to adjust, optimize, and cross-reference against other channels and reporting tools when pipeline looks off and you need to investigate.
+I would advise against trying to build the entire dashboard in one run: it is not a one-time build. It is a recurring artifact that you will have to adjust, optimize, and cross-reference against other channels and reporting tools when pipeline looks off and you need to investigate.
 
 At the start of the year, you use the Pacing tab to set seasonality-adjusted monthly targets and present them to leadership. That conversation anchors expectations before the first campaign launches.
 
@@ -160,9 +163,28 @@ When you update the Raw Data tab with a fresh CRM export (if you are not doing a
 
 You will use the Attribution Model tab to make the case for budget allocation when needed. Which channels are generating first-touch pipeline? Which are closing deals? Where are you hitting diminishing returns? The model toggle gives you four different angles on the same question.
 
-At the end of the year, the Deal Efficiency tab tells you whether you were reaching the right buyers. If your C-Suite win rate is high but your IC volume is low, you may be over-indexed on enterprise and leaving commercial pipeline on the table. If your average sales cycle is longer than the benchmark, you have a qualification conversation to have with sales — or a nurture program to review, depending on the challenge.
+At the end of the year, the Deal Efficiency tab tells you whether you were reaching the right buyers. If your C-Suite win rate is high but your IC volume is low, you may be over-indexed on enterprise and leaving commercial pipeline on the table. If your average sales cycle is longer than the benchmark, you have a qualification conversation to have with sales, or a nurture program to review, depending on the challenge.
 
 That is a full year of senior leadership communication, built on a single Google Sheet and a disciplined CRM export process.
+
+---
+
+## Frequently asked questions
+
+**What is the difference between CPL and cpMQL?**
+CPL (cost per lead) is your total channel spend divided by the number of leads generated. cpMQL (cost per marketing qualified lead) is your total channel spend divided by the number of those leads that met your MQL threshold. cpMQL is the more meaningful metric because it accounts for lead quality, not just volume.
+
+**Which attribution model is best for B2B paid media?**
+U-shaped attribution is the most defensible starting point for B2B SaaS. It credits first touch and last touch equally at 40% each, with middle touches splitting the remaining 20%. This respects both the channel that created awareness and the channel that triggered conversion. Use first touch to defend awareness investment and last touch to understand conversion triggers, but never use last touch alone for budget allocation decisions.
+
+**How do I export CRM data for attribution analysis?**
+In Salesforce, run a report that joins Contacts or Leads to Campaign Members or Activities, with Opportunities joined via Contact ID. Export one row per campaign touch per contact, including opportunity stage and pipeline amount. This flat structure is the foundation for both lead counting and attribution modeling.
+
+**What is U-shaped attribution?**
+U-shaped attribution is a multi-touch attribution model that gives 40% of pipeline credit to the first touch, 40% to the last touch, and splits the remaining 20% equally across any middle touches. It is called U-shaped because of how the credit curve looks when plotted across the buyer journey. It is the default model in this framework because it balances awareness and conversion channel credit without fully discarding either.
+
+**How do I set seasonality-adjusted pacing goals?**
+Pull your last 12 months of organic session data from Google Analytics or Search Console. Calculate what percentage of annual traffic each month drove. Use those percentages as weights against your annual MQL and pipeline goals to produce monthly targets. A month that drove 10% of annual traffic should carry 10% of the annual goal, not a flat one-twelfth.
 
 ---
 
