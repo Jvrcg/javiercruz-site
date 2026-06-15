@@ -7,8 +7,6 @@ tags: ["Playbook", "Attribution", "Paid Media", "Google Sheets", "Reporting", "B
 collection: playbooks
 ---
 
-A paid media attribution dashboard tracks which channels generate leads, MQLs, pipeline, and closed-won revenue, and how much credit each channel deserves across the buyer journey. This guide walks you through building one in Google Sheets using a raw CRM export, covering channel performance, multi-touch attribution modeling, seasonality-adjusted pacing, and deal efficiency by buyer seniority.
-
 ## Why I built this
 
 Every paid media manager eventually hits the same wall. The BI tool is misconfigured. The Salesforce admin changed a field without telling anyone or removed it without communicating it across the marketing org. Bizible stopped firing on a key page a week ago and nobody noticed. The QBR is in 48 hours and now the dashboard you were going to present is pulling garbage data.
@@ -28,7 +26,7 @@ I built a mock version of this using a fictional B2B SaaS company called Syncflo
 Before we get into the build, let me set expectations.
 
 **This framework covers:**
-- Channel-level performance (leads, MQLs (marketing qualified leads), SQLs (sales qualified leads), closed-won, CPL (cost per lead), ROAS (return on ad spend)): this will be part of your MVP
+- Channel-level performance (leads, MQLs, SQLs, closed-won, CPL, ROAS) — this will be part of your MVP
 - Multi-touch attribution modeling with four model types
 - Seasonality-adjusted monthly and quarterly pacing against annual goals: this will be part of your MVP
 - Deal efficiency by buyer seniority and sales motion
