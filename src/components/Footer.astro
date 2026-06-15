@@ -1,40 +1,79 @@
 ---
-import Subscribe from './Subscribe.astro';
-
 const year = new Date().getFullYear();
+
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'About' },
+  { href: '/tools', label: 'Tools' },
+  { href: '/playbooks', label: 'Playbooks' },
+  { href: '/lab-notes', label: 'Lab Notes' },
+  { href: '/contact', label: 'Contact' },
+];
+
+const personSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: 'Javier Cruz Galera',
+  url: 'https://jjcruzgalera.com',
+  jobTitle: 'Senior Digital Marketing Manager',
+  description:
+    'Senior B2B paid media and demand generation marketer with 8+ years driving pipeline growth for B2B SaaS companies.',
+  sameAs: ['https://www.linkedin.com/in/javiercruzgalera/', 'https://github.com/Jvrcg'],
+};
 ---
 
-<footer class="bg-[#0A0A0A] mt-24">
-  <div class="max-w-4xl mx-auto px-6 pt-10 pb-8">
+<footer class="bg-white border-t border-[#e5e5e3]" style="font-family: inherit;">
+  <div class="max-w-4xl mx-auto px-6" style="padding-top: 48px; padding-bottom: 32px;">
 
-    <!-- Newsletter strip -->
-    <div class="mb-8">
-      <Subscribe variant="compact" />
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-10">
+      <!-- Left column -->
+      <div>
+        <p class="text-lg" style="font-weight: 500;">Javier Cruz Galera</p>
+        <p class="text-sm text-gray-600 leading-relaxed mt-2 max-w-sm">
+          Senior B2B paid media and demand generation marketer with 8+ years driving pipeline
+          growth for B2B SaaS companies including Fivetran and Great Place to Work.
+        </p>
+        <p class="mt-4 text-sm">
+          <a href="https://www.linkedin.com/in/javiercruzgalera/" target="_blank" rel="noopener noreferrer" style="color: #2563EB;">LinkedIn</a> <a href="https://github.com/Jvrcg" target="_blank" rel="noopener noreferrer" style="color: #2563EB;">GitHub</a>
+        </p>
+      </div>
+
+      <!-- Right column -->
+      <div class="sm:text-right">
+        <nav aria-label="Footer navigation">
+          <ul class="list-none m-0 p-0 flex flex-col gap-2" role="list">
+            {navLinks.map(({ href, label }) => (
+              <li>
+                <a
+                  href={href}
+                  style="font-size: 14px; color: #6b6a68;"
+                  class="footer-nav-link"
+                >
+                  {label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </div>
     </div>
 
-    <!-- Bottom bar -->
-    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-gray-500 pt-6">
-      <p class="text-gray-500">&copy; {year} Javier Cruz Galera. All rights reserved.</p>
-      <nav aria-label="Footer navigation">
-        <ul class="flex gap-5 list-none m-0 p-0" role="list">
-          <li>
-            <a
-              href="https://www.linkedin.com/in/javiercruzgalera/"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-gray-400 hover:text-white transition-colors"
-            >
-              LinkedIn
-            </a>
-          </li>
-          <li>
-            <a href="/newsletter" class="text-gray-400 hover:text-white transition-colors">
-              Newsletter
-            </a>
-          </li>
-        </ul>
-      </nav>
+    <!-- Bottom row -->
+    <div
+      class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-10 pt-6 border-t"
+      style="border-color: #e5e5e3;"
+    >
+      <p style="font-size: 12px; color: #6b6a68;">&copy; {year} Javier Cruz Galera</p>
+      <a href="/sitemap.xml" style="font-size: 12px; color: #6b6a68;">Sitemap</a>
     </div>
 
   </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(personSchema)} />
 </footer>
+
+<style>
+  .footer-nav-link:hover {
+    color: #1a1a19;
+  }
+</style>
