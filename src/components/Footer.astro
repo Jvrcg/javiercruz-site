@@ -22,19 +22,40 @@ const personSchema = {
 };
 ---
 
-<footer class="bg-white border-t border-[#e5e5e3]" style="font-family: inherit;">
+<section class="bg-[#f8f8f7] border-t border-[#e5e5e3] py-6" aria-labelledby="newsletter-heading-banner">
+  <div class="max-w-4xl mx-auto px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h2 id="newsletter-heading-banner" class="text-base font-semibold text-gray-900 mb-1">
+        Notes from Page 2
+      </h2>
+      <p class="text-sm text-gray-600 max-w-md">
+        A monthly field report on performance marketing, experimentation, and what I'm learning running this site as an SEO lab.
+      </p>
+    </div>
+    <a
+      href="https://notesfrompage2.beehiiv.com/subscribe"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex-shrink-0 bg-blue-600 text-white px-5 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors text-center text-sm"
+    >
+      Subscribe
+    </a>
+  </div>
+</section>
+
+<footer class="bg-[#1a1a19] border-t border-[#2c2c2a]" style="font-family: inherit;">
   <div class="max-w-4xl mx-auto px-6" style="padding-top: 48px; padding-bottom: 32px;">
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-10">
       <!-- Left column -->
       <div>
-        <p class="text-lg" style="font-weight: 500;">Javier Cruz Galera</p>
-        <p class="text-sm text-gray-600 leading-relaxed mt-2 max-w-sm">
+        <p class="text-lg" style="font-weight: 500; color: #ffffff;">Javier Cruz Galera</p>
+        <p class="text-sm leading-relaxed mt-2 max-w-sm" style="color: #9b9a97;">
           Senior B2B paid media and demand generation marketer with 8+ years driving pipeline
           growth for B2B SaaS companies including Fivetran and Great Place to Work.
         </p>
         <p class="mt-4 text-sm">
-          <a href="https://www.linkedin.com/in/javiercruzgalera/" target="_blank" rel="noopener noreferrer" style="color: #2563EB;">LinkedIn</a> <a href="https://github.com/Jvrcg" target="_blank" rel="noopener noreferrer" style="color: #2563EB;">GitHub</a>
+          <a href="https://www.linkedin.com/in/javiercruzgalera/" target="_blank" rel="noopener noreferrer" class="footer-social-link" style="color: #2563EB;">LinkedIn</a> <a href="https://github.com/Jvrcg" target="_blank" rel="noopener noreferrer" class="footer-social-link" style="color: #2563EB;">GitHub</a>
         </p>
       </div>
 
@@ -46,7 +67,7 @@ const personSchema = {
               <li>
                 <a
                   href={href}
-                  style="font-size: 14px; color: #6b6a68;"
+                  style="font-size: 14px; color: #9b9a97;"
                   class="footer-nav-link"
                 >
                   {label}
@@ -61,7 +82,7 @@ const personSchema = {
     <!-- Bottom row -->
     <div
       class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-10 pt-6 border-t"
-      style="border-color: #e5e5e3;"
+      style="border-color: #2c2c2a;"
     >
       <p style="font-size: 12px; color: #6b6a68;">&copy; {year} Javier Cruz Galera</p>
       <a href="/sitemap.xml" style="font-size: 12px; color: #6b6a68;">Sitemap</a>
@@ -74,6 +95,10 @@ const personSchema = {
 
 <style>
   .footer-nav-link:hover {
-    color: #1a1a19;
+    color: #ffffff;
+  }
+
+  .footer-social-link:hover {
+    color: #3b82f6;
   }
 </style>
