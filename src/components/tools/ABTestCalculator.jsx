@@ -19,8 +19,6 @@ function normalPDF(x) {
 
 const Z_THRESHOLDS = { 80: 1.282, 90: 1.645, 95: 1.960, 99: 2.576 };
 
-const X_OPTIONS = ['Clicks', 'Impressions', 'Leads', 'MQLs', 'Sessions', 'Visitors', 'Custom'];
-const Y_OPTIONS = ['Lead', 'MQL', 'SQL', 'Demo request', 'Trial signup', 'Closed-won', 'Opportunity', 'Conversion', 'Custom'];
 
 function validateInputs(vA, cA, vB, cB) {
   const errors = {};
@@ -134,16 +132,6 @@ const STAGE_TABLE = [
   { conf: '99%', stage: 'Medical / Legal / Financial', description: 'Regulatory or liability implications. Not required for marketing campaign optimization.' },
 ];
 
-const selectStyle = {
-  width: '100%',
-  border: '1px solid #e5e7eb',
-  borderRadius: 6,
-  padding: '7px 10px',
-  fontSize: 13,
-  color: '#1a1a19',
-  background: 'white',
-  cursor: 'pointer',
-};
 
 export default function ABTestCalculator() {
   const [vA, setVA] = useState('');
@@ -157,13 +145,11 @@ export default function ABTestCalculator() {
   const [showStage, setShowStage] = useState(false);
   const [showContext, setShowContext] = useState(false);
 
-  const [xSelect, setXSelect] = useState('Visitors');
-  const [ySelect, setYSelect] = useState('Conversion');
-  const [xCustom, setXCustom] = useState('');
-  const [yCustom, setYCustom] = useState('');
+  const [xInput, setXInput] = useState('');
+  const [yInput, setYInput] = useState('');
 
-  const xLabel = xSelect === 'Custom' ? (xCustom || 'X') : xSelect;
-  const yLabel = ySelect === 'Custom' ? (yCustom || 'Y') : ySelect;
+  const xLabel = xInput.trim() || 'X';
+  const yLabel = yInput.trim() || 'Y';
 
   function handleCalculate() {
     const errs = validateInputs(vA, cA, vB, cB);
@@ -246,46 +232,36 @@ export default function ABTestCalculator() {
         {errors.general && <p style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>{errors.general}</p>}
       </div>
 
-      {/* Funnel context (optional) */}
+      {/* Label inputs (optional) */}
       <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden', marginBottom: 20 }}>
         <button
           onClick={() => setShowContext(v => !v)}
           style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '10px 14px', fontSize: 13, fontWeight: 500, color: '#6b6a68', cursor: 'pointer' }}
         >
-          <span>Add funnel context (optional)</span>
+          <span>Label your inputs (optional)</span>
           <span style={{ fontSize: 15 }}>{showContext ? '-' : '+'}</span>
         </button>
         {showContext && (
-          <div style={{ padding: '12px 14px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <div>
-              <p style={{ fontSize: 11, fontWeight: 600, color: '#6b6a68', marginBottom: 5 }}>What is X?</p>
-              <select value={xSelect} onChange={e => setXSelect(e.target.value)} style={selectStyle}>
-                {X_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-              </select>
-              {xSelect === 'Custom' && (
-                <input
-                  type="text"
-                  placeholder="Enter X label"
-                  value={xCustom}
-                  onChange={e => setXCustom(e.target.value)}
-                  style={{ ...selectStyle, marginTop: 6 }}
-                />
-              )}
+          <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', alignItems: 'center', gap: 12 }}>
+              <p style={{ fontSize: 12, fontWeight: 500, color: '#6b6a68' }}>What is X?</p>
+              <input
+                type="text"
+                placeholder="e.g. Clicks, Impressions, MQLs"
+                value={xInput}
+                onChange={e => setXInput(e.target.value)}
+                style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: '7px 10px', fontSize: 13, color: '#1a1a19', width: '100%' }}
+              />
             </div>
-            <div>
-              <p style={{ fontSize: 11, fontWeight: 600, color: '#6b6a68', marginBottom: 5 }}>What is Y?</p>
-              <select value={ySelect} onChange={e => setYSelect(e.target.value)} style={selectStyle}>
-                {Y_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-              </select>
-              {ySelect === 'Custom' && (
-                <input
-                  type="text"
-                  placeholder="Enter Y label"
-                  value={yCustom}
-                  onChange={e => setYCustom(e.target.value)}
-                  style={{ ...selectStyle, marginTop: 6 }}
-                />
-              )}
+            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', alignItems: 'center', gap: 12 }}>
+              <p style={{ fontSize: 12, fontWeight: 500, color: '#6b6a68' }}>What is Y?</p>
+              <input
+                type="text"
+                placeholder="e.g. Leads, MQLs, Closed-won"
+                value={yInput}
+                onChange={e => setYInput(e.target.value)}
+                style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: '7px 10px', fontSize: 13, color: '#1a1a19', width: '100%' }}
+              />
             </div>
           </div>
         )}
