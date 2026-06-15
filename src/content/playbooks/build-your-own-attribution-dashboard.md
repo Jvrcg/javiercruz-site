@@ -45,6 +45,8 @@ Think of it as the floor. When your stack is working, you go higher. When it bre
 
 The foundation of this entire framework is a flat CSV with one row per touch per prospect. That structure is intentional. Please do not get hung up on the actual numbers since this is a mock dataset.
 
+![Raw data tab in Google Sheets showing prospect touch rows with UTM fields and pipeline values](/images/playbooks/attribution/template-raw-data.jpg)
+
 Most CRM exports come out this way: one row per activity, not one row per person. A prospect who touched LinkedIn, then G2, then Google before converting will appear three times in your export. That is not a bug. It is the raw material for attribution modeling.
 
 The Syncflow mock dataset includes 9,378 unique prospects across 27,610 rows. Each row contains:
@@ -67,6 +69,8 @@ This dashboard is thorough by design, and it covers almost everything you will n
 
 **Tab 1: Channel Summary (MVP).** This is the table you will be asked to explain in every meeting. Leads, MQLs, SQLs, closed-won, CPL, and ROAS by channel. Depending on your company's growth strategy and goals the focus may shift, but you will most likely be asked about MQLs, SQLs, and ROAS by channel and motion. Keep in mind ROAS should be focused on closed-won, but given long sales cycles you will most likely track it against sales pipeline, which is a leading indicator.
 
+![Summary tab showing total leads, MQLs, pipeline and funnel conversion rates](/images/playbooks/attribution/summary-tab.jpg)
+
 **Tab 2: Pacing (MVP).** This is the table that saves your quarterly review. Monthly MQL and pipeline actuals versus seasonality-adjusted goals with on track, at risk, and behind indicators. It answers the question "Are we going to hit our goal this quarter?" before anyone has to ask it. I would also recommend linking to any weekly or monthly performance reporting decks that will provide the "why we are pacing at X" context.
 
 **Tab 3: Attribution Model (MVP).** This is the table that makes you sound like a senior marketer: four models, one dropdown, instant toggle. When a CMO asks "How much of this pipeline should we attribute to LinkedIn?" you have a defensible answer regardless of which model they prefer. Keep in mind that depending on the capabilities of your tech stack this may or may not be easy to implement. If you are running incrementality tests you should reference those findings within this section as well.
@@ -83,6 +87,8 @@ The Channel Summary tab answers the most fundamental question in paid media: whi
 
 The table is built by deduplicating the raw data by prospect ID, assigning each prospect to their primary channel based on first touch, and then counting unique prospects at each funnel stage. CPL is the total channel spend divided by the number of unique leads generated from that channel. At the channel summary level this gives you an efficiency benchmark across your full program, not a campaign-by-campaign view. For campaign-level CPL, drill into the Raw Data tab and filter by campaign name. ROAS is attributed pipeline divided by annual spend.
 
+![Channel Summary tab showing leads, MQLs, SQLs, CPL and ROAS by channel](/images/playbooks/attribution/channel-summary.jpg)
+
 **Why this matters in a leadership conversation:** CPL without context is just a number. CPL with a benchmark range attached to it (LinkedIn should run $80 to $130, Google Ads $75 to $200) becomes a decision-making tool. If you walk into a meeting and LinkedIn CPL is $180, the question is not "is this bad?" It is "what changed, and what are we going to do about it?" The benchmark turns a data point into a conversation. Also, some leaders or even other departments will say they do not care about lead volume, but in reality some of these channels will be the life source of your database and there should always be a well thought out nurture program targeting them.
 
 The ROAS column uses U-shaped attribution as the default, the same model that anchors the Attribution Model tab. That means the first and last touches each get 40% of the credit, with middle touches splitting the remaining 20%. It is not perfect, but it is the most defensible model for a B2B SaaS business where both demand creation and demand capture matter.
@@ -94,6 +100,8 @@ The ROAS column uses U-shaped attribution as the default, the same model that an
 The Attribution Model tab is where the analytical depth lives.
 
 Four models, computed from the same underlying touch data, show how pipeline credit shifts depending on how you weight the buyer journey.
+
+![Attribution model toggle showing U-shaped, First touch, Last touch and Linear options](/images/playbooks/attribution/attribution-model.jpg)
 
 **U-shaped** credits first and last touches equally at 40% each, with middle touches splitting 20%. This is the default because it respects both the channel that created awareness and the channel that closed the deal.
 
@@ -115,6 +123,8 @@ The dropdown in cell B2 controls which model the selected model results table di
 
 The Pacing tab solves a problem most paid media managers do not realize they have: flat monthly goals. Your goals should also follow last year's organic traffic fluctuations and trends.
 
+![Pacing tab showing monthly MQL and pipeline actuals versus seasonality-adjusted goals](/images/playbooks/attribution/pacing.jpg)
+
 If you divide your annual MQL goal by 12 and call that your monthly target, you are setting yourself up to look behind in January and March and ahead in May and October, not because performance changed, but because B2B buyer behavior is seasonal. Your audience is not evenly distributed across the calendar.
 
 This tab weights monthly goals against a traffic index derived from historical organic session patterns. If May historically drives 10.5% of annual traffic and December drives 3%, then May should carry a proportionally larger share of the annual MQL goal. Your paid media targets should reflect the market, not a spreadsheet formula.
@@ -124,6 +134,8 @@ The attainment indicators (green for 95% or above, yellow for 80 to 94%, red for
 ### Deal Efficiency
 
 The Deal Efficiency tab is the one most performance marketers skip and the one that most impresses senior finance and revenue leadership when you include it.
+
+![Deal efficiency tab showing metrics by seniority tier including avg deal size and sales cycle](/images/playbooks/attribution/deal-efficiency.jpg)
 
 It answers three questions that channel-level reporting cannot: who are we actually closing, how long does it take to get there, and does my current targeting reflect the buyers most likely to convert at the deal size we need?
 
