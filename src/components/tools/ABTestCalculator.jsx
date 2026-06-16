@@ -377,114 +377,120 @@ export default function ABTestCalculator() {
             </div>
           )}
 
-          {/* How this is calculated */}
-          <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden', marginBottom: 10 }}>
-            <button
-              onClick={() => setShowMethod(v => !v)}
-              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer' }}
-            >
-              <span>How this is calculated</span>
-              <span style={{ fontSize: 16 }}>{showMethod ? '-' : '+'}</span>
-            </button>
-            {showMethod && (
-              <div style={{ padding: '14px 16px', fontSize: 13, color: '#4b5563', lineHeight: 1.7 }}>
-                <p style={{ marginBottom: 10 }}>
-                  This calculator uses a two-tailed frequentist z-test for proportions. It works for any two-step funnel where you are comparing the rate at which {xLabel} converts to {yLabel} across two variations.
-                </p>
-                <p style={{ fontSize: 12, color: '#9b9a97' }}>
-                  Sources:{' '}
-                  <a href="https://blog.analytics-toolkit.com/2017/statistical-significance-ab-testing-complete-guide/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>
-                    Analytics Toolkit: Complete Guide to Statistical Significance in A/B Testing
-                  </a>
-                  {' '}and{' '}
-                  <a href="https://towardsdatascience.com/why-most-a-b-tests-are-lying-to-you/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>
-                    Towards Data Science: Why Most A/B Tests Are Lying to You
-                  </a>
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Confidence level guide by growth stage */}
-          <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden' }}>
-            <button
-              onClick={() => setShowStage(v => !v)}
-              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer' }}
-            >
-              <span>Confidence level guide by growth stage</span>
-              <span style={{ fontSize: 16 }}>{showStage ? '-' : '+'}</span>
-            </button>
-            {showStage && (
-              <div style={{ padding: '14px 16px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, marginBottom: 12 }}>
-                  <thead>
-                    <tr>
-                      <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>Confidence</th>
-                      <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>Stage</th>
-                      <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>When to use</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {STAGE_TABLE.map((row, i) => (
-                      <tr key={row.conf} style={{ background: i % 2 === 0 ? '#fafafa' : 'white' }}>
-                        <td style={{ padding: '8px', fontWeight: 600, color: '#1a1a19', whiteSpace: 'nowrap' }}>{row.conf}</td>
-                        <td style={{ padding: '8px', color: '#4b5563', whiteSpace: 'nowrap' }}>{row.stage}</td>
-                        <td style={{ padding: '8px', color: '#4b5563', lineHeight: 1.5 }}>{row.description}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                <p style={{ fontSize: 12, color: '#4b5563', lineHeight: 1.6, marginBottom: 10 }}>
-                  At 80% confidence you are accepting a 1 in 5 chance of a false positive to keep moving. For a small test budget that is a rational trade-off. For a $500K campaign change, probably not.
-                </p>
-                <p style={{ fontSize: 11, color: '#9b9a97', lineHeight: 1.6 }}>
-                  Sources:{' '}
-                  <a href="https://www.airship.com/blog/a-b-testing-the-science-behind-the-numbers/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Airship: When and why to adjust your confidence threshold</a>
-                  {', '}
-                  <a href="https://www.invespcro.com/ab-testing/results-analysis/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Invesp: How to analyze A/B test results</a>
-                  {', '}
-                  <a href="https://blog.analytics-toolkit.com/2017/statistical-significance-ab-testing-complete-guide/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Analytics Toolkit: Statistical significance in A/B testing: complete guide</a>
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Testing at growth stage */}
-          <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden', marginTop: 10 }}>
-            <button
-              onClick={() => setShowGrowth(v => !v)}
-              style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#eff6ff', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#2563EB', cursor: 'pointer' }}
-            >
-              <span>Testing at growth stage</span>
-              <span style={{ fontSize: 16 }}>{showGrowth ? '-' : '+'}</span>
-            </button>
-            {showGrowth && (
-              <div style={{ padding: '14px 16px' }}>
-                <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7, marginBottom: 12 }}>
-                  If your campaigns are generating fewer than 100 conversions per variation, you may not reach statistical significance regardless of how long you run the test. This is common at growth stage and does not mean the tool is broken or the test failed.
-                </p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a19', marginBottom: 3 }}>Treat results as directional signals</p>
-                    <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7 }}>A 70 to 80% confidence reading with a consistent directional trend over two or more weeks is often enough to make a budget reallocation decision at growth stage. Document your hypothesis, your result, and your confidence level, then revisit when volume increases.</p>
-                  </div>
-                  <div>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a19', marginBottom: 3 }}>Test the highest-volume metric first</p>
-                    <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7 }}>If conversions are too low to test, move up the funnel. Test CTR before testing click-to-lead rate. Test impression-level engagement before testing CTR. Work downstream as volume grows.</p>
-                  </div>
-                  <div>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a19', marginBottom: 3 }}>Velocity matters more than significance at early stage</p>
-                    <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7 }}>At growth stage you are trying to build intuition about what works, not prove it at 95% confidence. A consistent directional winner across three or more tests is stronger evidence than a single statistically significant result at low volume.</p>
-                  </div>
-                </div>
-                <p style={{ fontSize: 11, color: '#6b6a68', lineHeight: 1.6, marginTop: 12 }}>
-                  This guidance applies to campaigns generating fewer than 1,000 conversions per month per variation. Once you reach that volume, standard significance thresholds become achievable and you should hold yourself to them.
-                </p>
-              </div>
-            )}
-          </div>
         </div>
       )}
+
+      {/* Always-visible collapsible sections */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 24 }}>
+
+        {/* How this is calculated */}
+        <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden' }}>
+          <button
+            onClick={() => setShowMethod(v => !v)}
+            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer' }}
+          >
+            <span>How this is calculated</span>
+            <span style={{ fontSize: 16 }}>{showMethod ? '-' : '+'}</span>
+          </button>
+          {showMethod && (
+            <div style={{ padding: '14px 16px', fontSize: 13, color: '#4b5563', lineHeight: 1.7 }}>
+              <p style={{ marginBottom: 10 }}>
+                This calculator uses a two-tailed frequentist z-test for proportions. It works for any two-step funnel where you are comparing the rate at which {xLabel} converts to {yLabel} across two variations.
+              </p>
+              <p style={{ fontSize: 12, color: '#9b9a97' }}>
+                Sources:{' '}
+                <a href="https://blog.analytics-toolkit.com/2017/statistical-significance-ab-testing-complete-guide/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>
+                  Analytics Toolkit: Complete Guide to Statistical Significance in A/B Testing
+                </a>
+                {' '}and{' '}
+                <a href="https://towardsdatascience.com/why-most-a-b-tests-are-lying-to-you/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>
+                  Towards Data Science: Why Most A/B Tests Are Lying to You
+                </a>
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Confidence level guide by growth stage */}
+        <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden' }}>
+          <button
+            onClick={() => setShowStage(v => !v)}
+            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer' }}
+          >
+            <span>Confidence level guide by growth stage</span>
+            <span style={{ fontSize: 16 }}>{showStage ? '-' : '+'}</span>
+          </button>
+          {showStage && (
+            <div style={{ padding: '14px 16px' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, marginBottom: 12 }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>Confidence</th>
+                    <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>Stage</th>
+                    <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>When to use</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {STAGE_TABLE.map((row, i) => (
+                    <tr key={row.conf} style={{ background: i % 2 === 0 ? '#fafafa' : 'white' }}>
+                      <td style={{ padding: '8px', fontWeight: 600, color: '#1a1a19', whiteSpace: 'nowrap' }}>{row.conf}</td>
+                      <td style={{ padding: '8px', color: '#4b5563', whiteSpace: 'nowrap' }}>{row.stage}</td>
+                      <td style={{ padding: '8px', color: '#4b5563', lineHeight: 1.5 }}>{row.description}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ fontSize: 12, color: '#4b5563', lineHeight: 1.6, marginBottom: 10 }}>
+                At 80% confidence you are accepting a 1 in 5 chance of a false positive to keep moving. For a small test budget that is a rational trade-off. For a $500K campaign change, probably not.
+              </p>
+              <p style={{ fontSize: 11, color: '#9b9a97', lineHeight: 1.6 }}>
+                Sources:{' '}
+                <a href="https://www.airship.com/blog/a-b-testing-the-science-behind-the-numbers/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Airship: When and why to adjust your confidence threshold</a>
+                {', '}
+                <a href="https://www.invespcro.com/ab-testing/results-analysis/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Invesp: How to analyze A/B test results</a>
+                {', '}
+                <a href="https://blog.analytics-toolkit.com/2017/statistical-significance-ab-testing-complete-guide/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Analytics Toolkit: Statistical significance in A/B testing: complete guide</a>
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Testing at growth stage */}
+        <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden' }}>
+          <button
+            onClick={() => setShowGrowth(v => !v)}
+            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#eff6ff', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#2563EB', cursor: 'pointer' }}
+          >
+            <span>Testing at growth stage</span>
+            <span style={{ fontSize: 16 }}>{showGrowth ? '-' : '+'}</span>
+          </button>
+          {showGrowth && (
+            <div style={{ padding: '14px 16px' }}>
+              <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7, marginBottom: 12 }}>
+                If your campaigns are generating fewer than 100 conversions per variation, you may not reach statistical significance regardless of how long you run the test. This is common at growth stage and does not mean the tool is broken or the test failed.
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a19', marginBottom: 3 }}>Treat results as directional signals</p>
+                  <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7 }}>A 70 to 80% confidence reading with a consistent directional trend over two or more weeks is often enough to make a budget reallocation decision at growth stage. Document your hypothesis, your result, and your confidence level, then revisit when volume increases.</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a19', marginBottom: 3 }}>Test the highest-volume metric first</p>
+                  <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7 }}>If conversions are too low to test, move up the funnel. Test CTR before testing click-to-lead rate. Test impression-level engagement before testing CTR. Work downstream as volume grows.</p>
+                </div>
+                <div>
+                  <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a19', marginBottom: 3 }}>Velocity matters more than significance at early stage</p>
+                  <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7 }}>At growth stage you are trying to build intuition about what works, not prove it at 95% confidence. A consistent directional winner across three or more tests is stronger evidence than a single statistically significant result at low volume.</p>
+                </div>
+              </div>
+              <p style={{ fontSize: 11, color: '#6b6a68', lineHeight: 1.6, marginTop: 12 }}>
+                This guidance applies to campaigns generating fewer than 1,000 conversions per month per variation. Once you reach that volume, standard significance thresholds become achievable and you should hold yourself to them.
+              </p>
+            </div>
+          )}
+        </div>
+
+      </div>
     </div>
   );
 }
