@@ -400,6 +400,9 @@ export default function ABTestCalculator() {
               <p style={{ marginBottom: 10 }}>
                 This calculator uses a two-tailed frequentist z-test for proportions. It works for any two-step funnel where you are comparing the rate at which {xLabel} converts to {yLabel} across two variations.
               </p>
+              <p style={{ marginBottom: 10 }}>
+                Sample size estimates include 80% statistical power (z=0.84), meaning the test has an 80% probability of detecting a real difference if one exists. This is the industry standard assumption for experiment design.
+              </p>
               <p style={{ fontSize: 12, color: '#9b9a97' }}>
                 Sources:{' '}
                 <a href="https://blog.analytics-toolkit.com/2017/statistical-significance-ab-testing-complete-guide/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>
