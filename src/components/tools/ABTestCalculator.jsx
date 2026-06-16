@@ -295,7 +295,7 @@ export default function ABTestCalculator() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <p style={{ fontSize: 11, color: '#6b6a68' }}>80%: Directional signal. Reasonable to act at early stage or when budget at stake is low.</p>
           <p style={{ fontSize: 11, color: '#6b6a68' }}>90%: Strong signal. Appropriate for most paid media optimization decisions.</p>
-          <p style={{ fontSize: 11, color: '#6b6a68' }}>95% and 99%: Medical-grade thresholds. Not required for marketing campaign optimization.</p>
+          <p style={{ fontSize: 11, color: '#6b6a68' }}>95% and 99%: Higher confidence threshold. Appropriate when the decision carries significant budget or risk.</p>
         </div>
       </div>
 
