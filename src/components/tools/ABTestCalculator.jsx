@@ -468,35 +468,81 @@ export default function ABTestCalculator() {
           {showSampleSize && (
             <div style={{ padding: '14px 16px' }}>
               <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7, marginBottom: 12 }}>
-                The volume required to reach significance varies significantly by channel. Paid search and high-intent landing pages tend to generate enough conversions quickly. Brand awareness and upper-funnel channels rarely do. Use this as a rough planning guide before starting a test.
+                Sample size requirements vary by channel, baseline conversion rate, and the minimum lift you want to detect. These are practical benchmarks for paid media A/B tests. Some are sourced from published research; others are practitioner guidance noted as such.
               </p>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, marginBottom: 12 }}>
                 <thead>
-                  <tr>
-                    <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>Channel</th>
-                    <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>Typical conversion volume</th>
-                    <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>Significance achievable?</th>
+                  <tr style={{ background: '#f8f8f7' }}>
+                    <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e5e5e3', color: '#1a1a19', fontWeight: 500 }}>Channel</th>
+                    <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e5e5e3', color: '#1a1a19', fontWeight: 500 }}>Typical conversion volume</th>
+                    <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #e5e5e3', color: '#1a1a19', fontWeight: 500 }}>Significance achievable?</th>
                   </tr>
                 </thead>
                 <tbody>
                   {[
-                    { channel: 'Google Search (branded)', vol: 'High', sig: 'Yes, often within 2 to 4 weeks' },
-                    { channel: 'Google Search (non-branded)', vol: 'Medium', sig: 'Yes, with 4 to 8 weeks of data' },
-                    { channel: 'LinkedIn', vol: 'Low to medium', sig: 'Sometimes, requires longer run time' },
-                    { channel: 'Programmatic display', vol: 'Low', sig: 'Rarely at conversion level. Test CTR instead.' },
-                    { channel: 'G2 / review sites', vol: 'Low', sig: 'Rarely. Treat directionally.' },
-                    { channel: 'Email', vol: 'Medium to high', sig: 'Yes, for open rate and CTR. Rarely for conversion.' },
+                    {
+                      channel: 'Google Search (branded)',
+                      vol: 'Medium to high. Varies significantly by brand size and search volume.',
+                      sig: 'Often achievable in 4 to 8 weeks for high-volume accounts. Smaller B2B brands may see low branded volume and should treat results directionally.',
+                      note: 'Sourced: Google Ads 2 to 4 week minimum for high-volume accounts. blog.marketingblatt.com',
+                    },
+                    {
+                      channel: 'Google Search (non-branded)',
+                      vol: 'Medium',
+                      sig: 'Yes, with 4 to 8 weeks of data at typical B2B conversion volumes. Landing page tests detecting a 40 to 100% CVR lift are achievable in 4 to 6 weeks.',
+                      note: 'Sourced: GrowthSpree, Google Ads Experiments for B2B SaaS.',
+                    },
+                    {
+                      channel: 'LinkedIn',
+                      vol: 'Low to medium. High cost per conversion.',
+                      sig: 'Requires at least 50 conversions per variant for directional data and 100 or more for statistical significance. At a $75 CPL, 100 conversions per variant means approximately $15,000 in total test budget. Plan LinkedIn tests carefully.',
+                      note: 'Sourced: Percuity, How to A/B Test LinkedIn Ads Effectively.',
+                    },
+                    {
+                      channel: 'Programmatic and display',
+                      vol: 'Low at conversion level',
+                      sig: 'Rarely achievable at conversion level. Test CTR first. If your campaign serves fewer than 1,000 impressions per week or generates fewer than 20 conversions per month, plan for 8 to 12 weeks or longer.',
+                      note: 'Sourced: ALM Corp, Google Performance Max A/B Testing Guide.',
+                    },
+                    {
+                      channel: 'G2 and review sites',
+                      vol: 'Low',
+                      sig: 'Rarely achievable at standard significance thresholds. Treat all G2 test results directionally. This is practitioner guidance. No published benchmark exists for G2-specific A/B testing.',
+                      note: 'Practitioner guidance. No published source available.',
+                    },
+                    {
+                      channel: 'Email',
+                      vol: 'Medium to high',
+                      sig: 'Yes for open rate and CTR with at least 20,000 recipients per variant. Conversion-level significance is rarely achievable without very large list sizes.',
+                      note: 'Sourced: HubSpot, How to determine your A/B testing sample size and time frame.',
+                    },
                   ].map((row, i) => (
-                    <tr key={row.channel} style={{ background: i % 2 === 0 ? '#fafafa' : 'white' }}>
-                      <td style={{ padding: '8px', fontWeight: 500, color: '#1a1a19' }}>{row.channel}</td>
-                      <td style={{ padding: '8px', color: '#4b5563' }}>{row.vol}</td>
-                      <td style={{ padding: '8px', color: '#4b5563', lineHeight: 1.5 }}>{row.sig}</td>
+                    <tr key={row.channel} style={{ background: i % 2 === 0 ? 'white' : '#f8f8f7', borderBottom: '1px solid #e5e5e3' }}>
+                      <td style={{ padding: '8px', fontWeight: 500, color: '#1a1a19', verticalAlign: 'top' }}>{row.channel}</td>
+                      <td style={{ padding: '8px', color: '#6b6a68', lineHeight: 1.5, verticalAlign: 'top' }}>{row.vol}</td>
+                      <td style={{ padding: '8px', color: '#6b6a68', lineHeight: 1.5, verticalAlign: 'top' }}>
+                        {row.sig}
+                        <br />
+                        <span style={{ fontSize: 10, color: '#9b9a97', fontStyle: 'italic' }}>{row.note}</span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
-              <p style={{ fontSize: 11, color: '#6b6a68', lineHeight: 1.6 }}>
-                As a rule of thumb, aim for at least 100 conversions per variation before drawing conclusions. For small effect sizes (less than 5% relative lift), you may need 1,000 or more per variation. If your channel cannot reach that volume in a reasonable time frame, test a higher-funnel metric or treat the result as directional.
+              <p style={{ fontSize: 11, color: '#6b6a68', lineHeight: 1.6, marginTop: 12 }}>
+                Required sample size depends on your baseline conversion rate, the minimum lift you want to detect, and your selected confidence threshold. Lower baseline rates and smaller expected lifts require significantly larger samples. Use a sample size calculator before starting any test.
+              </p>
+              <p style={{ fontSize: 11, color: '#9b9a97', lineHeight: 1.7, marginTop: 8 }}>
+                Sources:{' '}
+                <a href="https://blog.marketingblatt.com/en/google-ads-ab-testing" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads testing minimum duration</a>
+                {', '}
+                <a href="https://www.growthspreeofficial.com/blogs/google-ads-experiments-b2b-saas-statistical-significance-methodology" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>GrowthSpree: Google Ads Experiments for B2B SaaS</a>
+                {', '}
+                <a href="https://percuity.ai/answers/linkedin-ads/linkedin-ads-ab-testing/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Percuity: LinkedIn Ads A/B Testing</a>
+                {', '}
+                <a href="https://almcorp.com/blog/performance-max-ab-testing-creative-assets-complete-guide/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>ALM Corp: Performance Max A/B Testing</a>
+                {', '}
+                <a href="https://blog.hubspot.com/marketing/email-a-b-test-sample-size-testing-time" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>HubSpot: Email A/B test sample size</a>
               </p>
             </div>
           )}
