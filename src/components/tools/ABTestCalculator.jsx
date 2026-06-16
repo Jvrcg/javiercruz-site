@@ -48,10 +48,12 @@ function calculate(vA, cA, vB, cB) {
   return { cvrA, cvrB, relativeLift, pooled, z, confidence, nVA, nCA, nVB, nCB };
 }
 
-function additionalNeeded(zThresh, cvrA, cvrB, pooled) {
+function additionalNeeded(zThresh, cvrA, cvrB, pooled, currentN) {
   const diff = Math.abs(cvrB - cvrA);
   if (diff === 0) return Infinity;
-  return Math.ceil(Math.pow(zThresh / diff, 2) * pooled * (1 - pooled) * 2);
+  const zPower = 0.84;
+  const totalNeeded = Math.ceil(Math.pow((zThresh + zPower) / diff, 2) * pooled * (1 - pooled) * 2);
+  return Math.max(0, totalNeeded - currentN);
 }
 
 function DistributionCurve({ cvrA, cvrB, nVA, nVB, xLabel, yLabel }) {
@@ -370,8 +372,8 @@ export default function ABTestCalculator() {
               <p style={{ fontSize: 13, color: '#713f12', lineHeight: 1.6, marginBottom: 8 }}>
                 Your current confidence is {result.confidence.toFixed(1)}%. You need {confidence}% to call a winner.
                 {' '}
-                {result.pooled && isFinite(additionalNeeded(zThresh, result.cvrA, result.cvrB, result.pooled)) && (
-                  <>You need approximately {additionalNeeded(zThresh, result.cvrA, result.cvrB, result.pooled).toLocaleString()} more {xLabel} per variation to reach significance. Keep running the test.</>
+                {result.pooled && isFinite(additionalNeeded(zThresh, result.cvrA, result.cvrB, result.pooled, Math.max(result.nVA, result.nVB))) && additionalNeeded(zThresh, result.cvrA, result.cvrB, result.pooled, Math.max(result.nVA, result.nVB)) > 0 && (
+                  <>You need approximately {additionalNeeded(zThresh, result.cvrA, result.cvrB, result.pooled, Math.max(result.nVA, result.nVB)).toLocaleString()} more {xLabel} per variation to reach significance at 80% power. Keep running the test.</>
                 )}
               </p>
               <p style={{ fontSize: 12, color: '#854d0e', fontStyle: 'italic' }}>{decisionGuidance()}</p>
