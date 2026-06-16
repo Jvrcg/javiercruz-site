@@ -468,7 +468,7 @@ export default function ABTestCalculator() {
           {showSampleSize && (
             <div style={{ padding: '14px 16px' }}>
               <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7, marginBottom: 12 }}>
-                Sample size requirements vary by channel, baseline conversion rate, and the minimum lift you want to detect. These are practical benchmarks for paid media A/B tests. Some are sourced from published research; others are practitioner guidance noted as such.
+                Sample size requirements vary by channel, baseline conversion rate, and the minimum lift you want to detect. These are practical benchmarks for paid media A/B tests. Some of the claims are sourced from published research; others are based on personal and practitioner guidance.
               </p>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, marginBottom: 12 }}>
                 <thead>
