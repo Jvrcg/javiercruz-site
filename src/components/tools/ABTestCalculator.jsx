@@ -519,7 +519,7 @@ export default function ABTestCalculator() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 <div>
                   <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a19', marginBottom: 3 }}>Treat results as directional signals</p>
-                  <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7 }}>A 70 to 80% confidence reading with a consistent directional trend over two or more weeks is often enough to make a budget reallocation decision at growth stage. Document your hypothesis, your result, and your confidence level, then revisit when volume increases.</p>
+                  <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7 }}>A 70 to 80% confidence reading with a consistent directional trend over two or more weeks is often enough to make a budget reallocation decision at growth stage. This is practitioner judgment, not a published statistical standard. Document your hypothesis, result, and confidence level, then revisit when volume increases.</p>
                 </div>
                 <div>
                   <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a19', marginBottom: 3 }}>Test the highest-volume metric first</p>
@@ -527,11 +527,17 @@ export default function ABTestCalculator() {
                 </div>
                 <div>
                   <p style={{ fontSize: 12, fontWeight: 600, color: '#1a1a19', marginBottom: 3 }}>Velocity matters more than significance at early stage</p>
-                  <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7 }}>At growth stage you are trying to build intuition about what works, not prove it at 95% confidence. A consistent directional winner across three or more tests is stronger evidence than a single statistically significant result at low volume.</p>
+                  <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7 }}>At growth stage you are trying to build intuition about what works, not prove it at 95% confidence. A consistent directional winner across three or more tests can provide more reliable signal than a single result at low sample size, but treat it as a hypothesis to validate, not a conclusion.</p>
                 </div>
               </div>
               <p style={{ fontSize: 11, color: '#6b6a68', lineHeight: 1.6, marginTop: 12 }}>
-                This guidance applies to campaigns generating fewer than 1,000 conversions per month per variation. Once you reach that volume, standard significance thresholds become achievable and you should hold yourself to them.
+                The right time to switch from directional to statistical decision-making is when your campaigns can generate enough volume to detect a meaningful lift. Use the sample size guidance section above to calculate when that threshold is achievable for your specific baseline conversion rate and budget.
+              </p>
+              <p style={{ fontSize: 11, color: '#9b9a97', lineHeight: 1.6, marginTop: 8 }}>
+                Sources:{' '}
+                <a href="https://www.convert.com/blog/a-b-testing/ab-testing-stats/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Convert.com: A/B Testing Stats 2026</a>
+                {' '}and{' '}
+                <a href="https://crometrics.com/blog/ab-testing-sample-size/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>CRO Metrics: How to properly determine A/B testing sample size</a>
               </p>
             </div>
           )}
