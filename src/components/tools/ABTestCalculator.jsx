@@ -143,6 +143,7 @@ export default function ABTestCalculator() {
   const [errors, setErrors] = useState({});
   const [showMethod, setShowMethod] = useState(false);
   const [showStage, setShowStage] = useState(false);
+  const [showSampleSize, setShowSampleSize] = useState(false);
   const [showGrowth, setShowGrowth] = useState(false);
   const [showContext, setShowContext] = useState(false);
 
@@ -450,6 +451,52 @@ export default function ABTestCalculator() {
                 <a href="https://www.invespcro.com/ab-testing/results-analysis/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Invesp: How to analyze A/B test results</a>
                 {', '}
                 <a href="https://blog.analytics-toolkit.com/2017/statistical-significance-ab-testing-complete-guide/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Analytics Toolkit: Statistical significance in A/B testing: complete guide</a>
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Sample size guidance by channel */}
+        <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden' }}>
+          <button
+            onClick={() => setShowSampleSize(v => !v)}
+            style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer' }}
+          >
+            <span>Sample size guidance by channel</span>
+            <span style={{ fontSize: 16 }}>{showSampleSize ? '-' : '+'}</span>
+          </button>
+          {showSampleSize && (
+            <div style={{ padding: '14px 16px' }}>
+              <p style={{ fontSize: 12, color: '#6b6a68', lineHeight: 1.7, marginBottom: 12 }}>
+                The volume required to reach significance varies significantly by channel. Paid search and high-intent landing pages tend to generate enough conversions quickly. Brand awareness and upper-funnel channels rarely do. Use this as a rough planning guide before starting a test.
+              </p>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, marginBottom: 12 }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>Channel</th>
+                    <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>Typical conversion volume</th>
+                    <th style={{ textAlign: 'left', padding: '6px 8px', borderBottom: '1px solid #e5e7eb', color: '#6b6a68', fontWeight: 600 }}>Significance achievable?</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { channel: 'Google Search (branded)', vol: 'High', sig: 'Yes, often within 2 to 4 weeks' },
+                    { channel: 'Google Search (non-branded)', vol: 'Medium', sig: 'Yes, with 4 to 8 weeks of data' },
+                    { channel: 'LinkedIn', vol: 'Low to medium', sig: 'Sometimes, requires longer run time' },
+                    { channel: 'Programmatic display', vol: 'Low', sig: 'Rarely at conversion level. Test CTR instead.' },
+                    { channel: 'G2 / review sites', vol: 'Low', sig: 'Rarely. Treat directionally.' },
+                    { channel: 'Email', vol: 'Medium to high', sig: 'Yes, for open rate and CTR. Rarely for conversion.' },
+                  ].map((row, i) => (
+                    <tr key={row.channel} style={{ background: i % 2 === 0 ? '#fafafa' : 'white' }}>
+                      <td style={{ padding: '8px', fontWeight: 500, color: '#1a1a19' }}>{row.channel}</td>
+                      <td style={{ padding: '8px', color: '#4b5563' }}>{row.vol}</td>
+                      <td style={{ padding: '8px', color: '#4b5563', lineHeight: 1.5 }}>{row.sig}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ fontSize: 11, color: '#6b6a68', lineHeight: 1.6 }}>
+                As a rule of thumb, aim for at least 100 conversions per variation before drawing conclusions. For small effect sizes (less than 5% relative lift), you may need 1,000 or more per variation. If your channel cannot reach that volume in a reasonable time frame, test a higher-funnel metric or treat the result as directional.
               </p>
             </div>
           )}
