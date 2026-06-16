@@ -56,10 +56,10 @@ This is the single most important step. The map is only as good as the list you 
 
 The framework I use is **four concentric rings around your anchor company**:
 
-- **Ring 1 — Direct competitors.** Who does your sales team compete against (keep in mind the PMM and sales answer might vary)?
-- **Ring 2 — Adjacent tooling.** What the buyer uses alongside you. Their workflow.
-- **Ring 3 — Upstream / dependencies.** What sits beneath you in the stack.
-- **Ring 4 — Broader peripheral context.** Where the audience hangs out even when they're not talking about your category (think of casting a wider net for contextual targeting).
+- **Ring 1: Direct competitors.** Who does your sales team compete against (keep in mind the PMM and sales answer might vary)?
+- **Ring 2: Adjacent tooling.** What the buyer uses alongside you. Their workflow.
+- **Ring 3: Upstream / dependencies.** What sits beneath you in the stack.
+- **Ring 4: Broader peripheral context.** Where the audience hangs out even when they're not talking about your category (think of casting a wider net for contextual targeting).
 
 For a marketer evaluating a channel, the goal is range, not just direct competitors. If your map is only "us and our five competitors," you'll see a tight little cluster and miss the actual adjacency that tells you where the audience already lives.
 
@@ -246,7 +246,7 @@ if __name__ == "__main__":
 python3 fetch_hn_data.py
 ```
 
-This will take 30-60 minutes for 30 domains. Some domains (OpenAI, AWS, Microsoft) have hundreds of HN stories each, and we're hitting the API once per story to get the comment thread. Walk away. The script prints progress as it goes. Don't worry — I have included a step to surface what really matters, so those behemoths don't take over the actual research.
+This will take 30-60 minutes for 30 domains. Some domains (OpenAI, AWS, Microsoft) have hundreds of HN stories each, and we're hitting the API once per story to get the comment thread. Walk away. The script prints progress as it goes. Don't worry. I have included a step to surface what really matters, so those behemoths don't take over the actual research.
 
 **One important quirk to know:** HN's Algolia search treats your domain as a fuzzy query. If you search for `replicate.com`, you'll also get hits for `page-replica.com` and similar. The script filters those out by parsing the actual URL and matching the hostname. If you tune this code, don't break that filter, as false positives will pollute the rest of the analysis.
 
@@ -312,7 +312,7 @@ if __name__ == "__main__":
 
 **Jaccard similarity** measures how much two audiences overlap relative to their combined size. It's the standard. But it has a flaw for this use case: when one domain has 10,000 commenters and another has 80, Jaccard will register very low even if every one of the smaller audience is also in the larger. That undersells real overlap.
 
-**Overlap coefficient** divides shared commenters by the *smaller* set's size. This is much better when audience sizes vary by orders of magnitude — when you're mapping an OpenAI scale company next to a Series B startup. We use this for the visualization.
+**Overlap coefficient** divides shared commenters by the *smaller* set's size. This is much better when audience sizes vary by orders of magnitude, particularly when you're mapping an OpenAI scale company next to a Series B startup. We use this for the visualization.
 
 **Run it:**
 
@@ -348,7 +348,7 @@ Circle size = total HN commenters (audience scale). Bigger circle, bigger audien
 
 Three things to look at, in order:
 
-**1. Where does YOUR company sit?** If your anchor is connected to several focus nodes by green lines, you're already showing up in the conversation. If it's isolated (like our anchor company in the example map), the absence *is* the finding — the audience exists adjacent to your competitors, but you're not in it.
+**1. Where does YOUR company sit?** If your anchor is connected to several focus nodes by green lines, you're already showing up in the conversation. If it's isolated (like our anchor company in the example map), the absence *is* the finding: the audience exists adjacent to your competitors, but you're not in it.
 
 **2. Where's the gravitational hub?** In most B2B markets, one or two nodes will have edges to almost everything else. That node is the room your audience is already in. If you're going to invest in earned presence on this channel, that's where the conversation routes through.
 
