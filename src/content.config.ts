@@ -8,6 +8,7 @@ const postSchema = z.object({
   updatedDate: z.date().optional(),
   tags: z.array(z.string()).optional().default([]),
   canonicalURL: z.string().url().optional(),
+  ogImage: z.string().optional(),
 });
 
 export const collections = {
