@@ -32,9 +32,10 @@ One page indexed out of five crawled. Seven impressions. One click. That is the 
 point.
 
 The 14.3% CTR is the one number worth noting. When the site did appear in results, someone
-clicked. That suggests the result was relevant to the query, even if the query data is too
-thin to surface in the console yet. Position 5.6 on a brand new domain with no inbound
-links is also a reasonable starting point.
+clicked (thank you for your kindness, and we haven't even made it to page 2 yet). That
+suggests the result was relevant to the query, even if the query data is too thin to
+surface in the console yet. Position 5.6 on a brand new domain with no inbound links is
+also a reasonable starting point.
 
 Everything else is a gap to close.
 
@@ -52,8 +53,8 @@ Graph image instead of a proper 1200x630 image. The bug was in `BaseLayout.astro
 Every link shared from this site was generating a broken social preview card.
 
 **2. H1s and meta descriptions were not targeting any searchable query.** The homepage H1
-was "Performance marketing, in the open." A strong brand line. A useless SEO signal. None
-of the top-level pages contained a phrase that a practitioner would actually type into
+was "Performance marketing, in the open." A strong brand line, but a useless SEO signal.
+None of the top-level pages contained a phrase that a practitioner would actually type into
 Google or an AI engine.
 
 **3. Lab Notes is empty but indexed.** The section exists, it is in the sitemap, Google
@@ -61,13 +62,14 @@ can crawl it, and it says "First posts coming soon." An empty indexed page is a 
 budget waste and a real E-E-A-T problem.
 
 **4. No structured data on playbook posts.** The playbook posts are long-form,
-step-by-step content. Neither HowTo schema nor Article schema is present on any of them.
-For AEO specifically, structured data is how you signal to Google and AI engines that a
-page is the canonical answer to a procedural question.
+step-by-step content. Neither the HowTo schema nor the Article schema is present on any
+of them. For AEO specifically, structured data is how you signal to Google and AI engines
+that a page is the canonical answer to a procedural question.
 
 **5. Zero inbound links.** No external sites linking to any page. For both SEO and GEO,
 external citation is the multiplier. Without it, even well-optimized content stays
-invisible to discovery.
+invisible to discovery. This one will take awhile, since I'm going to avoid posting on
+LinkedIn.
 
 ---
 
@@ -105,3 +107,45 @@ within 60 days. (Fingers crossed.)
 
 The next audit log will run in 30 days against the same Search Console metrics used here
 as a baseline.
+
+---
+
+## Terminology
+
+**OG image (Open Graph image):** A 1200x630 pixel image attached to a page via meta tags
+that platforms like LinkedIn, Slack, and X use to generate link preview cards. Without one,
+shared links render as broken or blank previews.
+
+**H1:** The primary heading tag on a webpage. Search engines weight it heavily when
+determining what a page is about. One H1 per page, and it should contain the core keyword
+phrase you want the page to rank for.
+
+**Meta description:** The short text snippet that appears below a page title in search
+results. It does not directly affect rankings but influences click-through rate. It should
+match the search intent of the query you are targeting.
+
+**E-E-A-T:** Experience, Expertise, Authoritativeness, and Trustworthiness. Google's
+framework for evaluating content quality. A site with original data, a named author, and
+external citations scores higher than anonymous, derivative content.
+
+**Structured data:** Code added to a page in JSON-LD format that explicitly tells search
+engines what type of content the page contains: an article, a how-to guide, a product, a
+person. For AEO, it increases the probability that your content gets surfaced as a direct
+answer.
+
+**AEO (Answer Engine Optimization):** The practice of structuring content so it gets
+selected as a direct answer in search results, featured snippets, People Also Ask boxes,
+and AI-generated responses.
+
+**GEO (Generative Engine Optimization):** The practice of optimizing content so it gets
+cited or referenced in AI-generated answers from tools like ChatGPT, Perplexity, Google
+AI Overviews, and Claude. Original data, named authorship, and external citations are the
+strongest signals.
+
+**Inbound links:** Links from external websites pointing to your site. One of the strongest
+signals in both traditional SEO and GEO. They tell search engines and AI systems that
+other sources consider your content credible enough to reference.
+
+**Crawl budget:** The number of pages a search engine will crawl on your site within a
+given period. Empty or thin pages waste it. Every indexed page should have a reason to
+exist.
