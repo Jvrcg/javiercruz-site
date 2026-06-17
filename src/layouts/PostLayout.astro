@@ -9,6 +9,7 @@ interface Props {
   tags?: string[];
   canonicalURL?: string;
   collection: 'playbooks' | 'lab-notes';
+  ogImage?: string;
 }
 
 const {
@@ -19,6 +20,7 @@ const {
   tags = [],
   canonicalURL,
   collection,
+  ogImage,
 } = Astro.props;
 
 const siteUrl = 'https://jjcruzgalera.com';
@@ -61,6 +63,7 @@ const backLabel = collection === 'playbooks' ? 'Playbooks' : 'Lab Notes';
   title={`${title} | Javier Cruz Galera`}
   description={description}
   canonicalUrl={canonical}
+  ogImage={ogImage}
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
