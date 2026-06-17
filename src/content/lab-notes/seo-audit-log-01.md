@@ -28,6 +28,8 @@ as of June 17, 2026, across a 3-month window:
 - Average position: 5.6
 - Pages indexed: 1 (the homepage only)
 
+![Search Console performance baseline, June 2026](/images/lab-notes/search-console-performance-baseline.png)
+
 One page indexed out of five crawled. Seven impressions. One click. That is the starting
 point.
 
@@ -141,11 +143,3 @@ and AI-generated responses.
 cited or referenced in AI-generated answers from tools like ChatGPT, Perplexity, Google
 AI Overviews, and Claude. Original data, named authorship, and external citations are the
 strongest signals.
-
-**Inbound links:** Links from external websites pointing to your site. One of the strongest
-signals in both traditional SEO and GEO. They tell search engines and AI systems that
-other sources consider your content credible enough to reference.
-
-**Crawl budget:** The number of pages a search engine will crawl on your site within a
-given period. Empty or thin pages waste it. Every indexed page should have a reason to
-exist.
