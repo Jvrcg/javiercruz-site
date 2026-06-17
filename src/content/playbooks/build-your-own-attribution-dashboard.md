@@ -5,6 +5,13 @@ author: "Javier Cruz Galera"
 publishDate: 2026-06-15
 tags: ["Playbook", "Attribution", "Paid Media", "Google Sheets", "Reporting", "B2B SaaS", "Dashboard", "CRM Export", "CPL", "ROAS"]
 collection: playbooks
+howTo:
+  - "Export your CRM data as a flat CSV with one row per touch per prospect"
+  - "Build the Channel Summary tab with CPL and ROAS by channel"
+  - "Build the Attribution Model tab with U-shaped, first touch, last touch, and linear models"
+  - "Build the Pacing tab with seasonality-adjusted monthly goals"
+  - "Build the Deal Efficiency tab with metrics by buyer seniority"
+  - "Replace mock data with your own CRM export and update spend inputs"
 ---
 
 ## Why I built this

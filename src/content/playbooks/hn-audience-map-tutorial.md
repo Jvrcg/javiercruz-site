@@ -4,6 +4,13 @@ description: "A practical walkthrough for digital, growth, and performance marke
 publishDate: 2026-05-01
 tags: ["Tutorial", "Audience Research", "HN Analysis"]
 collection: playbooks
+howTo:
+  - "Pick your domains using the four concentric rings framework"
+  - "Set up your Python environment and install dependencies"
+  - "Run fetch_hn_data.py to pull stories and commenters per domain"
+  - "Run compute_overlap.py to calculate the overlap matrix"
+  - "Run visualize_static.py to generate the network map"
+  - "Read the map by identifying your anchor position, gravitational hub, and audience clusters"
 ---
 
 ![HN Audience Overlap Map](/hn_audience_map.png)

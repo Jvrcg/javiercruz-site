@@ -10,6 +10,7 @@ interface Props {
   canonicalURL?: string;
   collection: 'playbooks' | 'lab-notes';
   ogImage?: string;
+  howTo?: string[];
 }
 
 const {
@@ -21,6 +22,7 @@ const {
   canonicalURL,
   collection,
   ogImage,
+  howTo,
 } = Astro.props;
 
 const siteUrl = 'https://jjcruzgalera.com';
@@ -55,6 +57,17 @@ const articleSchema = {
   url: canonical,
 };
 
+const howToSchema = howTo && howTo.length > 0 ? {
+  '@context': 'https://schema.org',
+  '@type': 'HowTo',
+  name: title,
+  description,
+  step: howTo.map(text => ({
+    '@type': 'HowToStep',
+    text,
+  })),
+} : null;
+
 const backHref = collection === 'playbooks' ? '/playbooks' : '/lab-notes';
 const backLabel = collection === 'playbooks' ? 'Playbooks' : 'Lab Notes';
 ---
@@ -67,6 +80,9 @@ const backLabel = collection === 'playbooks' ? 'Playbooks' : 'Lab Notes';
 >
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(articleSchema)} />
+    {howToSchema && (
+      <script type="application/ld+json" set:html={JSON.stringify(howToSchema)} />
+    )}
   </Fragment>
 
   <article class="max-w-2xl mx-auto px-6 py-20">

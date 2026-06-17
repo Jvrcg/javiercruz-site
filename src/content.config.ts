@@ -9,6 +9,7 @@ const postSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
   canonicalURL: z.string().url().optional(),
   ogImage: z.string().optional(),
+  howTo: z.array(z.string()).optional(),
 });
 
 export const collections = {
