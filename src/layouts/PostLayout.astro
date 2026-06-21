@@ -122,6 +122,48 @@ const backLabel = collection === 'playbooks' ? 'Playbooks' : 'Lab Notes';
       <slot />
     </div>
 
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const images = document.querySelectorAll('.prose img');
+
+        images.forEach((img) => {
+          img.style.cursor = 'zoom-in';
+
+          img.addEventListener('click', () => {
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+              position: fixed;
+              inset: 0;
+              background: rgba(0, 0, 0, 0.85);
+              z-index: 9999;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            `;
+
+            const clone = document.createElement('img');
+            clone.src = img.src;
+            clone.alt = img.alt;
+            clone.style.cssText = `
+              max-width: 90vw;
+              max-height: 90vh;
+              object-fit: contain;
+              border-radius: 4px;
+            `;
+
+            overlay.appendChild(clone);
+            document.body.appendChild(overlay);
+
+            const close = () => overlay.remove();
+            overlay.addEventListener('click', close);
+            document.addEventListener('keydown', (e) => {
+              if (e.key === 'Escape') close();
+            }, { once: true });
+          });
+        });
+      });
+    </script>
+
     <footer class="mt-20 border-t border-gray-100 pt-10">
       <a
         href={backHref}
@@ -133,51 +175,3 @@ const backLabel = collection === 'playbooks' ? 'Playbooks' : 'Lab Notes';
 
   </article>
 </BaseLayout>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const content = document.querySelector('.prose');
-    if (!content) return;
-
-    const images = content.querySelectorAll('img');
-
-    images.forEach((img) => {
-      img.style.cursor = 'pointer';
-      img.addEventListener('click', () => openLightbox(img));
-    });
-
-    function openLightbox(sourceImg: HTMLImageElement) {
-      const overlay = document.createElement('div');
-      overlay.style.position = 'fixed';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.width = '100vw';
-      overlay.style.height = '100vh';
-      overlay.style.background = 'rgba(0, 0, 0, 0.85)';
-      overlay.style.zIndex = '9999';
-      overlay.style.display = 'flex';
-      overlay.style.alignItems = 'center';
-      overlay.style.justifyContent = 'center';
-
-      const clone = sourceImg.cloneNode(true) as HTMLImageElement;
-      clone.style.maxWidth = '90vw';
-      clone.style.maxHeight = '90vh';
-      clone.style.objectFit = 'contain';
-
-      overlay.appendChild(clone);
-      document.body.appendChild(overlay);
-
-      function closeLightbox() {
-        overlay.remove();
-        document.removeEventListener('keydown', handleKeydown);
-      }
-
-      function handleKeydown(event: KeyboardEvent) {
-        if (event.key === 'Escape') closeLightbox();
-      }
-
-      overlay.addEventListener('click', closeLightbox);
-      document.addEventListener('keydown', handleKeydown);
-    }
-  });
-</script>
