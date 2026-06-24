@@ -59,15 +59,32 @@ function renderPreviewHTML(seeds, titles) {
   return html;
 }
 
+function csvField(value) {
+  const s = String(value ?? '');
+  if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+  return s;
+}
+function csvRow(fields) {
+  return fields.map(csvField).join(',');
+}
+
+function adGroupFor(intent, isCompetitor) {
+  if (isCompetitor) return 'Competitor comparisons';
+  return intent === 'bofu' ? 'High intent / evaluation' : 'Category / solution';
+}
+
 function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, useB) {
   const negs = ['jobs', 'salary', 'free', 'open source', 'tutorial', 'certification', 'reddit', 'what is', 'course', 'training', 'github', 'freeware'];
-  const exportLines = ['type,value,intent,cluster,job_function,layer', '--- KEYWORDS ---,,,,,'];
+  const rows = [['Keyword', 'Match Type', 'Campaign', 'Ad Group', 'Job Function', 'Label']];
   let html = '';
   selectedFns.forEach(fnKey => {
     const mods = personaModifiers[fnKey];
     html += `<div style="margin-bottom:20px"><div class="kt-group-header"><span class="kt-group-label">${mods.label}</span><span class="kt-group-badge">${seeds.length} seed${seeds.length > 1 ? 's' : ''}</span></div>`;
     seeds.forEach(seed => {
       const intent = classifyIntent(seed);
+      const isCompetitor = negSignals.competitor.some(n => seed.toLowerCase().includes(n));
+      const campaign = isCompetitor ? 'Competitor' : 'Non-brand search';
+      const adGroup = adGroupFor(intent, isCompetitor);
       const bofu = mods.bofu.map(m => seed + ' ' + m);
       const mofu = mods.mofu.map(m => seed + ' ' + m);
       const titleVariants = titles.length && mods.titleMod.length ? mods.titleMod.slice(0, 2).map(m => seed + ' ' + m) : [];
@@ -75,32 +92,46 @@ function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, u
       if (useE) {
         const eks = ['[' + seed + ']', ...bofu.slice(0, 4).map(k => '[' + k + ']')];
         html += `<span class="kt-label">Exact match</span><div style="margin-bottom:8px">`;
-        eks.forEach(k => { html += `<span class="kw-tag kw-exact">${k}</span>`; exportLines.push(`exact,"${k}",bofu,"${seed}","${mods.label}",keyword`); });
-        if (titleVariants.length) titleVariants.forEach(k => { html += `<span class="kw-tag kw-title">[${k}]</span>`; exportLines.push(`exact,"[${k}]",bofu,"${seed}","${mods.label}",title-informed`); });
+        eks.forEach(k => {
+          html += `<span class="kw-tag kw-exact">${k}</span>`;
+          rows.push([k.slice(1, -1), 'Exact', campaign, adGroup, mods.label, 'keyword']);
+        });
+        if (titleVariants.length) titleVariants.forEach(k => {
+          html += `<span class="kw-tag kw-title">[${k}]</span>`;
+          rows.push([k, 'Exact', campaign, adGroup, mods.label, 'title-informed']);
+        });
         html += `</div>`;
       }
       if (useP) {
         const pks = ['"' + seed + '"', ...mofu.slice(0, 4).map(k => '"' + k + '"')];
         html += `<span class="kt-label">Phrase match</span><div style="margin-bottom:8px">`;
-        pks.forEach(k => { html += `<span class="kw-tag kw-phrase">${k}</span>`; exportLines.push(`phrase,"${k}",mofu,"${seed}","${mods.label}",keyword`); });
+        pks.forEach(k => {
+          html += `<span class="kw-tag kw-phrase">${k}</span>`;
+          rows.push([k.slice(1, -1), 'Phrase', campaign, adGroup, mods.label, 'keyword']);
+        });
         html += `</div>`;
       }
       if (useB) {
         html += `<span class="kt-label">Broad match (signal discovery only)</span><div style="margin-bottom:8px"><span class="kw-tag kw-broad">${seed}</span></div>`;
-        exportLines.push(`broad,${seed},tofu,"${seed}","${mods.label}",keyword`);
+        rows.push([seed, 'Broad', campaign, adGroup, mods.label, 'keyword']);
       }
       html += `<span class="kt-label">Suggested negatives</span><div>`;
-      negs.forEach(n => { html += `<span class="kw-tag kw-neg">-${n}</span>`; exportLines.push(`negative,-${n},,"${seed}","${mods.label}",keyword`); });
+      negs.forEach(n => {
+        html += `<span class="kw-tag kw-neg">-${n}</span>`;
+        rows.push([n, 'Negative', '', '', mods.label, 'negative']);
+      });
       html += `</div></div>`;
     });
     html += `</div>`;
   });
+  const csvLines = rows.map(csvRow);
   if (titles.length) {
-    exportLines.push('');
-    exportLines.push('--- AUDIENCE SEED (LinkedIn + Customer Match) ---,,,,,');
-    titles.forEach(t => exportLines.push(`job_title,"${t}",,,,audience`));
+    csvLines.push('');
+    csvLines.push('AUDIENCE SEED -- LinkedIn + Customer Match');
+    csvLines.push('Job Title');
+    titles.forEach(t => csvLines.push(csvRow([t])));
   }
-  const csv = exportLines.join('\n');
+  const csv = csvLines.join('\n');
   return { html, csv };
 }
 
