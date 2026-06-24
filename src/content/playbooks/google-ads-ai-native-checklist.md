@@ -15,7 +15,7 @@ howTo:
   - "Implement dynamic landing pages that match headline and CTA to query intent and audience segment"
 ---
 
-NOTE: I shared my opinion on this process (more like I vented) within the "HEAR ME OUT" section, so feel free to jump to "How to use this."
+**NOTE:** I shared my opinion on this process (more like I vented) in the "HEAR ME OUT" section below. Feel free to skip ahead to "How to use this."
 
 ## HEAR ME OUT
 
