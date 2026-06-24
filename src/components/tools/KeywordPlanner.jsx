@@ -225,8 +225,7 @@ function FnGrid({ topic, selectedFns, onToggle }) {
   const hasOther = selectedFns.includes('other');
   return (
     <div className="fn-checkbox-wrap">
-      {count === 0 && <p className="fn-placeholder">Select job function/s</p>}
-      <div className="fn-grid" style={{ display: count === 0 ? 'none' : 'grid' }}>
+      <div className="fn-grid" style={{ display: 'grid' }}>
         {JOB_FUNCTIONS.map(fn => (
           <label className="fn-item" key={fn.value}>
             <input
