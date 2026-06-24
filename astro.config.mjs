@@ -12,7 +12,9 @@ export default defineConfig({
     '/writing': '/playbooks',
   },
   integrations: [sitemap(), react()],
-
+  markdown: {
+    smartypants: false,
+  },
   vite: {
     plugins: [tailwindcss()]
   }
