@@ -103,7 +103,7 @@ function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, u
         html += `<span class="kt-label">Exact match</span><div style="margin-bottom:8px">`;
         eks.forEach(k => {
           html += `<span class="kw-tag kw-exact">${k}</span>`;
-          rows.push([k.slice(1, -1), 'Exact', csvCampaign, csvAdGroupExact, mods.label, 'keyword']);
+          rows.push([k.replace(/^\[|\]$/g, ''), 'Exact', csvCampaign, csvAdGroupExact, mods.label, 'keyword']);
         });
         if (titleVariants.length) titleVariants.forEach(k => {
           html += `<span class="kw-tag kw-title">[${k}]</span>`;
@@ -120,7 +120,7 @@ function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, u
         html += `<span class="kt-label">Phrase match</span><div style="margin-bottom:8px">`;
         pks.forEach(k => {
           html += `<span class="kw-tag kw-phrase">${k}</span>`;
-          rows.push([k.slice(1, -1), 'Phrase', csvCampaign, csvAdGroupOther, mods.label, 'keyword']);
+          rows.push([k.replace(/^"|"$/g, ''), 'Phrase', csvCampaign, csvAdGroupOther, mods.label, 'keyword']);
         });
         html += `</div>`;
       }
