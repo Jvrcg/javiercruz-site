@@ -26,10 +26,9 @@ const tools = [
     label: 'Paid Search',
     title: 'B2B Paid Search Keyword Planner',
     description: 'Four entry points into the same intent-based clustering engine. Build keyword clusters by job function, expand with real Google Suggest data, upload your Google Ads CSV for performance-weighted analysis, and generate negatives from your search term report.',
-    href: '/tools/keyword-planner',
-    linkText: 'Open the planner',
-    secondaryHref: '/playbooks/google-ads-ai-native-checklist',
-    secondaryText: 'Read the AI-native account checklist',
+    badge: 'In the works',
+    secondaryHref: null,
+    secondaryText: null,
   },
 ];
 ---
@@ -57,12 +56,18 @@ const tools = [
           <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-3">{tool.label}</p>
           <h2 class="text-xl font-semibold text-gray-900 mb-2">{tool.title}</h2>
           <p class="text-gray-600 text-sm leading-relaxed mb-4">{tool.description}</p>
-          <a
-            href={tool.href}
-            class="card-link inline-block text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            {tool.linkText} →
-          </a>
+          {tool.badge ? (
+            <span class="inline-block text-xs font-medium text-gray-500 bg-gray-100 rounded-full px-3 py-1" style="text-decoration:none;cursor:default;">
+              {tool.badge}
+            </span>
+          ) : (
+            <a
+              href={tool.href}
+              class="card-link inline-block text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
+            >
+              {tool.linkText} →
+            </a>
+          )}
           {tool.secondaryHref && (
             <a
               href={tool.secondaryHref}
