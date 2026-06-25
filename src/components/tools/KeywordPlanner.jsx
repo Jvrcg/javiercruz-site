@@ -65,7 +65,7 @@ function csvField(value) {
   return s;
 }
 function csvRow(fields) {
-  return fields.map(csvField).join(',');
+  return fields.map(csvField).join('\t');
 }
 
 function adGroupFor(intent, isCompetitor) {
@@ -85,6 +85,9 @@ function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, u
       const isCompetitor = negSignals.competitor.some(n => seed.toLowerCase().includes(n));
       const campaign = isCompetitor ? 'Competitor' : 'Non-brand search';
       const adGroup = adGroupFor(intent, isCompetitor);
+      const csvCampaign = 'Non-brand search';
+      const csvAdGroupExact = intent === 'bofu' ? 'High intent' : 'Category and solution';
+      const csvAdGroupOther = 'Category and solution';
       const bofu = mods.bofu.map(m => seed + ' ' + m);
       const mofu = mods.mofu.map(m => seed + ' ' + m);
       const titleVariants = titles.length && mods.titleMod.length ? mods.titleMod.slice(0, 2).map(m => seed + ' ' + m) : [];
@@ -100,26 +103,30 @@ function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, u
         html += `<span class="kt-label">Exact match</span><div style="margin-bottom:8px">`;
         eks.forEach(k => {
           html += `<span class="kw-tag kw-exact">${k}</span>`;
-          rows.push([k.slice(1, -1), 'Exact', campaign, adGroup, mods.label, 'keyword']);
+          rows.push([k.slice(1, -1), 'Exact', csvCampaign, csvAdGroupExact, mods.label, 'keyword']);
         });
         if (titleVariants.length) titleVariants.forEach(k => {
           html += `<span class="kw-tag kw-title">[${k}]</span>`;
-          rows.push([k, 'Exact', campaign, adGroup, mods.label, 'title-informed']);
+          rows.push([k, 'Exact', csvCampaign, csvAdGroupExact, mods.label, 'title-informed']);
         });
         html += `</div>`;
       }
       if (useP) {
-        const pks = ['"' + seed + '"', ...mofu.slice(0, 4).map(k => '"' + k + '"')];
+        const phraseSolution = ['best ' + seed, 'top ' + seed, seed + ' software', seed + ' platform', seed + ' tool', seed + ' solution'].map(k => '"' + k + '"');
+        const phrasePersona = [seed + ' for ' + mods.label.toLowerCase()].map(k => '"' + k + '"');
+        const phraseCategory = mofu.map(k => '"' + k + '"');
+        const phraseBuying = [seed + ' pricing', seed + ' cost', seed + ' vendor'].map(k => '"' + k + '"');
+        const pks = [...new Set(['"' + seed + '"', ...phraseSolution, ...phrasePersona, ...phraseCategory, ...phraseBuying])].slice(0, 15);
         html += `<span class="kt-label">Phrase match</span><div style="margin-bottom:8px">`;
         pks.forEach(k => {
           html += `<span class="kw-tag kw-phrase">${k}</span>`;
-          rows.push([k.slice(1, -1), 'Phrase', campaign, adGroup, mods.label, 'keyword']);
+          rows.push([k.slice(1, -1), 'Phrase', csvCampaign, csvAdGroupOther, mods.label, 'keyword']);
         });
         html += `</div>`;
       }
       if (useB) {
-        html += `<span class="kt-label">Broad match (signal discovery only)</span><div style="margin-bottom:8px"><span class="kw-tag kw-broad">${seed}</span></div>`;
-        rows.push([seed, 'Broad', campaign, adGroup, mods.label, 'keyword']);
+        html += `<span class="kt-label">Broad match (signal discovery only)</span><div style="margin-bottom:8px"><span class="kw-tag kw-broad">${seed}</span><div style="background:#fffbea;border-left:3px solid #f5c518;padding:8px 12px;margin-top:8px;font-size:12px;color:#6b7280">Broad match captures all phrase and exact match queries plus related searches. Add only the seed keyword -- Google's algorithm finds the variations. Pair with Smart Bidding (Max Conversions or tCPA). Review your search terms report weekly and add negatives before scaling budget.</div></div>`;
+        rows.push([seed, 'Broad', csvCampaign, csvAdGroupOther, mods.label, 'keyword']);
       }
       html += `<span class="kt-label">Suggested negatives</span><div>`;
       negs.forEach(n => {
@@ -133,8 +140,8 @@ function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, u
   const csvLines = rows.map(csvRow);
   if (titles.length) {
     csvLines.push('');
+    csvLines.push('');
     csvLines.push('AUDIENCE SEED -- LinkedIn + Customer Match');
-    csvLines.push('Job Title');
     titles.forEach(t => csvLines.push(csvRow([t])));
   }
   const csv = csvLines.join('\n');
@@ -493,6 +500,17 @@ export default function KeywordPlanner() {
           <p style={{ marginBottom: 6 }}><strong style={{ color: '#111827' }}>Avoid selecting four or more</strong> unless doing exploratory research.</p>
           <p style={{ marginBottom: 6 }}><strong style={{ color: '#111827' }}>Select "Other" only</strong> when your ICP falls outside LinkedIn's taxonomy. Job titles become required.</p>
           <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>Mirror this selection in your LinkedIn Campaign Manager audience setup for ICP consistency across channels.</p>
+        </Explainer>
+        <Explainer title="How to use this keyword list">
+          <p style={{ marginBottom: 8 }}>This tool generates 20 to 30 keyword variants per seed as a starting list. Your job is to curate it down.</p>
+          <p style={{ marginBottom: 8 }}>Google's best practice recommends 5 to 10 tightly themed keywords per ad group -- enough to cover intent without diluting relevance or fragmenting Smart Bidding signal. Source: support.google.com/google-ads/answer/2453981</p>
+          <p style={{ marginBottom: 6 }}>How to use this output:</p>
+          <p style={{ marginBottom: 6 }}>Review the full list and remove variants that do not match your landing page or offer</p>
+          <p style={{ marginBottom: 6 }}>Promote your top 5 to 10 exact match terms to a dedicated high-intent ad group</p>
+          <p style={{ marginBottom: 6 }}>Use phrase match to cover adjacent intent in a separate ad group</p>
+          <p style={{ marginBottom: 6 }}>Add the broad match seed only after you have 30 or more conversions per month and Smart Bidding is active</p>
+          <p style={{ marginBottom: 8 }}>Add the suggested negatives to your campaign before launch</p>
+          <p style={{ fontSize: 12, color: '#9ca3af' }}>The goal is not to use every keyword this tool generates. The goal is to start from a comprehensive list and make deliberate cuts.</p>
         </Explainer>
       </div>
 
