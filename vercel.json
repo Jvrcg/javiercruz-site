@@ -3,6 +3,13 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "framework": "astro",
+  "redirects": [
+    {
+      "source": "/tools/keyword-planner",
+      "destination": "/tools",
+      "permanent": false
+    }
+  ],
   "headers": [
     {
       "source": "/downloads/(.*).xlsx",
