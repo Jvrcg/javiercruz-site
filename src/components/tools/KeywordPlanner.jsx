@@ -300,7 +300,7 @@ function Explainer({ title, children }) {
   return (
     <div className="kt-explainer" style={{ marginTop: 16 }}>
       <div className="kt-explainer-toggle" onClick={() => setOpen(o => !o)}>
-        <span>{title}</span>
+        <span style={{ fontWeight: 600, color: '#1a1a19' }}>{title}</span>
         <span style={{ fontSize: 14, transition: 'transform .2s', transform: open ? 'rotate(90deg)' : '' }}>{'›'}</span>
       </div>
       <div className={`kt-explainer-body${open ? ' open' : ''}`}>{children}</div>
@@ -493,25 +493,6 @@ export default function KeywordPlanner() {
             <button className="kt-copy-btn" onClick={copyManualCSV}>{manualCopied ? 'Copied' : 'Copy CSV'}</button>
           </div>
         )}
-        <Explainer title="Recommendations for selecting job functions">
-          <p style={{ marginBottom: 8 }}>Job functions map directly to LinkedIn Campaign Manager audience targeting.</p>
-          <p style={{ marginBottom: 6 }}><strong style={{ color: '#111827' }}>Select one function</strong> when your ICP is clearly defined and sits within a single department.</p>
-          <p style={{ marginBottom: 6 }}><strong style={{ color: '#111827' }}>Select two to three functions</strong> when your buyer spans multiple departments. Each function generates its own cluster group.</p>
-          <p style={{ marginBottom: 6 }}><strong style={{ color: '#111827' }}>Avoid selecting four or more</strong> unless doing exploratory research.</p>
-          <p style={{ marginBottom: 6 }}><strong style={{ color: '#111827' }}>Select "Other" only</strong> when your ICP falls outside LinkedIn's taxonomy. Job titles become required.</p>
-          <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>Mirror this selection in your LinkedIn Campaign Manager audience setup for ICP consistency across channels.</p>
-        </Explainer>
-        <Explainer title="How to use this keyword list">
-          <p style={{ marginBottom: 8 }}>This tool generates 20 to 30 keyword variants per seed as a starting list. Your job is to curate it down.</p>
-          <p style={{ marginBottom: 8 }}>Google's best practice recommends 5 to 10 tightly themed keywords per ad group -- enough to cover intent without diluting relevance or fragmenting Smart Bidding signal. Source: support.google.com/google-ads/answer/2453981</p>
-          <p style={{ marginBottom: 6 }}>How to use this output:</p>
-          <p style={{ marginBottom: 6 }}>Review the full list and remove variants that do not match your landing page or offer</p>
-          <p style={{ marginBottom: 6 }}>Promote your top 5 to 10 exact match terms to a dedicated high-intent ad group</p>
-          <p style={{ marginBottom: 6 }}>Use phrase match to cover adjacent intent in a separate ad group</p>
-          <p style={{ marginBottom: 6 }}>Add the broad match seed only after you have 30 or more conversions per month and Smart Bidding is active</p>
-          <p style={{ marginBottom: 8 }}>Add the suggested negatives to your campaign before launch</p>
-          <p style={{ fontSize: 12, color: '#9ca3af' }}>The goal is not to use every keyword this tool generates. The goal is to start from a comprehensive list and make deliberate cuts.</p>
-        </Explainer>
       </div>
 
       <div style={{ display: activeTab === 'csv' ? 'block' : 'none' }}>
@@ -536,14 +517,6 @@ export default function KeywordPlanner() {
             <div dangerouslySetInnerHTML={{ __html: csvPreview }} />
           </>
         )}
-        <Explainer title="How impression share is used in this tool">
-          <p style={{ marginBottom: 8 }}>IS is a <strong style={{ color: '#111827' }}>secondary signal</strong>. Conversion volume and cost efficiency drive clustering. IS layers in as a strategic flag:</p>
-          <p style={{ marginBottom: 6 }}><span className="is-flag is-protect">Protect and deepen</span> High IS + strong conversions.</p>
-          <p style={{ marginBottom: 6 }}><span className="is-flag is-scale">Scale opportunity</span> Low IS + strong conversions.</p>
-          <p style={{ marginBottom: 6 }}><span className="is-flag is-efficiency">Efficiency problem</span> High IS + weak conversions.</p>
-          <p style={{ marginBottom: 8 }}><span className="is-flag is-deprioritize">Deprioritize</span> Low IS + weak conversions.</p>
-          <p style={{ fontSize: 12, color: '#9ca3af' }}>Always lead with pipeline impact over IS.</p>
-        </Explainer>
       </div>
 
       <div style={{ display: activeTab === 'topic' ? 'block' : 'none' }}>
@@ -568,11 +541,6 @@ export default function KeywordPlanner() {
             </>
           )}
         </div>
-        <Explainer title="About Google Suggest data in this tool">
-          <p style={{ marginBottom: 8 }}>Queries labeled <span className="suggest-badge">via Google Suggest</span> come from Google's autocomplete API. They reflect real queries people are typing.</p>
-          <p style={{ marginBottom: 8 }}>What Google Suggest <strong style={{ color: '#111827' }}>does not tell you:</strong> search volume, competition level, CPC, or conversion rate.</p>
-          <p>Validate volume and intent in Google Ads Keyword Planner before committing budget.</p>
-        </Explainer>
       </div>
 
       <div style={{ display: activeTab === 'audit' ? 'block' : 'none' }}>
@@ -592,6 +560,42 @@ export default function KeywordPlanner() {
           <button className="kt-btn" onClick={genNegatives}>Generate negatives</button>
           <div style={{ marginTop: 16 }} dangerouslySetInnerHTML={{ __html: negOut }} />
         </div>
+      </div>
+
+      <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <Explainer title="How to use this keyword list">
+          <p style={{ marginBottom: 8 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Start with the full list</span></p>
+          <p style={{ marginBottom: 8 }}>This tool generates 20 to 30 keyword variants per seed. Your job is to curate it down.</p>
+          <p style={{ marginBottom: 8 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Google's best practice</span></p>
+          <p style={{ marginBottom: 8 }}>5 to 10 tightly themed keywords per ad group -- enough to cover intent without diluting relevance or fragmenting Smart Bidding signal. Source: support.google.com/google-ads/answer/2453981</p>
+          <p style={{ marginBottom: 8 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>How to curate</span></p>
+          <p style={{ marginBottom: 6 }}>(1) Remove variants that do not match your landing page or offer.</p>
+          <p style={{ marginBottom: 6 }}>(2) Promote your top 5 to 10 exact match terms to a dedicated high-intent ad group.</p>
+          <p style={{ marginBottom: 6 }}>(3) Use phrase match to cover adjacent intent in a separate ad group.</p>
+          <p style={{ marginBottom: 6 }}>(4) Add the broad match seed only after 30 or more conversions per month with Smart Bidding active.</p>
+          <p style={{ marginBottom: 8 }}>(5) Add the suggested negatives before launch.</p>
+        </Explainer>
+        <Explainer title="Recommendations for selecting job functions">
+          <p style={{ marginBottom: 8 }}>Job functions map directly to LinkedIn Campaign Manager audience targeting.</p>
+          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Select one function</span> when your ICP is clearly defined and sits within a single department.</p>
+          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Select two to three functions</span> when your buyer spans multiple departments. Each function generates its own cluster group.</p>
+          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Avoid selecting four or more</span> unless doing exploratory research.</p>
+          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Select "Other" only</span> when your ICP falls outside LinkedIn's taxonomy. Job titles become required.</p>
+          <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>Mirror this selection in your LinkedIn Campaign Manager audience setup for ICP consistency across channels.</p>
+        </Explainer>
+        <Explainer title="How impression share is used in this tool">
+          <p style={{ marginBottom: 8 }}>IS is a <strong style={{ color: '#111827' }}>secondary signal</strong>. Conversion volume and cost efficiency drive clustering. IS layers in as a strategic flag:</p>
+          <p style={{ marginBottom: 6 }}><span className="is-flag is-protect">Protect and deepen</span> High IS + strong conversions.</p>
+          <p style={{ marginBottom: 6 }}><span className="is-flag is-scale">Scale opportunity</span> Low IS + strong conversions.</p>
+          <p style={{ marginBottom: 6 }}><span className="is-flag is-efficiency">Efficiency problem</span> High IS + weak conversions.</p>
+          <p style={{ marginBottom: 8 }}><span className="is-flag is-deprioritize">Deprioritize</span> Low IS + weak conversions.</p>
+          <p style={{ fontSize: 12, color: '#9ca3af' }}>Always lead with pipeline impact over IS.</p>
+        </Explainer>
+        <Explainer title="About Google Suggest data in this tool">
+          <p style={{ marginBottom: 8 }}>Queries labeled <span className="suggest-badge">via Google Suggest</span> come from Google's autocomplete API. They reflect real queries people are typing.</p>
+          <p style={{ marginBottom: 8 }}>What Google Suggest <strong style={{ color: '#111827' }}>does not tell you:</strong> search volume, competition level, CPC, or conversion rate.</p>
+          <p>Validate volume and intent in Google Ads Keyword Planner before committing budget.</p>
+        </Explainer>
       </div>
     </div>
   );
