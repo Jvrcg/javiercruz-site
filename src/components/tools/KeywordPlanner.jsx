@@ -93,17 +93,20 @@ function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, u
       const titleVariants = titles.length && mods.titleMod.length ? mods.titleMod.slice(0, 2).map(m => seed + ' ' + m) : [];
       html += `<div class="kt-card"><div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:10px"><span style="font-size:15px;font-weight:500;color:#111827">${seed}</span><span class="intent-pill ${intentClass(intent)}">${intentLabel(intent)}</span></div>`;
       if (useE) {
-        const exactEvaluation = ['demo','pricing','free trial','get started'].map(m => '[' + seed + ' ' + m + ']');
-        const exactComparison = ['vs','alternative','alternatives','comparison'].map(m => '[' + seed + ' ' + m + ']');
-        const exactMigration = ['migration','migrate to'].map(m => '[' + seed + ' ' + m + ']');
-        const exactIntegration = ['integration','api','connector'].map(m => '[' + seed + ' ' + m + ']');
-        const exactEnterprise = ['enterprise','for teams'].map(m => '[' + seed + ' ' + m + ']');
-        const exactPersona = bofu.map(k => '[' + k + ']');
-        const eks = [...new Set(['[' + seed + ']', ...exactEvaluation, ...exactComparison, ...exactMigration, ...exactIntegration, ...exactEnterprise, ...exactPersona])].slice(0, 20);
+        const exactVariants = [
+          { kw: '[' + seed + ']', adGroup: csvAdGroupExact },
+          ...['demo','pricing','free trial','get started'].map(m => ({ kw: '[' + seed + ' ' + m + ']', adGroup: 'High intent' })),
+          ...['vs','alternative','alternatives','comparison'].map(m => ({ kw: '[' + seed + ' ' + m + ']', adGroup: 'High intent' })),
+          ...['migration','migrate to'].map(m => ({ kw: '[' + seed + ' ' + m + ']', adGroup: 'High intent' })),
+          ...['integration','api','connector'].map(m => ({ kw: '[' + seed + ' ' + m + ']', adGroup: 'Category and solution' })),
+          ...['enterprise','for teams'].map(m => ({ kw: '[' + seed + ' ' + m + ']', adGroup: 'High intent' })),
+          ...bofu.map(k => ({ kw: '[' + k + ']', adGroup: 'High intent' })),
+        ];
+        const eks = [...new Map(exactVariants.map(v => [v.kw, v])).values()].slice(0, 20);
         html += `<span class="kt-label">Exact match</span><div style="margin-bottom:8px">`;
-        eks.forEach(k => {
-          html += `<span class="kw-tag kw-exact">${k}</span>`;
-          rows.push([k.replace(/^\[|\]$/g, ''), 'Exact', csvCampaign, csvAdGroupExact, mods.label, 'keyword']);
+        eks.forEach(item => {
+          html += `<span class="kw-tag kw-exact">${item.kw}</span>`;
+          rows.push([item.kw.replace(/^\[|\]$/g, ''), 'Exact', csvCampaign, item.adGroup, mods.label, 'keyword']);
         });
         if (titleVariants.length) titleVariants.forEach(k => {
           html += `<span class="kw-tag kw-title">[${k}]</span>`;
