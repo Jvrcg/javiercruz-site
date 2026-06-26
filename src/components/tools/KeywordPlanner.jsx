@@ -301,14 +301,14 @@ function FnGrid({ topic, selectedFns, onToggle }) {
 function Explainer({ title, children }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden', marginTop: 16 }}>
+    <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden', marginBottom: 12 }}>
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
         style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer' }}
       >
         <span>{title}</span>
-        <span>{open ? '-' : '+'}</span>
+        <span style={{ fontSize: 16 }}>{open ? '-' : '+'}</span>
       </button>
       {open && (
         <div style={{ padding: '14px 16px', fontSize: 13, color: '#4b5563', lineHeight: 1.7 }}>{children}</div>
@@ -502,7 +502,7 @@ export default function KeywordPlanner() {
             <button className="kt-copy-btn" onClick={copyManualCSV}>{manualCopied ? 'Copied' : 'Copy CSV'}</button>
           </div>
         )}
-        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column' }}>
           <Explainer title="Recommendations for selecting job functions">
             <p style={{ marginBottom: 8 }}>Job functions map directly to LinkedIn Campaign Manager audience targeting.</p>
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Select one function</p>
@@ -526,7 +526,7 @@ export default function KeywordPlanner() {
             <p style={{ marginBottom: 6 }}>(3) Use phrase match to cover adjacent intent in a separate ad group.</p>
             <p style={{ marginBottom: 6 }}>(4) Add the broad match seed only after 30 or more conversions per month with Smart Bidding active.</p>
             <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Add the suggested negatives before launch.</p>
-            <p style={{ fontSize: 12, color: '#9b9a97' }}>
+            <p style={{ fontSize: 11, color: '#9b9a97' }}>
               Sources: <a href="https://support.google.com/google-ads/answer/2453981" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads Help: Keyword best practices</a>
             </p>
           </Explainer>
@@ -555,7 +555,7 @@ export default function KeywordPlanner() {
             <div dangerouslySetInnerHTML={{ __html: csvPreview }} />
           </>
         )}
-        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column' }}>
           <Explainer title="How impression share is used in this tool">
             <p style={{ marginBottom: 8 }}>IS is a secondary signal. Conversion volume and cost efficiency drive clustering. IS layers in as a strategic flag:</p>
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Protect and deepen</p>
@@ -567,7 +567,7 @@ export default function KeywordPlanner() {
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Deprioritize</p>
             <p style={{ marginBottom: 8 }}>Low IS + weak conversions.</p>
             <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Always lead with pipeline impact over IS.</p>
-            <p style={{ fontSize: 12, color: '#9b9a97' }}>
+            <p style={{ fontSize: 11, color: '#9b9a97' }}>
               Sources: <a href="https://support.google.com/google-ads/answer/2497703" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads Help: About impression share</a>
             </p>
           </Explainer>
@@ -596,7 +596,7 @@ export default function KeywordPlanner() {
             </>
           )}
         </div>
-        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column' }}>
           <Explainer title="About Google Suggest data in this tool">
             <p style={{ marginBottom: 8 }}>Queries labeled <span className="suggest-badge">via Google Suggest</span> come from Google's autocomplete API. They reflect real queries people are typing.</p>
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>What Google Suggest does not tell you</p>
@@ -625,7 +625,7 @@ export default function KeywordPlanner() {
         </div>
       </div>
 
-      <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column' }}>
         <Explainer title="Deep dive into labels">
           <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 0 }}>Intent labels -- how this tool classifies keywords</p>
           <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Bottom funnel</p>
@@ -650,7 +650,7 @@ export default function KeywordPlanner() {
           <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Deprioritize</p>
           <p style={{ marginBottom: 4 }}>Low IS + weak conversions. You are neither dominant nor converting on this keyword.</p>
           <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Pause or move to a negative list. Redirect budget to converting terms before revisiting.</p>
-          <p style={{ fontSize: 12, color: '#9b9a97' }}>
+          <p style={{ fontSize: 11, color: '#9b9a97' }}>
             Sources: <a href="https://support.google.com/google-ads/answer/2497703" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads Help: About impression share</a>, <a href="https://vehnta.com/google-ads-impression-share" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Vehnta: Google Ads Impression Share Guide</a>, <a href="https://business.google.com/uk/resources/articles/explore-the-b2b-marketing-funnel-with-google-ads" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google: B2B Marketing Funnel with Google Ads</a>, <a href="https://perrill.com/guide-to-a-full-funnel-google-ads-strategy" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Perrill: Full-Funnel Google Ads Strategy</a>
           </p>
         </Explainer>
