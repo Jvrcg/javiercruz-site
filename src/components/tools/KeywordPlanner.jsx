@@ -301,12 +301,18 @@ function FnGrid({ topic, selectedFns, onToggle }) {
 function Explainer({ title, children }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className="kt-explainer" style={{ marginTop: 16 }}>
-      <div className="kt-explainer-toggle" onClick={() => setOpen(o => !o)}>
-        <span style={{ fontWeight: 600, color: '#1a1a19' }}>{title}</span>
-        <span style={{ fontSize: 14, transition: 'transform .2s', transform: open ? 'rotate(90deg)' : '' }}>{'›'}</span>
-      </div>
-      <div className={`kt-explainer-body${open ? ' open' : ''}`}>{children}</div>
+    <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden', marginTop: 16 }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer' }}
+      >
+        <span>{title}</span>
+        <span>{open ? '-' : '+'}</span>
+      </button>
+      {open && (
+        <div style={{ padding: '14px 16px', fontSize: 13, color: '#4b5563', lineHeight: 1.7 }}>{children}</div>
+      )}
     </div>
   );
 }
@@ -496,6 +502,35 @@ export default function KeywordPlanner() {
             <button className="kt-copy-btn" onClick={copyManualCSV}>{manualCopied ? 'Copied' : 'Copy CSV'}</button>
           </div>
         )}
+        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <Explainer title="Recommendations for selecting job functions">
+            <p style={{ marginBottom: 8 }}>Job functions map directly to LinkedIn Campaign Manager audience targeting.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Select one function</p>
+            <p style={{ marginBottom: 8 }}>When your ICP is clearly defined and sits within a single department.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Select two to three functions</p>
+            <p style={{ marginBottom: 8 }}>When your buyer spans multiple departments. Each function generates its own cluster group.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Avoid selecting four or more</p>
+            <p style={{ marginBottom: 8 }}>Unless doing exploratory research.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Select "Other" only</p>
+            <p style={{ marginBottom: 8 }}>When your ICP falls outside LinkedIn's taxonomy. Job titles become required.</p>
+            <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Mirror this selection in your LinkedIn Campaign Manager audience setup for ICP consistency across channels.</p>
+          </Explainer>
+          <Explainer title="How to use this keyword list">
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 0 }}>Start with the full list</p>
+            <p style={{ marginBottom: 8 }}>This tool generates 20 to 30 keyword variants per seed. Your job is to curate it down.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Google's best practice</p>
+            <p style={{ marginBottom: 8 }}>5 to 10 tightly themed keywords per ad group -- enough to cover intent without diluting relevance or fragmenting Smart Bidding signal.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>How to curate</p>
+            <p style={{ marginBottom: 6 }}>(1) Remove variants that do not match your landing page or offer.</p>
+            <p style={{ marginBottom: 6 }}>(2) Promote your top 5 to 10 exact match terms to a dedicated high-intent ad group.</p>
+            <p style={{ marginBottom: 6 }}>(3) Use phrase match to cover adjacent intent in a separate ad group.</p>
+            <p style={{ marginBottom: 6 }}>(4) Add the broad match seed only after 30 or more conversions per month with Smart Bidding active.</p>
+            <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Add the suggested negatives before launch.</p>
+            <p style={{ fontSize: 12, color: '#9b9a97' }}>
+              Sources: <a href="https://support.google.com/google-ads/answer/2453981" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads Help: Keyword best practices</a>
+            </p>
+          </Explainer>
+        </div>
       </div>
 
       <div style={{ display: activeTab === 'csv' ? 'block' : 'none' }}>
@@ -520,6 +555,23 @@ export default function KeywordPlanner() {
             <div dangerouslySetInnerHTML={{ __html: csvPreview }} />
           </>
         )}
+        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <Explainer title="How impression share is used in this tool">
+            <p style={{ marginBottom: 8 }}>IS is a secondary signal. Conversion volume and cost efficiency drive clustering. IS layers in as a strategic flag:</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Protect and deepen</p>
+            <p style={{ marginBottom: 8 }}>High IS + strong conversions.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Scale opportunity</p>
+            <p style={{ marginBottom: 8 }}>Low IS + strong conversions.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Efficiency problem</p>
+            <p style={{ marginBottom: 8 }}>High IS + weak conversions.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Deprioritize</p>
+            <p style={{ marginBottom: 8 }}>Low IS + weak conversions.</p>
+            <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Always lead with pipeline impact over IS.</p>
+            <p style={{ fontSize: 12, color: '#9b9a97' }}>
+              Sources: <a href="https://support.google.com/google-ads/answer/2497703" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads Help: About impression share</a>
+            </p>
+          </Explainer>
+        </div>
       </div>
 
       <div style={{ display: activeTab === 'topic' ? 'block' : 'none' }}>
@@ -544,6 +596,14 @@ export default function KeywordPlanner() {
             </>
           )}
         </div>
+        <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <Explainer title="About Google Suggest data in this tool">
+            <p style={{ marginBottom: 8 }}>Queries labeled <span className="suggest-badge">via Google Suggest</span> come from Google's autocomplete API. They reflect real queries people are typing.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>What Google Suggest does not tell you</p>
+            <p style={{ marginBottom: 8 }}>Search volume, competition level, CPC, or conversion rate.</p>
+            <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Validate volume and intent in Google Ads Keyword Planner before committing budget.</p>
+          </Explainer>
+        </div>
       </div>
 
       <div style={{ display: activeTab === 'audit' ? 'block' : 'none' }}>
@@ -567,65 +627,32 @@ export default function KeywordPlanner() {
 
       <div style={{ marginTop: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
         <Explainer title="Deep dive into labels">
-          <p style={{ marginBottom: 8 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Intent labels -- how this tool classifies keywords</span></p>
-          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Bottom funnel</span></p>
+          <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 0 }}>Intent labels -- how this tool classifies keywords</p>
+          <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Bottom funnel</p>
           <p style={{ marginBottom: 4 }}>The buyer is in active evaluation. Queries signal a decision is close -- demo, pricing, comparison, alternative, and vendor terms. These searches have the highest purchase intent and typically deliver the strongest ROI.</p>
-          <p style={{ marginBottom: 8, fontSize: 12, color: '#6b7280' }}>Action: Prioritize exact match. Dedicate a separate ad group. Use your highest bids and most conversion-focused landing page.</p>
-          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Mid funnel</span></p>
+          <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Prioritize exact match. Dedicate a separate ad group. Use your highest bids and most conversion-focused landing page.</p>
+          <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Mid funnel</p>
           <p style={{ marginBottom: 4 }}>The buyer is aware of the problem and researching solutions. Queries include category terms, software comparisons, and solution language. They are building a shortlist but have not committed to a vendor.</p>
-          <p style={{ marginBottom: 8, fontSize: 12, color: '#6b7280' }}>Action: Use phrase match. Push case studies, comparisons, and testimonials. Nurture with retargeting.</p>
-          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Top funnel</span></p>
+          <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Use phrase match. Push case studies, comparisons, and testimonials. Nurture with retargeting.</p>
+          <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Top funnel</p>
           <p style={{ marginBottom: 4 }}>The buyer is learning about the problem space. Queries are informational -- "what is," "how to," "guide to." Purchase intent is low.</p>
-          <p style={{ marginBottom: 8, fontSize: 12, color: '#6b7280' }}>Action: Use only if you have TOFU content to support it. Do not bid on informational queries without a dedicated landing page and a clear nurture path.</p>
-          <p style={{ marginBottom: 8 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Impression share flags -- what to do with each signal</span></p>
-          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Protect and deepen</span></p>
+          <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Use only if you have TOFU content to support it. Do not bid on informational queries without a dedicated landing page and a clear nurture path.</p>
+          <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Impression share flags -- what to do with each signal</p>
+          <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Protect and deepen</p>
           <p style={{ marginBottom: 4 }}>High IS + strong conversions. Your ad is dominant on this keyword and it is converting well. You are in a strong position.</p>
-          <p style={{ marginBottom: 8, fontSize: 12, color: '#6b7280' }}>Action: Expand exact match coverage. Add title-informed variants. Defend against competitors bidding on the same terms.</p>
-          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Scale opportunity</span></p>
+          <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Expand exact match coverage. Add title-informed variants. Defend against competitors bidding on the same terms.</p>
+          <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Scale opportunity</p>
           <p style={{ marginBottom: 4 }}>Low IS + strong conversions. The keyword converts when you show up but you are not showing up enough -- you are leaving pipeline on the table.</p>
-          <p style={{ marginBottom: 8, fontSize: 12, color: '#6b7280' }}>Action: Increase bids or budget on this term. Check Lost IS (Budget) vs Lost IS (Rank) in Google Ads to identify the constraint.</p>
-          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Efficiency problem</span></p>
+          <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Increase bids or budget on this term. Check Lost IS (Budget) vs Lost IS (Rank) in Google Ads to identify the constraint.</p>
+          <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Efficiency problem</p>
           <p style={{ marginBottom: 4 }}>High IS + weak conversions. You are winning auctions but traffic is not converting. Visibility is high but quality is low.</p>
-          <p style={{ marginBottom: 8, fontSize: 12, color: '#6b7280' }}>Action: Review ad copy and landing page alignment. Check if the keyword intent matches your offer. Pause or reduce bids until the conversion issue is diagnosed.</p>
-          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Deprioritize</span></p>
+          <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Review ad copy and landing page alignment. Check if the keyword intent matches your offer. Pause or reduce bids until the conversion issue is diagnosed.</p>
+          <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Deprioritize</p>
           <p style={{ marginBottom: 4 }}>Low IS + weak conversions. You are neither dominant nor converting on this keyword.</p>
-          <p style={{ marginBottom: 8, fontSize: 12, color: '#6b7280' }}>Action: Pause or move to a negative list. Redirect budget to converting terms before revisiting.</p>
-          <p style={{ fontSize: 12, color: '#9ca3af' }}>
-            Sources: <a href="https://support.google.com/google-ads/answer/2497703" target="_blank" rel="noopener noreferrer">Google Ads Help: About impression share</a>, <a href="https://vehnta.com/google-ads-impression-share" target="_blank" rel="noopener noreferrer">Vehnta: Google Ads Impression Share Guide</a>, <a href="https://business.google.com/uk/resources/articles/explore-the-b2b-marketing-funnel-with-google-ads" target="_blank" rel="noopener noreferrer">Google: B2B Marketing Funnel with Google Ads</a>, <a href="https://perrill.com/guide-to-a-full-funnel-google-ads-strategy" target="_blank" rel="noopener noreferrer">Perrill: Full-Funnel Google Ads Strategy</a>
+          <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Pause or move to a negative list. Redirect budget to converting terms before revisiting.</p>
+          <p style={{ fontSize: 12, color: '#9b9a97' }}>
+            Sources: <a href="https://support.google.com/google-ads/answer/2497703" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads Help: About impression share</a>, <a href="https://vehnta.com/google-ads-impression-share" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Vehnta: Google Ads Impression Share Guide</a>, <a href="https://business.google.com/uk/resources/articles/explore-the-b2b-marketing-funnel-with-google-ads" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google: B2B Marketing Funnel with Google Ads</a>, <a href="https://perrill.com/guide-to-a-full-funnel-google-ads-strategy" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Perrill: Full-Funnel Google Ads Strategy</a>
           </p>
-        </Explainer>
-        <Explainer title="How to use this keyword list">
-          <p style={{ marginBottom: 8 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Start with the full list</span></p>
-          <p style={{ marginBottom: 8 }}>This tool generates 20 to 30 keyword variants per seed. Your job is to curate it down.</p>
-          <p style={{ marginBottom: 8 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Google's best practice</span></p>
-          <p style={{ marginBottom: 8 }}>5 to 10 tightly themed keywords per ad group -- enough to cover intent without diluting relevance or fragmenting Smart Bidding signal. Source: support.google.com/google-ads/answer/2453981</p>
-          <p style={{ marginBottom: 8 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>How to curate</span></p>
-          <p style={{ marginBottom: 6 }}>(1) Remove variants that do not match your landing page or offer.</p>
-          <p style={{ marginBottom: 6 }}>(2) Promote your top 5 to 10 exact match terms to a dedicated high-intent ad group.</p>
-          <p style={{ marginBottom: 6 }}>(3) Use phrase match to cover adjacent intent in a separate ad group.</p>
-          <p style={{ marginBottom: 6 }}>(4) Add the broad match seed only after 30 or more conversions per month with Smart Bidding active.</p>
-          <p style={{ marginBottom: 8 }}>(5) Add the suggested negatives before launch.</p>
-        </Explainer>
-        <Explainer title="Recommendations for selecting job functions">
-          <p style={{ marginBottom: 8 }}>Job functions map directly to LinkedIn Campaign Manager audience targeting.</p>
-          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Select one function</span> when your ICP is clearly defined and sits within a single department.</p>
-          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Select two to three functions</span> when your buyer spans multiple departments. Each function generates its own cluster group.</p>
-          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Avoid selecting four or more</span> unless doing exploratory research.</p>
-          <p style={{ marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Select "Other" only</span> when your ICP falls outside LinkedIn's taxonomy. Job titles become required.</p>
-          <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 8 }}>Mirror this selection in your LinkedIn Campaign Manager audience setup for ICP consistency across channels.</p>
-        </Explainer>
-        <Explainer title="How impression share is used in this tool">
-          <p style={{ marginBottom: 8 }}>IS is a <strong style={{ color: '#111827' }}>secondary signal</strong>. Conversion volume and cost efficiency drive clustering. IS layers in as a strategic flag:</p>
-          <p style={{ marginBottom: 6 }}><span className="is-flag is-protect">Protect and deepen</span> High IS + strong conversions.</p>
-          <p style={{ marginBottom: 6 }}><span className="is-flag is-scale">Scale opportunity</span> Low IS + strong conversions.</p>
-          <p style={{ marginBottom: 6 }}><span className="is-flag is-efficiency">Efficiency problem</span> High IS + weak conversions.</p>
-          <p style={{ marginBottom: 8 }}><span className="is-flag is-deprioritize">Deprioritize</span> Low IS + weak conversions.</p>
-          <p style={{ fontSize: 12, color: '#9ca3af' }}>Always lead with pipeline impact over IS.</p>
-        </Explainer>
-        <Explainer title="About Google Suggest data in this tool">
-          <p style={{ marginBottom: 8 }}>Queries labeled <span className="suggest-badge">via Google Suggest</span> come from Google's autocomplete API. They reflect real queries people are typing.</p>
-          <p style={{ marginBottom: 8 }}>What Google Suggest <strong style={{ color: '#111827' }}>does not tell you:</strong> search volume, competition level, CPC, or conversion rate.</p>
-          <p>Validate volume and intent in Google Ads Keyword Planner before committing budget.</p>
         </Explainer>
       </div>
     </div>
