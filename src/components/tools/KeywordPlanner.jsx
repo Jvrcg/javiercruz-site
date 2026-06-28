@@ -298,17 +298,25 @@ function FnGrid({ topic, selectedFns, onToggle }) {
   );
 }
 
+function Chevron({ open }) {
+  return (
+    <svg width="10" height="10" viewBox="0 0 12 12" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.15s ease' }}>
+      <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function Explainer({ title, children }) {
   const [open, setOpen] = useState(false);
   return (
-    <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden', marginBottom: 12 }}>
+    <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden' }}>
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
         style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer' }}
       >
         <span>{title}</span>
-        <span style={{ fontSize: 16 }}>{open ? '-' : '+'}</span>
+        <Chevron open={open} />
       </button>
       {open && (
         <div style={{ padding: '14px 16px', fontSize: 13, color: '#4b5563', lineHeight: 1.7 }}>{children}</div>
@@ -502,7 +510,7 @@ export default function KeywordPlanner() {
             <button className="kt-copy-btn" onClick={copyManualCSV}>{manualCopied ? 'Copied' : 'Copy CSV'}</button>
           </div>
         )}
-        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Explainer title="How to use this keyword list">
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 0 }}>Start with the full list</p>
             <p style={{ marginBottom: 8 }}>This tool generates 20 to 30 keyword variants per seed. Your job is to curate it down.</p>
@@ -572,7 +580,7 @@ export default function KeywordPlanner() {
             <div dangerouslySetInnerHTML={{ __html: csvPreview }} />
           </>
         )}
-        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Explainer title="How impression share is used in this tool">
             <p style={{ marginBottom: 8 }}>IS is a secondary signal. Conversion volume and cost efficiency drive clustering. IS layers in as a strategic flag:</p>
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Protect and deepen</p>
@@ -613,7 +621,7 @@ export default function KeywordPlanner() {
             </>
           )}
         </div>
-        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column' }}>
+        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <Explainer title="About Google Suggest data in this tool">
             <p style={{ marginBottom: 8 }}>Queries labeled <span className="suggest-badge">via Google Suggest</span> come from Google's autocomplete API. They reflect real queries people are typing.</p>
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>What Google Suggest does not tell you</p>
@@ -642,7 +650,7 @@ export default function KeywordPlanner() {
         </div>
       </div>
 
-      <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
         <Explainer title="Deep dive into labels">
           <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 0 }}>Intent labels -- how this tool classifies keywords</p>
           <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Bottom funnel</p>
