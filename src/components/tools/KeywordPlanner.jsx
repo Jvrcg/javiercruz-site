@@ -169,6 +169,25 @@ function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, u
   return { html, csv };
 }
 
+function parseCSVLine(line) {
+  const cols = [];
+  let current = '';
+  let inQuotes = false;
+  for (let c = 0; c < line.length; c++) {
+    const char = line[c];
+    if (char === '"') {
+      inQuotes = !inQuotes;
+    } else if (char === ',' && !inQuotes) {
+      cols.push(current.trim());
+      current = '';
+    } else {
+      current += char;
+    }
+  }
+  cols.push(current.trim());
+  return cols;
+}
+
 function analyzeCSVData(raw) {
   const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
   if (lines.length < 2) return { error: 'Need at least a header row and one data row.' };
@@ -180,7 +199,7 @@ function analyzeCSVData(raw) {
   if (kwIdx === -1) return { error: 'Could not find a Keyword column. Check your CSV header row.' };
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(',');
+    const cols = parseCSVLine(lines[i]);
     const kw = (cols[kwIdx] || '').trim().replace(/^["']|["']$/g, '');
     if (!kw) continue;
     const conv = parseFloat(cols[convIdx]) || 0;
