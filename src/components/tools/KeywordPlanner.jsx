@@ -23,7 +23,11 @@ function isCompetitorTerm(kw) {
 
 function classifyIntent(kw) {
   const k = kw.toLowerCase();
-  if (intentSignals.bofu.some(s => k.includes(s))) return 'bofu';
+  const isTechComparison = techComparisons.some(t => k.includes(t));
+  if (intentSignals.bofu.some(s => {
+    if ((s === 'vs ' || s === 'versus') && isTechComparison) return false;
+    return k.includes(s);
+  })) return 'bofu';
   if (intentSignals.mofu.some(s => k.includes(s))) return 'mofu';
   return 'tofu';
 }
@@ -45,9 +49,9 @@ function groupIntoCampaigns(seeds) {
       for (let i = 0; i < midSeeds.length; i += 3) chunks.push(midSeeds.slice(i, i + 3));
       chunks.forEach((c, i) => adgroups.push({ name: 'Category / solution (group ' + (i + 1) + ')', seeds: c }));
     }
-    campaigns.push({ name: 'Non-brand search', type: 'Search', bidRec: 'Start Max Conversions -- graduate to tCPA once 30+ conversions/month', adgroups });
+    campaigns.push({ name: 'Non-brand search', type: 'Search', bidRec: 'Start Max Conversions, then graduate to tCPA once 30+ conversions/month', adgroups });
   }
-  if (competitor.length) campaigns.push({ name: 'Competitor', type: 'Search', bidRec: 'Separate budget -- dedicated LP per competitor required', adgroups: [{ name: 'Competitor comparisons', seeds: competitor }] });
+  if (competitor.length) campaigns.push({ name: 'Competitor', type: 'Search', bidRec: 'Separate budget. Dedicated LP per competitor required.', adgroups: [{ name: 'Competitor comparisons', seeds: competitor }] });
   return campaigns;
 }
 
@@ -57,9 +61,9 @@ function renderPreviewHTML(seeds, titles) {
   const mofuCount = seeds.filter(s => classifyIntent(s) === 'mofu').length;
   const tofuCount = seeds.length - bofuCount - mofuCount;
   let bidAdvice = 'Mostly top-funnel seeds. Start with Max Conversions, build data before setting tCPA.';
-  if (bofuCount > mofuCount && bofuCount > tofuCount) bidAdvice = 'Strong BOFU signal. Move to tCPA sooner -- anchor to cost per qualified opportunity.';
+  if (bofuCount > mofuCount && bofuCount > tofuCount) bidAdvice = 'Strong BOFU signal. Move to tCPA sooner, anchored to cost per qualified opportunity.';
   else if (mofuCount >= bofuCount) bidAdvice = 'Mixed intent. Keep ad groups separate so Smart Bidding learns independently per group.';
-  let html = `<div class="kt-preview"><p class="kt-preview-title">Campaign architecture preview</p><p class="kt-preview-sub">Structured by intent, not topic -- per Google best practice for B2B Search.</p><div class="funnel-bar"><div class="funnel-cell funnel-bofu"><div class="funnel-count">${bofuCount}</div><div class="funnel-label">Bottom funnel</div></div><div class="funnel-cell funnel-mofu"><div class="funnel-count">${mofuCount}</div><div class="funnel-label">Mid funnel</div></div><div class="funnel-cell funnel-tofu"><div class="funnel-count">${tofuCount}</div><div class="funnel-label">Top funnel</div></div></div>`;
+  let html = `<div class="kt-preview"><p class="kt-preview-title">Campaign architecture preview</p><p class="kt-preview-sub">Structured by intent, not topic: per Google best practice for B2B Search.</p><div class="funnel-bar"><div class="funnel-cell funnel-bofu"><div class="funnel-count">${bofuCount}</div><div class="funnel-label">Bottom funnel</div></div><div class="funnel-cell funnel-mofu"><div class="funnel-count">${mofuCount}</div><div class="funnel-label">Mid funnel</div></div><div class="funnel-cell funnel-tofu"><div class="funnel-count">${tofuCount}</div><div class="funnel-label">Top funnel</div></div></div>`;
   campaigns.forEach(c => {
     html += `<div class="campaign-block"><div class="campaign-name">${c.name} <span style="font-size:11px;font-weight:400;color:#9ca3af;margin-left:6px">${c.type}</span></div><div class="campaign-meta">Bid strategy: ${c.bidRec}</div>`;
     c.adgroups.forEach(ag => {
@@ -142,7 +146,7 @@ function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, u
         html += `</div>`;
       }
       if (useB) {
-        html += `<span class="kt-label">Broad match (signal discovery only)</span><div style="margin-bottom:8px"><span class="kw-tag kw-broad">${seed}</span><div style="background:#fffbea;border-left:3px solid #f5c518;padding:8px 12px;margin-top:8px;font-size:12px;color:#6b7280">Broad match captures all phrase and exact match queries plus related searches. Add only the seed keyword -- Google's algorithm finds the variations. Pair with Smart Bidding (Max Conversions or tCPA). Review your search terms report weekly and add negatives before scaling budget.</div></div>`;
+        html += `<span class="kt-label">Broad match (signal discovery only)</span><div style="margin-bottom:8px"><span class="kw-tag kw-broad">${seed}</span><div style="background:#fffbea;border-left:3px solid #f5c518;padding:8px 12px;margin-top:8px;font-size:12px;color:#6b7280">Broad match captures all phrase and exact match queries plus related searches. Add only the seed keyword. Google's algorithm finds the variations. Pair with Smart Bidding (Max Conversions or tCPA). Review your search terms report weekly and add negatives before scaling budget.</div></div>`;
         rows.push([seed, 'Broad', csvCampaign, csvAdGroupOther, mods.label, 'keyword']);
       }
       html += `<span class="kt-label">Suggested negatives</span><div>`;
@@ -158,7 +162,7 @@ function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, u
   if (titles.length) {
     csvLines.push('');
     csvLines.push('');
-    csvLines.push('AUDIENCE SEED -- LinkedIn + Customer Match');
+    csvLines.push('AUDIENCE SEED: LinkedIn + Customer Match');
     titles.forEach(t => csvLines.push(csvRow([t])));
   }
   const csv = csvLines.join('\n');
@@ -204,21 +208,21 @@ function renderAnalyzeCSVHTML(rows) {
   const hasMOFU = rows.some(r => r.intent === 'mofu' && r.conv > 0);
   const hasAnyBOFU = rows.some(r => r.intent === 'bofu');
   const gaps = [];
-  if (!hasBOFU) gaps.push('No converting BOFU keywords -- missing evaluation-stage coverage (pricing, demo, alternatives, vs)');
-  if (!hasMOFU) gaps.push('No converting MOFU keywords -- mid-funnel is underrepresented, limiting demand capture');
-  if (!hasAnyBOFU) gaps.push('No bottom-funnel keywords in account at all -- add demo, pricing, and competitor comparison terms');
+  if (!hasBOFU) gaps.push('No converting BOFU keywords: missing evaluation-stage coverage (pricing, demo, alternatives, vs)');
+  if (!hasMOFU) gaps.push('No converting MOFU keywords: mid-funnel is underrepresented, limiting demand capture');
+  if (!hasAnyBOFU) gaps.push('No bottom-funnel keywords in account at all: add demo, pricing, and competitor comparison terms');
   let html = '';
   if (gaps.length) {
     html += `<div style="margin-bottom:14px"><span class="kt-label">Funnel gaps identified</span>`;
     gaps.forEach(g => { html += `<div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px"><span class="gap-flag">Gap</span><span style="font-size:13px;color:#6b7280">${g}</span></div>`; });
     html += `</div>`;
   }
-  html += `<span class="kt-label">Converting keywords (${converting.length}) -- ranked by volume</span>`;
+  html += `<span class="kt-label">Converting keywords (${converting.length}), ranked by volume</span>`;
   converting.forEach(r => {
     html += `<div class="perf-card"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px"><span style="font-size:14px;font-weight:500;color:#111827">${r.kw}</span><span class="intent-pill ${intentClass(r.intent)}">${intentLabel(r.intent)}</span>${getISFlagHTML(r)}</div><div class="perf-metrics"><span class="perf-metric">Conversions: <strong>${r.conv}</strong></span><span class="perf-metric">Cost: <strong>$${Math.round(r.cost)}</strong></span>${r.cpa !== null ? `<span class="perf-metric">CPA: <strong>$${r.cpa}</strong></span>` : ''} ${r.is !== null ? `<span class="perf-metric">Impr. share: <strong>${Math.round(r.is * 100)}%</strong></span>` : ''}</div></div>`;
   });
   if (nonConverting.length) {
-    html += `<span class="kt-label" style="margin-top:4px">Zero-conversion keywords (${nonConverting.length}) -- review for negative or restructure</span>`;
+    html += `<span class="kt-label" style="margin-top:4px">Zero-conversion keywords (${nonConverting.length}), review for negative or restructure</span>`;
     nonConverting.forEach(r => {
       html += `<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:6px 0;border-bottom:0.5px solid #f3f4f6"><span style="font-size:13px;color:#6b7280">${r.kw}</span><span class="intent-pill ${intentClass(r.intent)}" style="font-size:10px">${intentLabel(r.intent)}</span>${getISFlagHTML(r)}<span style="font-size:11px;color:#9ca3af">$${Math.round(r.cost)} spent</span></div>`;
     });
@@ -235,9 +239,9 @@ function runAuditHTML(terms) {
     if (negSignals.job.some(s => tl.includes(s)) || negSignals.irrelevant.some(s => tl.includes(s))) { rec = 'Add as negative'; cls = 'kw-neg'; reason = 'Irrelevant intent'; }
     else if (negSignals.freeOnly.some(s => tl.includes(s))) { rec = 'Add as negative'; cls = 'kw-neg'; reason = 'Free-only seeker'; }
     else if (negSignals.educational.some(s => tl.includes(s)) && classifyIntent(t) === 'tofu') { rec = 'Negative (or TOFU only)'; cls = 'kw-neg'; reason = 'Research / educational intent'; }
-    else if (isCompetitorTerm(t)) { rec = 'Dedicated ad group'; cls = 'kw-phrase'; reason = 'Comparison query -- needs tailored copy + LP'; }
+    else if (isCompetitorTerm(t)) { rec = 'Dedicated ad group'; cls = 'kw-phrase'; reason = 'Comparison query, needs tailored copy + LP'; }
     else if (classifyIntent(t) === 'bofu') { rec = 'Promote to exact'; cls = 'kw-exact'; reason = 'High commercial intent'; }
-    else if (classifyIntent(t) === 'mofu') { rec = 'Keep as phrase'; cls = 'kw-phrase'; reason = 'Mid-funnel -- monitor CVR'; }
+    else if (classifyIntent(t) === 'mofu') { rec = 'Keep as phrase'; cls = 'kw-phrase'; reason = 'Mid-funnel, monitor CVR'; }
     else { rec = 'Negative or TOFU content'; cls = 'kw-neg'; reason = 'Low conversion probability'; }
     html += `<div class="audit-row"><span style="color:#111827">${t}</span><span><span class="kw-tag ${cls}" style="margin:0">${rec}</span></span><span style="color:#6b7280;font-size:12px">${reason}</span></div>`;
   });
@@ -261,7 +265,7 @@ function genNegativesHTML(terms) {
     educational: { label: 'Educational / certification intent', action: 'Negative unless you have TOFU content', cls: 'kw-neg' },
     irrelevant: { label: 'Off-topic / irrelevant', action: 'Negative immediately', cls: 'kw-neg' },
     competitor: { label: 'Competitor comparisons', action: 'Keep: build a dedicated comparison ad group', cls: 'kw-phrase' },
-    keep: { label: 'Worth keeping', action: 'Monitor CVR -- evaluate for exact promotion', cls: 'kw-phrase' },
+    keep: { label: 'Worth keeping', action: 'Monitor CVR, evaluate for exact promotion', cls: 'kw-phrase' },
   };
   let html = '';
   Object.entries(buckets).forEach(([cat, list]) => {
@@ -275,11 +279,11 @@ function genNegativesHTML(terms) {
 }
 
 const TOPIC_LAYER_META = [
-  { key: 'branded', label: 'Branded intent', desc: 'Queries that include your product or category name -- highest purchase intent' },
+  { key: 'branded', label: 'Branded intent', desc: 'Queries that include your product or category name: highest purchase intent' },
   { key: 'category', label: 'Category definition', desc: 'How buyers describe the problem space when they do not yet know your brand' },
-  { key: 'comparison', label: 'Solution comparison', desc: 'Buyers evaluating options -- high intent, needs dedicated landing pages' },
-  { key: 'competitor', label: 'Competitor alternatives', desc: 'Buyers already aware of solutions -- separate campaign, tailored copy required' },
-  { key: 'jtbd', label: 'Job to be done', desc: 'Queries based on what the buyer is trying to accomplish -- often underleveraged in B2B accounts' },
+  { key: 'comparison', label: 'Solution comparison', desc: 'Buyers evaluating options: high intent, needs dedicated landing pages' },
+  { key: 'competitor', label: 'Competitor alternatives', desc: 'Buyers already aware of solutions: separate campaign, tailored copy required' },
+  { key: 'jtbd', label: 'Job to be done', desc: 'Queries based on what the buyer is trying to accomplish, often underleveraged in B2B accounts' },
 ];
 
 const TOPIC_LAYER_EXTRA = {
@@ -287,7 +291,7 @@ const TOPIC_LAYER_EXTRA = {
   category: '<p style="font-size:12px;color:#6b7280;line-height:1.6;margin-top:8px;">These are your primary lead-generation keywords: high-intent problem queries where buyers know they need a solution but have not yet committed to a vendor.<br/><br/><strong>Action:</strong> Exact and phrase match. Start with Max Conversions, graduate to Target CPA once you hit 30 or more conversions per month. Pair with a dedicated landing page. Do not send to your homepage.</p><p style="font-size:11px;color:#9b9a97;line-height:1.6;margin-top:4px;">Source: <a href="https://business.google.com/us/resources/articles/guide-to-keyword-match-types/" target="_blank" rel="noopener noreferrer" style="color:#2563EB;">Google</a></p>',
   comparison: '<p style="font-size:12px;color:#6b7280;line-height:1.6;margin-top:8px;">Someone searching for "alternatives to [competitor]" indicates active buying consideration, not early research. These queries typically convert faster than category-level terms.<br/><br/><strong>Action:</strong> Exact match. Dedicated ad group with a comparison or alternatives landing page. Expect higher CPCs, these are worth it. Add job seeker and free intent negatives before launch.</p><p style="font-size:11px;color:#9b9a97;line-height:1.6;margin-top:4px;">Source: <a href="https://www.stackmatix.com/blog/google-ads-keyword-match-types-guide" target="_blank" rel="noopener noreferrer" style="color:#2563EB;">Stackmatix</a></p>',
   competitor: '<p style="font-size:12px;color:#6b7280;line-height:1.6;margin-top:8px;">Bid on "[competitor] alternative" and "[competitor] pricing" rather than the brand name alone, since these modifiers signal evaluation intent, not curiosity. Set a hard daily budget cap and track SQLs, not form fills. Keep in mind you will most likely need to update the content in competitor conquesting campaigns every other quarter to remain accurate as products update, and you should be disciplined about reporting trademark infringements on a routine basis since that will help you battle competitors.<br/><br/><strong>Action:</strong> Separate campaign, separate budget, separate landing page. Start with manual CPC to control costs while you learn what converts. Do not use your competitor\'s trademark in ad copy.</p><p style="font-size:11px;color:#9b9a97;line-height:1.6;margin-top:4px;">Source: <a href="https://skai.io/glossary/google-ads-match-types/" target="_blank" rel="noopener noreferrer" style="color:#2563EB;">Skai</a></p>',
-  jtbd: '<p style="font-size:12px;color:#6b7280;line-height:1.6;margin-top:8px;">Mid-funnel keywords signal problem awareness but not vendor selection. Offer a content asset, comparison guide, or self-serve resource rather than a direct demo CTA.<br/><br/><strong>Action:</strong> Phrase match. Max Conversions bidding. This cluster feeds your retargeting pool. Do not expect direct pipeline but do expect to warm the audience for BOFU campaigns.</p>',
+  jtbd: '<p style="font-size:12px;color:#6b7280;line-height:1.6;margin-top:8px;">Mid-funnel keywords signal problem awareness but not vendor selection. Offer a content asset, comparison guide, or self-serve resource rather than a direct demo CTA.<br/><br/><strong>Action:</strong> Phrase match. Max Conversions bidding. This cluster feeds your retargeting pool. Do not expect direct pipeline but do expect to warm the audience for BOFU campaigns.</p><p style="font-size:11px;color:#9b9a97;line-height:1.6;margin-top:4px;">Source: <a href="https://www.stackmatix.com/blog/google-ads-keyword-match-types-guide" target="_blank" rel="noopener noreferrer" style="color:#2563EB;">Stackmatix</a></p>',
 };
 
 const TOPIC_COMPARISON_VS_COMPETITOR_HTML = '<div style="margin:12px 0;background:#f8f8f7;border-left:3px solid #e5e7eb;border-radius:4px;padding:12px 14px;font-size:12px;color:#4b5563;line-height:1.6;"><p style="font-weight:600;color:#1a1a19;font-size:12px;margin-bottom:4px;">Why these are separate clusters</p><p style="margin:0;">Solution comparison and Competitor alternatives can look similar on the surface but target buyers at different points in their decision process. Solution comparison captures buyers who are evaluating the category: they know they need a solution but have not yet named a specific competitor. Competitor alternatives captures buyers who have already evaluated a named vendor and are actively looking for something different. The landing page, ad copy, and bid strategy for each are different enough that merging them into a single ad group would force you to serve the wrong message to the wrong buyer. Keep them in separate ad groups at minimum, separate campaigns if budget allows.</p></div>';
@@ -349,6 +353,73 @@ function Explainer({ title, children }) {
         <div style={{ padding: '14px 16px', fontSize: 13, color: '#4b5563', lineHeight: 1.7 }}>{children}</div>
       )}
     </div>
+  );
+}
+
+function DeepDiveLabelsInsights() {
+  return (
+    <Explainer title="Deep dive into labels and insights">
+      <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13, marginBottom: 12 }}>Intent labels</p>
+
+      <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
+        <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Bottom funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high purchase intent)</span></p>
+        <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer is in active evaluation. Queries signal a decision is close: demo, pricing, comparison, alternative, and vendor terms. These searches have the highest purchase intent and typically deliver the strongest ROI.</p>
+        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Prioritize exact match. Dedicate a separate ad group. Use your highest bids and most conversion-focused landing page.</p>
+      </div>
+
+      <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
+        <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Mid funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(transition point)</span></p>
+        <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer knows they have a problem and is actively comparing solutions. They are building a shortlist but have not committed to a vendor.</p>
+        <div style={{ background: '#f8f8f7', borderLeft: '3px solid #e5e7eb', padding: 12, margin: '10px 0', fontSize: 12, color: '#4b5563' }}>
+          <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 6 }}>A note on mid funnel</p>
+          <p style={{ marginBottom: 8 }}>I treat mid funnel as a transition point rather than a fixed destination. In practice, I simplify to two anchors: TOFU and BOFU, and use mid funnel as the border between them.</p>
+          <p style={{ marginBottom: 8 }}>As much as we would like to build clean blueprints and frameworks, we never fully know the internal workings of a prospect's organization until sales gets on a call with them, and even then, they may not share everything. You will regularly see BOFU audiences consuming MOFU content and TOFU audiences clicking on MOFU offers. A prospect could spend weeks consuming TOFU content, then one day request a demo, and before they even get on the call, they go back and consume MOFU content to prepare.</p>
+          <p>The implication for testing: take your top-performing mid-funnel assets and run them against TOFU and BOFU audiences. Do the same in reverse. The funnel is a living system. Stay flexible while remaining measured. Test deliberately, not randomly, and let performance data tell you where each asset actually belongs.</p>
+        </div>
+        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Use phrase match. Serve category and solution content. Monitor search terms closely: MOFU queries frequently surface buyers who are further along than the keyword suggests.</p>
+      </div>
+
+      <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
+        <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Top funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(awareness and education)</span></p>
+        <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer is researching a problem, not a solution. Queries are broad, educational, and low commercial intent. Volume is high but conversion rates are low.</p>
+        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Use broad match for discovery only. Pair with Max Conversions bidding. Do not expect direct pipeline from this stage. Use it to build audience pools for retargeting.</p>
+      </div>
+
+      <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13, marginTop: 20, marginBottom: 12 }}>Impression share flags</p>
+      <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>Impression share (IS) measures the percentage of eligible auctions where your ad actually appeared. These flags appear in the Audit tab when IS data is present in your CSV.</p>
+
+      <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
+        <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Protect and deepen<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high IS + converting)</span></p>
+        <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>You are winning the auction and converting. The risk is erosion: competitor bid increases or budget caps can quietly drop your IS.</p>
+        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Set an alert if IS falls below 60%, then deepen the cluster by adding exact match variants (demo, pricing, alternatives) rather than just holding position.</p>
+      </div>
+
+      <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
+        <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Scale opportunity<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(low IS + converting)</span></p>
+        <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>You are converting but losing a large share of eligible auctions to underbidding or budget constraints. The signal is proven, you are just not capturing it.</p>
+        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Raise bids or increase campaign budget, then monitor CPA weekly. If CPA holds within target as volume grows, keep scaling. This is the highest-priority flag in a healthy account.</p>
+      </div>
+
+      <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
+        <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Efficiency problem<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high IS + not converting)</span></p>
+        <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>High visibility, no results. Most common causes: ad-to-landing-page message mismatch, wrong audience, or keyword intent that does not map to what you actually solve.</p>
+        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Reduce bids to stop the bleed, audit the landing page for message match, and check the search term report to confirm which queries are actually triggering the ad.</p>
+      </div>
+
+      <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
+        <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Deprioritize<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(low IS + not converting)</span></p>
+        <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>Low visibility and no conversions. Not enough data to cut, not enough signal to invest.</p>
+        <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: If the keyword has crossed 50 clicks with zero conversions, pause it and redirect budget to Scale Opportunity terms. Under 50 clicks, give it more runway before deciding.</p>
+      </div>
+
+      <p style={{ fontSize: 11, color: '#9b9a97' }}>
+        Sources:{' '}
+        <a href="https://thehigherpitch.com/b2b-buyer-journey-in-2026-why-the-old-playbook-is-quietly-losing-you-deals/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Gartner B2B Buying Journey via The Higher Pitch</a>
+        {'; '}
+        <a href="https://intentamplify.com/blog/all-that-you-should-know-about-the-b2b-sales-funnel/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Intent Amplify: B2B Sales Funnel 2026</a>
+        {'; practitioner judgment from years of B2B paid search management.'}
+      </p>
+    </Explainer>
   );
 }
 
@@ -533,7 +604,7 @@ export default function KeywordPlanner() {
         <div dangerouslySetInnerHTML={{ __html: manualOut }} />
         {manualCSV && (
           <div>
-            <span className="kt-label" style={{ marginTop: 8 }}>Export (CSV -- keywords by job function + audience seed)</span>
+            <span className="kt-label" style={{ marginTop: 8 }}>Export (CSV: keywords by job function + audience seed)</span>
             <div className="kt-export">{manualCSV}</div>
             <button className="kt-copy-btn" onClick={copyManualCSV}>{manualCopied ? 'Copied' : 'Copy CSV'}</button>
           </div>
@@ -543,7 +614,7 @@ export default function KeywordPlanner() {
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 0 }}>Start with the full list</p>
             <p style={{ marginBottom: 8 }}>This tool generates 20 to 30 keyword variants per seed. Your job is to curate it down.</p>
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Google's best practice</p>
-            <p style={{ marginBottom: 8 }}>5 to 10 tightly themed keywords per ad group -- enough to cover intent without diluting relevance or fragmenting Smart Bidding signal.</p>
+            <p style={{ marginBottom: 8 }}>5 to 10 tightly themed keywords per ad group, enough to cover intent without diluting relevance or fragmenting Smart Bidding signal.</p>
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>How to curate</p>
             <p style={{ marginBottom: 6 }}>(1) Remove variants that do not match your landing page or offer.</p>
             <p style={{ marginBottom: 6 }}>(2) Promote your top 5 to 10 exact match terms to a dedicated high-intent ad group.</p>
@@ -556,16 +627,16 @@ export default function KeywordPlanner() {
           </Explainer>
           <Explainer title="How this keyword list is generated">
             <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
-              <span style={{ fontWeight: 600, color: '#1a1a19' }}>Intent classification.</span> Every keyword is scored against a signal library of BOFU terms (pricing, demo, trial, alternatives, vs, migrate) and MOFU terms (software, platform, tool, solution, integration). Keywords that match neither are treated as top-funnel. This determines ad group assignment -- not topic.
+              <span style={{ fontWeight: 600, color: '#1a1a19' }}>Intent classification.</span> Every keyword is scored against a signal library of BOFU terms (pricing, demo, trial, alternatives, vs, migrate) and MOFU terms (software, platform, tool, solution, integration). Keywords that match neither are treated as top-funnel. This determines ad group assignment, not topic.
             </p>
             <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
-              <span style={{ fontWeight: 600, color: '#1a1a19' }}>Match type expansion.</span> Exact match variants are generated by appending high-intent modifiers (demo, pricing, free trial, vs, alternatives, migration, integration, enterprise) to your seed. Phrase match variants cover solution-level queries (best [seed], [seed] platform, [seed] for [persona]). Broad match keeps only the raw seed -- Google's algorithm handles variation from there.
+              <span style={{ fontWeight: 600, color: '#1a1a19' }}>Match type expansion.</span> Exact match variants are generated by appending high-intent modifiers (demo, pricing, free trial, vs, alternatives, migration, integration, enterprise) to your seed. Phrase match variants cover solution-level queries (best [seed], [seed] platform, [seed] for [persona]). Broad match keeps only the raw seed. Google's algorithm handles variation from there.
             </p>
             <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
               <span style={{ fontWeight: 600, color: '#1a1a19' }}>Job function layering.</span> Each selected job function maps to a modifier set built for that persona's buying language and workflow. The same seed keyword generates different variants per function, which is how the tool produces job-function-targeted ad groups without requiring you to brainstorm per-persona manually.
             </p>
             <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
-              What this tool does not do. It does not pull live search volume, CPC, or competition data -- those require the Google Keyword Planner or a paid tool like Semrush. Treat this output as your starting list for validation, not a final media plan.
+              What this tool does not do. It does not pull live search volume, CPC, or competition data. Those require the Google Keyword Planner or a paid tool like Semrush. Treat this output as your starting list for validation, not a final media plan.
             </p>
             <p style={{ fontSize: 11, color: '#9b9a97', lineHeight: 1.6 }}>
               {'Sources: '}
@@ -587,68 +658,7 @@ export default function KeywordPlanner() {
             <p style={{ marginBottom: 8 }}>When your ICP falls outside LinkedIn's taxonomy. Job titles become required.</p>
             <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Mirror this selection in your LinkedIn Campaign Manager audience setup for ICP consistency across channels.</p>
           </Explainer>
-          <Explainer title="Deep dive into labels and insights">
-            <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13, marginBottom: 12 }}>Intent labels</p>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Bottom funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high purchase intent)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer is in active evaluation. Queries signal a decision is close: demo, pricing, comparison, alternative, and vendor terms. These searches have the highest purchase intent and typically deliver the strongest ROI.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Prioritize exact match. Dedicate a separate ad group. Use your highest bids and most conversion-focused landing page.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Mid funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(transition point)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer knows they have a problem and is actively comparing solutions. They are building a shortlist but have not committed to a vendor.</p>
-              <div style={{ background: '#f8f8f7', borderLeft: '3px solid #e5e7eb', padding: 12, margin: '10px 0', fontSize: 12, color: '#4b5563' }}>
-                <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 6 }}>A note on mid funnel</p>
-                <p style={{ marginBottom: 8 }}>I treat mid funnel as a transition point rather than a fixed destination. In practice, I simplify to two anchors: TOFU and BOFU, and use mid funnel as the border between them.</p>
-                <p style={{ marginBottom: 8 }}>As much as we would like to build clean blueprints and frameworks, we never fully know the internal workings of a prospect's organization until sales gets on a call with them, and even then, they may not share everything. You will regularly see BOFU audiences consuming MOFU content and TOFU audiences clicking on MOFU offers. A prospect could spend weeks consuming TOFU content, then one day request a demo, and before they even get on the call, they go back and consume MOFU content to prepare.</p>
-                <p>The implication for testing: take your top-performing mid-funnel assets and run them against TOFU and BOFU audiences. Do the same in reverse. The funnel is a living system. Stay flexible while remaining measured. Test deliberately, not randomly, and let performance data tell you where each asset actually belongs.</p>
-              </div>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Use phrase match. Serve category and solution content. Monitor search terms closely: MOFU queries frequently surface buyers who are further along than the keyword suggests.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Top funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(awareness and education)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer is researching a problem, not a solution. Queries are broad, educational, and low commercial intent. Volume is high but conversion rates are low.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Use broad match for discovery only. Pair with Max Conversions bidding. Do not expect direct pipeline from this stage. Use it to build audience pools for retargeting.</p>
-            </div>
-
-            <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13, marginTop: 20, marginBottom: 12 }}>Impression share flags</p>
-            <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>Impression share (IS) measures the percentage of eligible auctions where your ad actually appeared. These flags appear in the Audit tab when IS data is present in your CSV.</p>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Protect and deepen<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high IS + converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>You are winning the auction and converting. The risk is erosion: competitor bid increases or budget caps can quietly drop your IS.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Set an alert if IS falls below 60%, then deepen the cluster by adding exact match variants (demo, pricing, alternatives) rather than just holding position.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Scale opportunity<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(low IS + converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>You are converting but losing a large share of eligible auctions to underbidding or budget constraints. The signal is proven, you are just not capturing it.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Raise bids or increase campaign budget, then monitor CPA weekly. If CPA holds within target as volume grows, keep scaling. This is the highest-priority flag in a healthy account.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Efficiency problem<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high IS + not converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>High visibility, no results. Most common causes: ad-to-landing-page message mismatch, wrong audience, or keyword intent that does not map to what you actually solve.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Reduce bids to stop the bleed, audit the landing page for message match, and check the search term report to confirm which queries are actually triggering the ad.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Deprioritize<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(low IS + not converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>Low visibility and no conversions. Not enough data to cut, not enough signal to invest.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: If the keyword has crossed 50 clicks with zero conversions, pause it and redirect budget to Scale Opportunity terms. Under 50 clicks, give it more runway before deciding.</p>
-            </div>
-
-            <p style={{ fontSize: 11, color: '#9b9a97' }}>
-              Sources:{' '}
-              <a href="https://thehigherpitch.com/b2b-buyer-journey-in-2026-why-the-old-playbook-is-quietly-losing-you-deals/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Gartner B2B Buying Journey via The Higher Pitch</a>
-              {'; '}
-              <a href="https://intentamplify.com/blog/all-that-you-should-know-about-the-b2b-sales-funnel/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Intent Amplify: B2B Sales Funnel 2026</a>
-              {'; practitioner judgment from years of B2B paid search management.'}
-            </p>
-          </Explainer>
+          <DeepDiveLabelsInsights />
         </div>
       </div>
 
@@ -698,68 +708,7 @@ export default function KeywordPlanner() {
               Sources: <a href="https://support.google.com/google-ads/answer/2497703" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads Help: About impression share</a>
             </p>
           </Explainer>
-          <Explainer title="Deep dive into labels and insights">
-            <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13, marginBottom: 12 }}>Intent labels</p>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Bottom funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high purchase intent)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer is in active evaluation. Queries signal a decision is close: demo, pricing, comparison, alternative, and vendor terms. These searches have the highest purchase intent and typically deliver the strongest ROI.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Prioritize exact match. Dedicate a separate ad group. Use your highest bids and most conversion-focused landing page.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Mid funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(transition point)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer knows they have a problem and is actively comparing solutions. They are building a shortlist but have not committed to a vendor.</p>
-              <div style={{ background: '#f8f8f7', borderLeft: '3px solid #e5e7eb', padding: 12, margin: '10px 0', fontSize: 12, color: '#4b5563' }}>
-                <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 6 }}>A note on mid funnel</p>
-                <p style={{ marginBottom: 8 }}>I treat mid funnel as a transition point rather than a fixed destination. In practice, I simplify to two anchors: TOFU and BOFU, and use mid funnel as the border between them.</p>
-                <p style={{ marginBottom: 8 }}>As much as we would like to build clean blueprints and frameworks, we never fully know the internal workings of a prospect's organization until sales gets on a call with them, and even then, they may not share everything. You will regularly see BOFU audiences consuming MOFU content and TOFU audiences clicking on MOFU offers. A prospect could spend weeks consuming TOFU content, then one day request a demo, and before they even get on the call, they go back and consume MOFU content to prepare.</p>
-                <p>The implication for testing: take your top-performing mid-funnel assets and run them against TOFU and BOFU audiences. Do the same in reverse. The funnel is a living system. Stay flexible while remaining measured. Test deliberately, not randomly, and let performance data tell you where each asset actually belongs.</p>
-              </div>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Use phrase match. Serve category and solution content. Monitor search terms closely: MOFU queries frequently surface buyers who are further along than the keyword suggests.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Top funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(awareness and education)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer is researching a problem, not a solution. Queries are broad, educational, and low commercial intent. Volume is high but conversion rates are low.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Use broad match for discovery only. Pair with Max Conversions bidding. Do not expect direct pipeline from this stage. Use it to build audience pools for retargeting.</p>
-            </div>
-
-            <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13, marginTop: 20, marginBottom: 12 }}>Impression share flags</p>
-            <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>Impression share (IS) measures the percentage of eligible auctions where your ad actually appeared. These flags appear in the Audit tab when IS data is present in your CSV.</p>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Protect and deepen<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high IS + converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>You are winning the auction and converting. The risk is erosion: competitor bid increases or budget caps can quietly drop your IS.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Set an alert if IS falls below 60%, then deepen the cluster by adding exact match variants (demo, pricing, alternatives) rather than just holding position.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Scale opportunity<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(low IS + converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>You are converting but losing a large share of eligible auctions to underbidding or budget constraints. The signal is proven, you are just not capturing it.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Raise bids or increase campaign budget, then monitor CPA weekly. If CPA holds within target as volume grows, keep scaling. This is the highest-priority flag in a healthy account.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Efficiency problem<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high IS + not converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>High visibility, no results. Most common causes: ad-to-landing-page message mismatch, wrong audience, or keyword intent that does not map to what you actually solve.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Reduce bids to stop the bleed, audit the landing page for message match, and check the search term report to confirm which queries are actually triggering the ad.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Deprioritize<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(low IS + not converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>Low visibility and no conversions. Not enough data to cut, not enough signal to invest.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: If the keyword has crossed 50 clicks with zero conversions, pause it and redirect budget to Scale Opportunity terms. Under 50 clicks, give it more runway before deciding.</p>
-            </div>
-
-            <p style={{ fontSize: 11, color: '#9b9a97' }}>
-              Sources:{' '}
-              <a href="https://thehigherpitch.com/b2b-buyer-journey-in-2026-why-the-old-playbook-is-quietly-losing-you-deals/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Gartner B2B Buying Journey via The Higher Pitch</a>
-              {'; '}
-              <a href="https://intentamplify.com/blog/all-that-you-should-know-about-the-b2b-sales-funnel/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Intent Amplify: B2B Sales Funnel 2026</a>
-              {'; practitioner judgment from years of B2B paid search management.'}
-            </p>
-          </Explainer>
+          <DeepDiveLabelsInsights />
         </div>
       </div>
 
@@ -793,16 +742,16 @@ export default function KeywordPlanner() {
           </Explainer>
           <Explainer title="How this keyword list is generated">
             <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
-              <span style={{ fontWeight: 600, color: '#1a1a19' }}>Intent classification.</span> Every keyword is scored against a signal library of BOFU terms (pricing, demo, trial, alternatives, vs, migrate) and MOFU terms (software, platform, tool, solution, integration). Keywords that match neither are treated as top-funnel. This determines ad group assignment -- not topic.
+              <span style={{ fontWeight: 600, color: '#1a1a19' }}>Intent classification.</span> Every keyword is scored against a signal library of BOFU terms (pricing, demo, trial, alternatives, vs, migrate) and MOFU terms (software, platform, tool, solution, integration). Keywords that match neither are treated as top-funnel. This determines ad group assignment, not topic.
             </p>
             <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
-              <span style={{ fontWeight: 600, color: '#1a1a19' }}>Match type expansion.</span> Exact match variants are generated by appending high-intent modifiers (demo, pricing, free trial, vs, alternatives, migration, integration, enterprise) to your seed. Phrase match variants cover solution-level queries (best [seed], [seed] platform, [seed] for [persona]). Broad match keeps only the raw seed -- Google's algorithm handles variation from there.
+              <span style={{ fontWeight: 600, color: '#1a1a19' }}>Match type expansion.</span> Exact match variants are generated by appending high-intent modifiers (demo, pricing, free trial, vs, alternatives, migration, integration, enterprise) to your seed. Phrase match variants cover solution-level queries (best [seed], [seed] platform, [seed] for [persona]). Broad match keeps only the raw seed. Google's algorithm handles variation from there.
             </p>
             <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
               <span style={{ fontWeight: 600, color: '#1a1a19' }}>Job function layering.</span> Each selected job function maps to a modifier set built for that persona's buying language and workflow. The same seed keyword generates different variants per function, which is how the tool produces job-function-targeted ad groups without requiring you to brainstorm per-persona manually.
             </p>
             <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
-              What this tool does not do. It does not pull live search volume, CPC, or competition data -- those require the Google Keyword Planner or a paid tool like Semrush. Treat this output as your starting list for validation, not a final media plan.
+              What this tool does not do. It does not pull live search volume, CPC, or competition data. Those require the Google Keyword Planner or a paid tool like Semrush. Treat this output as your starting list for validation, not a final media plan.
             </p>
             <p style={{ fontSize: 11, color: '#9b9a97', lineHeight: 1.6 }}>
               {'Sources: '}
@@ -875,68 +824,7 @@ export default function KeywordPlanner() {
             <p style={{ marginBottom: 8 }}>Search volume, competition level, CPC, or conversion rate.</p>
             <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Validate volume and intent in Google Ads Keyword Planner before committing budget.</p>
           </Explainer>
-          <Explainer title="Deep dive into labels and insights">
-            <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13, marginBottom: 12 }}>Intent labels</p>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Bottom funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high purchase intent)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer is in active evaluation. Queries signal a decision is close: demo, pricing, comparison, alternative, and vendor terms. These searches have the highest purchase intent and typically deliver the strongest ROI.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Prioritize exact match. Dedicate a separate ad group. Use your highest bids and most conversion-focused landing page.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Mid funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(transition point)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer knows they have a problem and is actively comparing solutions. They are building a shortlist but have not committed to a vendor.</p>
-              <div style={{ background: '#f8f8f7', borderLeft: '3px solid #e5e7eb', padding: 12, margin: '10px 0', fontSize: 12, color: '#4b5563' }}>
-                <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 6 }}>A note on mid funnel</p>
-                <p style={{ marginBottom: 8 }}>I treat mid funnel as a transition point rather than a fixed destination. In practice, I simplify to two anchors: TOFU and BOFU, and use mid funnel as the border between them.</p>
-                <p style={{ marginBottom: 8 }}>As much as we would like to build clean blueprints and frameworks, we never fully know the internal workings of a prospect's organization until sales gets on a call with them, and even then, they may not share everything. You will regularly see BOFU audiences consuming MOFU content and TOFU audiences clicking on MOFU offers. A prospect could spend weeks consuming TOFU content, then one day request a demo, and before they even get on the call, they go back and consume MOFU content to prepare.</p>
-                <p>The implication for testing: take your top-performing mid-funnel assets and run them against TOFU and BOFU audiences. Do the same in reverse. The funnel is a living system. Stay flexible while remaining measured. Test deliberately, not randomly, and let performance data tell you where each asset actually belongs.</p>
-              </div>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Use phrase match. Serve category and solution content. Monitor search terms closely: MOFU queries frequently surface buyers who are further along than the keyword suggests.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Top funnel<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(awareness and education)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>The buyer is researching a problem, not a solution. Queries are broad, educational, and low commercial intent. Volume is high but conversion rates are low.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Use broad match for discovery only. Pair with Max Conversions bidding. Do not expect direct pipeline from this stage. Use it to build audience pools for retargeting.</p>
-            </div>
-
-            <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13, marginTop: 20, marginBottom: 12 }}>Impression share flags</p>
-            <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 10 }}>Impression share (IS) measures the percentage of eligible auctions where your ad actually appeared. These flags appear in the Audit tab when IS data is present in your CSV.</p>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Protect and deepen<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high IS + converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>You are winning the auction and converting. The risk is erosion: competitor bid increases or budget caps can quietly drop your IS.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Set an alert if IS falls below 60%, then deepen the cluster by adding exact match variants (demo, pricing, alternatives) rather than just holding position.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Scale opportunity<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(low IS + converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>You are converting but losing a large share of eligible auctions to underbidding or budget constraints. The signal is proven, you are just not capturing it.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Raise bids or increase campaign budget, then monitor CPA weekly. If CPA holds within target as volume grows, keep scaling. This is the highest-priority flag in a healthy account.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Efficiency problem<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(high IS + not converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>High visibility, no results. Most common causes: ad-to-landing-page message mismatch, wrong audience, or keyword intent that does not map to what you actually solve.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: Reduce bids to stop the bleed, audit the landing page for message match, and check the search term report to confirm which queries are actually triggering the ad.</p>
-            </div>
-
-            <div style={{ borderBottom: '1px solid #f3f4f6', marginBottom: 14 }}>
-              <p style={{ fontWeight: 600, color: '#1a1a19', fontSize: 13 }}>Deprioritize<span style={{ fontSize: 11, color: '#9b9a97', marginLeft: 8, display: 'inline' }}>(low IS + not converting)</span></p>
-              <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 6 }}>Low visibility and no conversions. Not enough data to cut, not enough signal to invest.</p>
-              <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 14 }}>Action: If the keyword has crossed 50 clicks with zero conversions, pause it and redirect budget to Scale Opportunity terms. Under 50 clicks, give it more runway before deciding.</p>
-            </div>
-
-            <p style={{ fontSize: 11, color: '#9b9a97' }}>
-              Sources:{' '}
-              <a href="https://thehigherpitch.com/b2b-buyer-journey-in-2026-why-the-old-playbook-is-quietly-losing-you-deals/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Gartner B2B Buying Journey via The Higher Pitch</a>
-              {'; '}
-              <a href="https://intentamplify.com/blog/all-that-you-should-know-about-the-b2b-sales-funnel/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Intent Amplify: B2B Sales Funnel 2026</a>
-              {'; practitioner judgment from years of B2B paid search management.'}
-            </p>
-          </Explainer>
+          <DeepDiveLabelsInsights />
         </div>
       </div>
 
