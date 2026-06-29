@@ -7,6 +7,20 @@ const personaModifiers = {eng:{label:'Engineering',bofu:['api integration','deve
 const intentSignals = {bofu:['pricing','demo','trial','free trial','sign up','get started','quote','schedule','migrate','onboarding','vs ','versus','alternative','switch from','enterprise','buy','purchase','compare'],mofu:['software','platform','tool','solution','best','top','how to','features','integration','api','vendor','provider','service','cost','benchmark']};
 const negSignals = {job:['jobs','salary','career','hire','hiring','interview','resume','glassdoor','internship'],freeOnly:['free ','open source','github','freeware','crack','no cost','student','academic'],educational:['certification','course','tutorial for beginners','learn ','coursera','udemy','training program','study guide'],irrelevant:['reddit','youtube','twitter','news','pdf download','torrent','wiki'],competitor:['vs ','versus','alternative to','switch from','migrate from','compare','competitor']};
 
+const techComparisons = [
+  'vs elt', 'etl vs', 'elt vs', 'vs sql', 'sql vs', 'vs api', 'api vs',
+  'vs rest', 'rest vs', 'vs graphql', 'graphql vs', 'vs batch', 'batch vs',
+  'vs streaming', 'streaming vs', 'vs real time', 'vs realtime',
+  'vs cloud', 'cloud vs', 'vs on premise', 'vs saas', 'saas vs',
+  'vs open source', 'open source vs', 'vs managed', 'managed vs'
+];
+
+function isCompetitorTerm(kw) {
+  const k = kw.toLowerCase();
+  if (techComparisons.some(t => k.includes(t))) return false;
+  return negSignals.competitor.some(n => k.includes(n));
+}
+
 function classifyIntent(kw) {
   const k = kw.toLowerCase();
   if (intentSignals.bofu.some(s => k.includes(s))) return 'bofu';
@@ -18,7 +32,7 @@ function intentClass(i) { return i === 'bofu' ? 'intent-bofu' : i === 'mofu' ? '
 function parseTitles(r) { return r.split(',').map(t => t.trim()).filter(Boolean).slice(0, 15); }
 
 function groupIntoCampaigns(seeds) {
-  const competitor = seeds.filter(s => negSignals.competitor.some(n => s.toLowerCase().includes(n)));
+  const competitor = seeds.filter(s => isCompetitorTerm(s));
   const nonBrand = seeds.filter(s => !competitor.includes(s));
   const bofuSeeds = nonBrand.filter(s => classifyIntent(s) === 'bofu');
   const midSeeds = nonBrand.filter(s => classifyIntent(s) !== 'bofu');
@@ -82,7 +96,7 @@ function renderPerFunctionClustersHTML(seeds, selectedFns, titles, useE, useP, u
     html += `<div style="margin-bottom:20px"><div class="kt-group-header"><span class="kt-group-label">${mods.label}</span><span class="kt-group-badge">${seeds.length} seed${seeds.length > 1 ? 's' : ''}</span></div>`;
     seeds.forEach(seed => {
       const intent = classifyIntent(seed);
-      const isCompetitor = negSignals.competitor.some(n => seed.toLowerCase().includes(n));
+      const isCompetitor = isCompetitorTerm(seed);
       const campaign = isCompetitor ? 'Competitor' : 'Non-brand search';
       const adGroup = adGroupFor(intent, isCompetitor);
       const csvCampaign = 'Non-brand search';
@@ -221,7 +235,7 @@ function runAuditHTML(terms) {
     if (negSignals.job.some(s => tl.includes(s)) || negSignals.irrelevant.some(s => tl.includes(s))) { rec = 'Add as negative'; cls = 'kw-neg'; reason = 'Irrelevant intent'; }
     else if (negSignals.freeOnly.some(s => tl.includes(s))) { rec = 'Add as negative'; cls = 'kw-neg'; reason = 'Free-only seeker'; }
     else if (negSignals.educational.some(s => tl.includes(s)) && classifyIntent(t) === 'tofu') { rec = 'Negative (or TOFU only)'; cls = 'kw-neg'; reason = 'Research / educational intent'; }
-    else if (negSignals.competitor.some(s => tl.includes(s))) { rec = 'Dedicated ad group'; cls = 'kw-phrase'; reason = 'Comparison query -- needs tailored copy + LP'; }
+    else if (isCompetitorTerm(t)) { rec = 'Dedicated ad group'; cls = 'kw-phrase'; reason = 'Comparison query -- needs tailored copy + LP'; }
     else if (classifyIntent(t) === 'bofu') { rec = 'Promote to exact'; cls = 'kw-exact'; reason = 'High commercial intent'; }
     else if (classifyIntent(t) === 'mofu') { rec = 'Keep as phrase'; cls = 'kw-phrase'; reason = 'Mid-funnel -- monitor CVR'; }
     else { rec = 'Negative or TOFU content'; cls = 'kw-neg'; reason = 'Low conversion probability'; }
@@ -236,6 +250,7 @@ function genNegativesHTML(terms) {
     const tl = t.toLowerCase();
     let placed = false;
     for (const [cat, sigs] of Object.entries(negSignals)) {
+      if (cat === 'competitor' && techComparisons.some(s => tl.includes(s))) continue;
       if (sigs.some(s => tl.includes(s))) { buckets[cat].push(t); placed = true; break; }
     }
     if (!placed) buckets.keep.push(t);
@@ -245,7 +260,7 @@ function genNegativesHTML(terms) {
     freeOnly: { label: 'Free / open source seekers', action: 'Negative unless you have freemium', cls: 'kw-neg' },
     educational: { label: 'Educational / certification intent', action: 'Negative unless you have TOFU content', cls: 'kw-neg' },
     irrelevant: { label: 'Off-topic / irrelevant', action: 'Negative immediately', cls: 'kw-neg' },
-    competitor: { label: 'Competitor comparisons', action: 'Keep -- build dedicated comparison ad group', cls: 'kw-phrase' },
+    competitor: { label: 'Competitor comparisons', action: 'Keep: build a dedicated comparison ad group', cls: 'kw-phrase' },
     keep: { label: 'Worth keeping', action: 'Monitor CVR -- evaluate for exact promotion', cls: 'kw-phrase' },
   };
   let html = '';
