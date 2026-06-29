@@ -195,11 +195,13 @@ function analyzeCSVData(raw) {
   const kwIdx = headers.findIndex(h => h.includes('keyword'));
   const convIdx = headers.findIndex(h => h.includes('conv'));
   const costIdx = headers.findIndex(h => h.includes('cost'));
+  console.log('HEADERS:', headers, 'costIdx:', costIdx);
   const isIdx = headers.findIndex(h => h.includes('impr') || h.includes('share'));
   if (kwIdx === -1) return { error: 'Could not find a Keyword column. Check your CSV header row.' };
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
     const cols = parseCSVLine(lines[i]);
+    console.log('ROW', i, 'cols:', cols, 'costIdx:', costIdx, 'rawCost:', cols[costIdx], 'parsedCost:', parseFloat((cols[costIdx] || '').replace(/[$,]/g, '')));
     const kw = (cols[kwIdx] || '').trim().replace(/^["']|["']$/g, '');
     if (!kw) continue;
     const conv = parseFloat(cols[convIdx]) || 0;
