@@ -1,5 +1,13 @@
 import { useState } from 'react';
 
+function Chevron({ open }) {
+  return (
+    <svg width="10" height="10" viewBox="0 0 12 12" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.15s ease' }}>
+      <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
 function normalCDF(x) {
   const t = 1 / (1 + 0.2316419 * Math.abs(x));
   const poly =
@@ -243,7 +251,7 @@ export default function ABTestCalculator() {
           style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '10px 14px', fontSize: 13, fontWeight: 500, color: '#6b6a68', cursor: 'pointer' }}
         >
           <span>Label your inputs (optional)</span>
-          <span style={{ fontSize: 15 }}>{showContext ? '-' : '+'}</span>
+          <Chevron open={showContext} />
         </button>
         {showContext && (
           <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -384,7 +392,7 @@ export default function ABTestCalculator() {
       )}
 
       {/* Always-visible collapsible sections */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginTop: 24 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 24 }}>
 
         {/* How this is calculated */}
         <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden' }}>
@@ -393,7 +401,7 @@ export default function ABTestCalculator() {
             style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer' }}
           >
             <span>How this is calculated</span>
-            <span style={{ fontSize: 16 }}>{showMethod ? '-' : '+'}</span>
+            <Chevron open={showMethod} />
           </button>
           {showMethod && (
             <div style={{ padding: '14px 16px', fontSize: 13, color: '#4b5563', lineHeight: 1.7 }}>
@@ -424,7 +432,7 @@ export default function ABTestCalculator() {
             style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer' }}
           >
             <span>Confidence level guide by growth stage</span>
-            <span style={{ fontSize: 16 }}>{showStage ? '-' : '+'}</span>
+            <Chevron open={showStage} />
           </button>
           {showStage && (
             <div style={{ padding: '14px 16px' }}>
@@ -468,7 +476,7 @@ export default function ABTestCalculator() {
             style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer' }}
           >
             <span>Sample size guidance by channel</span>
-            <span style={{ fontSize: 16 }}>{showSampleSize ? '-' : '+'}</span>
+            <Chevron open={showSampleSize} />
           </button>
           {showSampleSize && (
             <div style={{ padding: '14px 16px' }}>
@@ -560,7 +568,7 @@ export default function ABTestCalculator() {
             style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#eff6ff', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#2563EB', cursor: 'pointer' }}
           >
             <span>Testing at growth stage</span>
-            <span style={{ fontSize: 16 }}>{showGrowth ? '-' : '+'}</span>
+            <Chevron open={showGrowth} />
           </button>
           {showGrowth && (
             <div style={{ padding: '14px 16px' }}>
