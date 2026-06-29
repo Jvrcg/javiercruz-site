@@ -602,7 +602,7 @@ export default function KeywordPlanner() {
               What this tool does not do. It does not pull live search volume, CPC, or competition data -- those require the Google Keyword Planner or a paid tool like Semrush. Treat this output as your starting list for validation, not a final media plan.
             </p>
             <p style={{ fontSize: 11, color: '#9b9a97', lineHeight: 1.6 }}>
-              Sources:{' '}
+              {'Sources: '}
               <a href="https://support.google.com/google-ads/answer/7478529" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads keyword matching options</a>
               {'; '}
               <a href="https://support.google.com/google-ads/answer/7065882" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Smart Bidding guide</a>
