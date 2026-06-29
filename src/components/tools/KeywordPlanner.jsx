@@ -191,17 +191,16 @@ function parseCSVLine(line) {
 function analyzeCSVData(raw) {
   const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
   if (lines.length < 2) return { error: 'Need at least a header row and one data row.' };
-  const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+  const delimiter = lines[0].includes('\t') ? '\t' : ',';
+  const headers = lines[0].split(delimiter).map(h => h.trim().toLowerCase().replace(/^"|"$/g, ''));
   const kwIdx = headers.findIndex(h => h.includes('keyword'));
   const convIdx = headers.findIndex(h => h.includes('conv'));
   const costIdx = headers.findIndex(h => h.includes('cost'));
-  console.log('HEADERS:', headers, 'costIdx:', costIdx);
   const isIdx = headers.findIndex(h => h.includes('impr') || h.includes('share'));
   if (kwIdx === -1) return { error: 'Could not find a Keyword column. Check your CSV header row.' };
   const rows = [];
   for (let i = 1; i < lines.length; i++) {
-    const cols = parseCSVLine(lines[i]);
-    console.log('ROW', i, 'cols:', cols, 'costIdx:', costIdx, 'rawCost:', cols[costIdx], 'parsedCost:', parseFloat((cols[costIdx] || '').replace(/[$,]/g, '')));
+    const cols = delimiter === '\t' ? lines[i].split('\t').map(c => c.trim().replace(/^"|"$/g, '')) : parseCSVLine(lines[i]);
     const kw = (cols[kwIdx] || '').trim().replace(/^["']|["']$/g, '');
     if (!kw) continue;
     const conv = parseFloat(cols[convIdx]) || 0;
