@@ -238,6 +238,7 @@ function renderAnalyzeCSVHTML(rows) {
     html += `</div>`;
   }
   html += `<span class="kt-label">Converting keywords (${converting.length}), ranked by volume</span>`;
+  html += `<p style="font-size:12px;color:#2563EB;margin-bottom:12px;margin-top:4px;">See <strong>Deep dive into labels and insights</strong> below for action steps on each label.</p>`;
   converting.forEach(r => {
     html += `<div class="perf-card"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:6px"><span style="font-size:14px;font-weight:500;color:#111827">${r.kw}</span><span class="intent-pill ${intentClass(r.intent)}">${intentLabel(r.intent)}</span>${getISFlagHTML(r)}</div><div class="perf-metrics"><span class="perf-metric">Conversions: <strong>${r.conv}</strong></span><span class="perf-metric">Cost: <strong>$${Math.round(r.cost)}</strong></span>${r.cpa !== null ? `<span class="perf-metric">CPA: <strong>$${r.cpa}</strong></span>` : ''} ${r.is !== null ? `<span class="perf-metric">Impr. share: <strong>${Math.round(r.is * 100)}%</strong></span>` : ''}</div></div>`;
   });
