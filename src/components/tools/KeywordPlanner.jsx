@@ -184,7 +184,7 @@ function analyzeCSVData(raw) {
     const kw = (cols[kwIdx] || '').trim().replace(/^["']|["']$/g, '');
     if (!kw) continue;
     const conv = parseFloat(cols[convIdx]) || 0;
-    const cost = parseFloat(cols[costIdx]) || 0;
+    const cost = parseFloat((cols[costIdx] || '').replace(/[$,]/g, '')) || 0;
     const is = isIdx >= 0 ? parseFloat(cols[isIdx]) || 0 : null;
     const cpa = conv > 0 ? Math.round(cost / conv) : null;
     rows.push({ kw, conv, cost, cpa, is, intent: classifyIntent(kw) });
