@@ -647,6 +647,14 @@ export default function KeywordPlanner() {
           </>
         )}
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Explainer title="How to use this tab">
+            <p style={{ marginBottom: 8 }}>This tab analyzes an existing keyword list from your account. It classifies each keyword by intent, flags impression share labels where data is available, and surfaces funnel gaps based on what is and is not converting.</p>
+
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>How to export from Google Ads</p>
+            <p style={{ marginBottom: 8 }}>Go to Keywords, click the download icon, and select CSV. Required columns: <strong>Keyword, Match type, Conversions, Cost</strong>. Optional but recommended: <strong>Impr. share</strong>.</p>
+
+            <p style={{ marginBottom: 8 }}>Copy all cells (CTRL+A) and paste (CTRL+V) the data directly into the text area, then click Analyze keywords. The tool will return a breakdown by intent stage, IS flags for converting and non-converting terms, and a list of funnel gaps worth addressing.</p>
+          </Explainer>
           <Explainer title="How impression share is used in this tool">
             <p style={{ marginBottom: 8 }}>IS is a secondary signal. Conversion volume and cost efficiency drive clustering. IS layers in as a strategic flag:</p>
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Protect and deepen</p>
@@ -750,6 +758,11 @@ export default function KeywordPlanner() {
           )}
         </div>
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Explainer title="How to use this tab">
+            <p style={{ marginBottom: 8 }}>This tab uses Google Suggest to surface real queries people are typing related to your seed keyword. These are not generated variants. They are actual autocomplete suggestions pulled from Google's API at the time you run the tool.</p>
+
+            <p style={{ marginBottom: 8 }}>Use this tab when you are starting from scratch and need to discover what language your buyers actually use before building a keyword list. The output is a discovery layer, not a final media plan. Select the strongest signals and bring them into the Manual seeds tab to generate match-type variants.</p>
+          </Explainer>
           <Explainer title="How this keyword list is generated">
             <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
               <span style={{ fontWeight: 600, color: '#1a1a19' }}>Intent classification.</span> Every keyword is scored against a signal library of BOFU terms (pricing, demo, trial, alternatives, vs, migrate) and MOFU terms (software, platform, tool, solution, integration). Keywords that match neither are treated as top-funnel. This determines ad group assignment -- not topic.
@@ -804,6 +817,15 @@ export default function KeywordPlanner() {
           <div style={{ marginTop: 16 }} dangerouslySetInnerHTML={{ __html: negOut }} />
         </div>
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <Explainer title="How to use this tab">
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 0 }}>Search term audit</p>
+            <p style={{ marginBottom: 8 }}>Drop in your raw Search Terms report and get every query bucketed by intent, with clear calls on what to keep, what to break into its own ad group, and what to cut.</p>
+
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Negative generator</p>
+            <p style={{ marginBottom: 8 }}>Paste a keyword or theme, and the tool returns a suggested list of negative keywords organized by category, such as job seekers, free intent, educational, irrelevant, and competitor terms.</p>
+
+            <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Use this tab on a weekly basis during the first 30 days of a new campaign and monthly after that.</p>
+          </Explainer>
           <Explainer title="How impression share is used in this tool">
             <p style={{ marginBottom: 8 }}>IS is a secondary signal. Conversion volume and cost efficiency drive clustering. IS layers in as a strategic flag:</p>
             <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Protect and deepen</p>
