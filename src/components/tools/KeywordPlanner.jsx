@@ -819,7 +819,7 @@ export default function KeywordPlanner() {
         </div>
         <div style={{ display: auditMode === 'auditMode' ? 'block' : 'none' }}>
           <span className="kt-label">Search terms (paste from Google Ads search term report)</span>
-          <textarea ref={auditInputRef} className="kt-textarea" rows={7} style={{ marginBottom: 10 }} placeholder={'data pipeline software\netl jobs salary\nfree data connector\nfivetran vs stitch\nwhat is etl'} />
+          <textarea ref={auditInputRef} className="kt-textarea" rows={7} style={{ marginBottom: 10 }} placeholder={'data pipeline software\netl jobs salary\nfree data connector\nsyncflow vs stitch\nwhat is etl'} />
           <button className="kt-btn" onClick={runAudit}>Audit terms</button>
           <div style={{ marginTop: 16 }} dangerouslySetInnerHTML={{ __html: auditOut }} />
         </div>
