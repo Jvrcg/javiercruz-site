@@ -3,6 +3,11 @@ Daily Job Search Scraper
 Searches BuiltIn, Wellfound, YC Work at a Startup, and TrueUp
 for paid media / growth marketing roles matching Javier's profile.
 Sends a daily email digest of new listings.
+
+These boards render listings client-side with JavaScript, so plain
+`requests` + BeautifulSoup sees an empty shell. Playwright renders each
+page in a headless browser first, then BeautifulSoup parses the
+resulting DOM.
 """
 
 import os
@@ -10,11 +15,11 @@ import json
 import hashlib
 import smtplib
 import datetime
-import requests
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from bs4 import BeautifulSoup
-from urllib.parse import urlencode, quote_plus
+from urllib.parse import quote_plus
+from playwright.sync_api import sync_playwright
 import time
 import re
 
@@ -37,13 +42,11 @@ KEYWORDS = [
 # Seen jobs file — committed back to repo so duplicates are suppressed
 SEEN_FILE = "seen_jobs.json"
 
-HEADERS = {
-    "User-Agent": (
-        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
-        "AppleWebKit/537.36 (KHTML, like Gecko) "
-        "Chrome/124.0.0.0 Safari/537.36"
-    )
-}
+USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/124.0.0.0 Safari/537.36"
+)
 
 # ── UTILITIES ────────────────────────────────────────────────────────────────
 
@@ -83,9 +86,50 @@ def title_matches(title):
 def clean(text):
     return re.sub(r"\s+", " ", text).strip()
 
-# ── SCRAPERS ─────────────────────────────────────────────────────────────────
+# ── BROWSER HELPERS ──────────────────────────────────────────────────────────
 
-def scrape_builtin():
+def fetch_rendered_html(page, url, wait_selector=None, wait_ms=3000):
+    """Load a JS-rendered page in the shared browser and return its DOM HTML."""
+    page.goto(url, timeout=30000, wait_until="domcontentloaded")
+    if wait_selector:
+        try:
+            page.wait_for_selector(wait_selector, timeout=wait_ms)
+        except Exception:
+            pass
+    else:
+        page.wait_for_timeout(wait_ms)
+    return page.content()
+
+
+def find_json_objects(data, predicate):
+    """Recursively walk a parsed JSON structure, yielding dicts matching predicate."""
+    if isinstance(data, dict):
+        if predicate(data):
+            yield data
+        for val in data.values():
+            yield from find_json_objects(val, predicate)
+    elif isinstance(data, list):
+        for item in data:
+            yield from find_json_objects(item, predicate)
+
+
+def extract_json_scripts(soup):
+    """Return parsed JSON from every <script> tag that looks like embedded state."""
+    blobs = []
+    for script in soup.find_all("script"):
+        text = script.string or script.get_text()
+        if not text or "{" not in text:
+            continue
+        try:
+            blobs.append(json.loads(text))
+        except Exception:
+            continue
+    return blobs
+
+# ── SCRAPERS ─────────────────────────────────────────────────────────────────
+# Each scraper takes a Playwright `page` so all sources share one browser.
+
+def scrape_builtin(page):
     """BuiltIn job search — marketing category, filtered by keyword."""
     jobs = []
     search_terms = [
@@ -96,9 +140,9 @@ def scrape_builtin():
     for term in search_terms:
         url = f"https://builtin.com/jobs?search={term}&seniority=mid&seniority=senior"
         try:
-            resp = requests.get(url, headers=HEADERS, timeout=15)
-            soup = BeautifulSoup(resp.text, "html.parser")
-            cards = soup.select("article[data-id]") or soup.select("div[data-testid='job-card']")
+            html = fetch_rendered_html(page, url, wait_selector="article, div[data-id]")
+            soup = BeautifulSoup(html, "html.parser")
+            cards = soup.select("article[data-id]") or soup.select("div[data-testid='job-card']") or soup.select("article")
             for card in cards[:30]:
                 title_el = card.select_one("h2, h3, [data-testid='job-title']")
                 company_el = card.select_one("[data-testid='company-title'], .company-name, .company")
@@ -117,8 +161,8 @@ def scrape_builtin():
     return jobs
 
 
-def scrape_wellfound():
-    """Wellfound public role search pages."""
+def scrape_wellfound(page):
+    """Wellfound public role search pages — reads the rendered Apollo JSON cache."""
     jobs = []
     role_slugs = [
         "performance-marketing-manager",
@@ -129,25 +173,20 @@ def scrape_wellfound():
     for slug in role_slugs:
         url = f"https://wellfound.com/role/l/{slug}"
         try:
-            resp = requests.get(url, headers=HEADERS, timeout=15)
-            soup = BeautifulSoup(resp.text, "html.parser")
-            # Wellfound embeds Apollo JSON in a script tag
-            scripts = soup.find_all("script", {"type": "application/json"})
-            for script in scripts:
-                try:
-                    data = json.loads(script.string or "{}")
-                    # Walk the Apollo cache looking for job objects
-                    for key, val in data.items():
-                        if isinstance(val, dict) and val.get("__typename") == "JobListing":
-                            title   = val.get("title", "")
-                            company = val.get("startup", {}).get("name", "Unknown") if isinstance(val.get("startup"), dict) else "Unknown"
-                            slug_j  = val.get("slug", "")
-                            job_url = f"https://wellfound.com/jobs/{slug_j}" if slug_j else url
-                            if title_matches(title):
-                                jobs.append({"title": title, "company": company, "url": job_url, "source": "Wellfound"})
-                except Exception:
-                    pass
-            # Fallback: parse HTML cards
+            html = fetch_rendered_html(page, url, wait_selector="[class*='job']")
+            soup = BeautifulSoup(html, "html.parser")
+
+            for data in extract_json_scripts(soup):
+                for obj in find_json_objects(data, lambda d: d.get("__typename") == "JobListing"):
+                    title   = obj.get("title", "")
+                    startup = obj.get("startup")
+                    company = startup.get("name", "Unknown") if isinstance(startup, dict) else "Unknown"
+                    slug_j  = obj.get("slug", "")
+                    job_url = f"https://wellfound.com/jobs/{slug_j}" if slug_j else url
+                    if title_matches(title):
+                        jobs.append({"title": title, "company": company, "url": job_url, "source": "Wellfound"})
+
+            # Fallback: parse rendered HTML cards directly
             cards = soup.select("div[class*='styles_jobCard'], a[class*='job']")
             for card in cards[:30]:
                 title_el   = card.select_one("h3, h4, [class*='title']")
@@ -167,31 +206,36 @@ def scrape_wellfound():
     return jobs
 
 
-def scrape_yc():
-    """YC Work at a Startup job board — JSON-backed."""
+def scrape_yc(page):
+    """YC Work at a Startup job board — reads the rendered __NEXT_DATA__ payload."""
     jobs = []
     url = "https://www.workatastartup.com/jobs?role=marketing&jobType=fulltime"
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=15)
-        soup = BeautifulSoup(resp.text, "html.parser")
-        # Try structured data first
-        script = soup.find("script", id="__NEXT_DATA__") or soup.find("script", {"type": "application/json"})
+        html = fetch_rendered_html(page, url, wait_selector="[class*='job']")
+        soup = BeautifulSoup(html, "html.parser")
+
+        script = soup.find("script", id="__NEXT_DATA__")
         if script and script.string:
             try:
                 data = json.loads(script.string)
-                job_list = (
-                    data.get("props", {}).get("pageProps", {}).get("jobs", [])
-                    or data.get("jobs", [])
-                )
-                for j in job_list:
-                    title   = j.get("title", "") or j.get("job_title", "")
-                    company = j.get("company", {}).get("name", "Unknown") if isinstance(j.get("company"), dict) else j.get("company_name", "Unknown")
-                    slug    = j.get("slug", "") or str(j.get("id", ""))
+                # Job entries can live at different depths depending on the
+                # current Next.js build, so search recursively for anything
+                # that looks like a job record rather than a fixed path.
+                seen_ids = set()
+                for obj in find_json_objects(data, lambda d: ("title" in d or "job_title" in d) and ("company" in d or "company_name" in d)):
+                    title   = obj.get("title", "") or obj.get("job_title", "")
+                    company_field = obj.get("company")
+                    company = company_field.get("name", "Unknown") if isinstance(company_field, dict) else obj.get("company_name", "Unknown")
+                    slug    = obj.get("slug", "") or str(obj.get("id", ""))
+                    if slug in seen_ids:
+                        continue
+                    seen_ids.add(slug)
                     job_url = f"https://www.workatastartup.com/jobs/{slug}" if slug else url
-                    if title_matches(title):
+                    if title and title_matches(title):
                         jobs.append({"title": title, "company": company, "url": job_url, "source": "YC Work at a Startup"})
             except Exception:
                 pass
+
         # HTML fallback
         cards = soup.select("div[class*='job-card'], li[class*='job']")
         for card in cards[:40]:
@@ -211,8 +255,8 @@ def scrape_yc():
     return jobs
 
 
-def scrape_trueup():
-    """TrueUp job search — marketing category."""
+def scrape_trueup(page):
+    """TrueUp job search — marketing category, rendered DOM."""
     jobs = []
     terms = [
         "paid media manager",
@@ -222,8 +266,8 @@ def scrape_trueup():
     for term in terms:
         url = f"https://www.trueup.io/job-openings?q={quote_plus(term)}&category=marketing"
         try:
-            resp = requests.get(url, headers=HEADERS, timeout=15)
-            soup = BeautifulSoup(resp.text, "html.parser")
+            html = fetch_rendered_html(page, url, wait_selector="a[href*='/job/'], [class*='job']")
+            soup = BeautifulSoup(html, "html.parser")
             cards = soup.select("a[href*='/job/'], div[class*='job']")
             for card in cards[:30]:
                 title_el   = card.select_one("h2, h3, h4, [class*='title']")
@@ -240,31 +284,6 @@ def scrape_trueup():
         except Exception as e:
             print(f"TrueUp error ({term}): {e}")
         time.sleep(1)
-    return jobs
-
-
-def scrape_jacknjill():
-    """Jack & Jill Jobs — startup marketing roles."""
-    jobs = []
-    url = "https://www.jackandjilljobs.com/jobs?category=Marketing"
-    try:
-        resp = requests.get(url, headers=HEADERS, timeout=15)
-        soup = BeautifulSoup(resp.text, "html.parser")
-        cards = soup.select("div[class*='job'], li[class*='job'], article")
-        for card in cards[:40]:
-            title_el   = card.select_one("h2, h3, h4, [class*='title'], [class*='position']")
-            company_el = card.select_one("[class*='company'], [class*='employer']")
-            link_el    = card.select_one("a[href]")
-            if not title_el:
-                continue
-            title   = clean(title_el.get_text())
-            company = clean(company_el.get_text()) if company_el else "Unknown"
-            href    = link_el["href"] if link_el else ""
-            full_url = href if href.startswith("http") else f"https://www.jackandjilljobs.com{href}"
-            if title_matches(title):
-                jobs.append({"title": title, "company": company, "url": full_url, "source": "Jack & Jill Jobs"})
-    except Exception as e:
-        print(f"Jack & Jill error: {e}")
     return jobs
 
 # ── EMAIL ────────────────────────────────────────────────────────────────────
@@ -287,7 +306,7 @@ def build_html_email(new_jobs):
       <h2 style="border-bottom:2px solid #1a1aff; padding-bottom:8px;">
         Job Search Digest &mdash; {date_str}
       </h2>
-      <p style="color:#555;">{len(new_jobs)} new match(es) found across BuiltIn, Wellfound, YC, TrueUp, and Jack & Jill Jobs.</p>
+      <p style="color:#555;">{len(new_jobs)} new match(es) found across BuiltIn, Wellfound, YC, and TrueUp.</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;">
         <thead>
           <tr style="background:#f5f5f5; text-align:left;">
@@ -334,16 +353,20 @@ def main():
     seen = load_seen()
     all_jobs = []
 
-    print("Scraping BuiltIn...")
-    all_jobs += scrape_builtin()
-    print("Scraping Wellfound...")
-    all_jobs += scrape_wellfound()
-    print("Scraping YC Work at a Startup...")
-    all_jobs += scrape_yc()
-    print("Scraping TrueUp...")
-    all_jobs += scrape_trueup()
-    print("Scraping Jack & Jill Jobs...")
-    all_jobs += scrape_jacknjill()
+    with sync_playwright() as pw:
+        browser = pw.chromium.launch(headless=True)
+        page = browser.new_page(user_agent=USER_AGENT)
+
+        print("Scraping BuiltIn...")
+        all_jobs += scrape_builtin(page)
+        print("Scraping Wellfound...")
+        all_jobs += scrape_wellfound(page)
+        print("Scraping YC Work at a Startup...")
+        all_jobs += scrape_yc(page)
+        print("Scraping TrueUp...")
+        all_jobs += scrape_trueup(page)
+
+        browser.close()
 
     # Deduplicate within this run
     seen_this_run = set()
