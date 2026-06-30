@@ -49,8 +49,14 @@ HEADERS = {
 
 def load_seen():
     if os.path.exists(SEEN_FILE):
-        with open(SEEN_FILE) as f:
-            return set(json.load(f))
+        try:
+            with open(SEEN_FILE) as f:
+                content = f.read().strip()
+                if not content:
+                    return set()
+                return set(json.loads(content))
+        except Exception:
+            return set()
     return set()
 
 
