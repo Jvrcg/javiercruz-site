@@ -1,4 +1,8 @@
 User-agent: *
 Allow: /
+Disallow: /wp-*.php
+Disallow: /wp-admin/
+Disallow: /wp-login.php
+Disallow: /xmlrpc.php
 
 Sitemap: https://jjcruzgalera.com/sitemap-index.xml
