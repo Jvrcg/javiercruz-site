@@ -11,7 +11,12 @@ export default defineConfig({
   redirects: {
     '/writing': '/playbooks',
   },
-  integrations: [sitemap(), react()],
+  integrations: [
+    sitemap({
+      filter: page => !page.includes('/tools/funnel-diagnostic-draft'),
+    }),
+    react(),
+  ],
   markdown: {
     smartypants: false,
   },

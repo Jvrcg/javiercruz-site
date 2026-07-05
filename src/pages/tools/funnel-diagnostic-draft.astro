@@ -1,0 +1,64 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FunnelDiagnosticInput from '../../components/tools/FunnelDiagnosticInput.jsx';
+---
+
+<BaseLayout
+  title="B2B Funnel Diagnostic Tool (Draft)"
+  description="Draft input and column-mapping layer for the B2B Funnel Diagnostic Tool. Not for public review."
+>
+  <Fragment slot="head">
+    <meta name="robots" content="noindex, nofollow" />
+  </Fragment>
+  <article class="max-w-4xl mx-auto px-6 py-20">
+    <header class="mb-10">
+      <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-3">Tools, draft</p>
+      <h1 class="text-4xl font-bold text-gray-900 leading-tight mb-4">
+        B2B Funnel Diagnostic Tool: data input
+      </h1>
+      <h2 class="text-xl font-normal text-gray-700 leading-snug mb-4">
+        Layer 1 of 4: paste in your monthly funnel data, confirm the column mapping, and hand off clean structured data to the next layer.
+      </h2>
+      <p class="text-gray-600 leading-relaxed mb-4">
+        This is a draft page reachable only by direct URL. It is not linked from navigation, the footer, or the sitemap. It covers data entry and column mapping only. Baseline comparison, pattern detection, and dual-audience output are separate layers, not implemented here.
+      </p>
+    </header>
+    <FunnelDiagnosticInput client:load />
+  </article>
+</BaseLayout>
+
+<style is:global>
+  .fd-wrap * { box-sizing: border-box; }
+  .fd-wrap { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+  .fd-tab-row { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+  .fd-tab { padding: 6px 14px; border: 0.5px solid #d1d5db; border-radius: 6px; background: transparent; cursor: pointer; font-size: 13px; color: #6b7280; font-family: inherit; }
+  .fd-tab.active { background: #fff; color: #111827; border-color: #9ca3af; }
+  .fd-label { font-size: 11px; font-weight: 500; color: #9ca3af; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; display: block; }
+  .fd-field-required::after { content: " *"; color: #C0392B; }
+  .fd-input { width: 100%; padding: 8px 10px; font-size: 14px; border: 0.5px solid #d1d5db; border-radius: 6px; background: #fff; color: #111827; font-family: inherit; }
+  .fd-input:focus { outline: none; border-color: #2563eb; }
+  .fd-select { width: 100%; padding: 6px 8px; font-size: 13px; border: 0.5px solid #d1d5db; border-radius: 6px; background: #fff; color: #111827; font-family: inherit; }
+  .fd-select:focus { outline: none; border-color: #2563eb; }
+  .fd-textarea { width: 100%; padding: 10px; font-size: 13px; border: 0.5px solid #d1d5db; border-radius: 6px; resize: vertical; background: #fff; color: #111827; font-family: monospace; }
+  .fd-textarea:focus { outline: none; border-color: #2563eb; }
+  .fd-btn { padding: 8px 20px; cursor: pointer; font-size: 14px; background: #2563eb; color: #fff; border: none; border-radius: 6px; font-family: inherit; }
+  .fd-btn:hover { background: #1d4ed8; }
+  .fd-btn:disabled { background: #9ca3af; cursor: not-allowed; }
+  .fd-btn-secondary { padding: 8px 16px; cursor: pointer; font-size: 13px; background: #fff; color: #374151; border: 0.5px solid #d1d5db; border-radius: 6px; font-family: inherit; }
+  .fd-btn-secondary:hover { background: #f9fafb; }
+  .fd-card { background: #fff; border: 0.5px solid #e5e7eb; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 14px; }
+  .fd-table-wrap { overflow-x: auto; margin-bottom: 14px; }
+  .fd-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .fd-table th { text-align: left; padding: 6px 8px; border-bottom: 1px solid #e5e7eb; color: #6b7280; font-weight: 600; white-space: nowrap; }
+  .fd-table td { padding: 6px 8px; border-bottom: 1px solid #f3f4f6; color: #111827; white-space: nowrap; }
+  .fd-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .fd-badge-matched { background: #E6F1FB; color: #0C447C; }
+  .fd-badge-unmatched { background: #FAEEDA; color: #633806; }
+  .fd-badge-ignored { background: #F1EFE8; color: #444441; }
+  .fd-warn { background: #FAEEDA; border-left: 3px solid #BA7517; border-radius: 0 6px 6px 0; padding: 8px 12px; font-size: 12px; color: #633806; line-height: 1.5; margin-bottom: 10px; }
+  .fd-success { background: #EAF3DE; border-left: 3px solid #4C8B1F; border-radius: 0 6px 6px 0; padding: 8px 12px; font-size: 12px; color: #27500A; line-height: 1.5; margin-bottom: 10px; }
+  .fd-error { background: #FCEBEB; border-left: 3px solid #C0392B; border-radius: 0 6px 6px 0; padding: 8px 12px; font-size: 12px; color: #791F1F; line-height: 1.5; margin-bottom: 10px; }
+  .fd-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin-bottom: 16px; }
+  .fd-note { font-size: 12px; color: #9ca3af; margin-bottom: 10px; line-height: 1.5; }
+  .fd-remove-btn { font-size: 11px; color: #791F1F; background: none; border: none; cursor: pointer; text-decoration: underline; font-family: inherit; padding: 0; }
+</style>
