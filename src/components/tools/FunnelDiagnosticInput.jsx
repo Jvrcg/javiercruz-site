@@ -4,6 +4,7 @@ const IGNORE = '__ignore__';
 
 export const FUNNEL_FIELDS = [
   { key: 'month', label: 'Month/Period', required: true, aliases: ['month', 'period', 'monthperiod', 'reportingmonth', 'reportingperiod', 'date', 'monthyear'] },
+  { key: 'channel', label: 'Channel', required: true, options: ['Google Ads', 'LinkedIn', 'Meta', 'Programmatic/DSP', 'Other'], aliases: ['channel', 'adchannel', 'mediachannel', 'marketingchannel', 'platform'] },
   { key: 'spend', label: 'Spend', aliases: ['spend', 'adspend', 'totalspend', 'mediaspend', 'cost', 'totalcost'] },
   { key: 'clicks', label: 'Clicks', aliases: ['clicks', 'totalclicks', 'clickcount'] },
   { key: 'leads', label: 'Leads', aliases: ['leads', 'totalleads', 'formfills', 'formsubmissions'] },
@@ -18,6 +19,8 @@ export const FUNNEL_FIELDS = [
 ];
 
 const FIELD_LABEL_BY_KEY = Object.fromEntries(FUNNEL_FIELDS.map(f => [f.key, f.label]));
+
+const REQUIRED_FIELDS = FUNNEL_FIELDS.filter(f => f.required);
 
 const EMPTY_MANUAL_FORM = Object.fromEntries(FUNNEL_FIELDS.map(f => [f.key, '']));
 
@@ -108,7 +111,7 @@ function csvField(value) {
 
 function downloadTemplate() {
   const headerRow = FUNNEL_FIELDS.map(f => f.label).map(csvField).join(',');
-  const exampleRow = ['Jan 2026', '15000', '4200', '180', '45', '12', '3', '45000', '12', '2024-03-01', 'Tier 1', 'Lead Gen'].map(csvField).join(',');
+  const exampleRow = ['Jan 2026', 'Google Ads', '15000', '4200', '180', '45', '12', '3', '45000', '12', '2024-03-01', 'Tier 1', 'Lead Gen'].map(csvField).join(',');
   const csv = headerRow + '\n' + exampleRow + '\n';
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -154,7 +157,7 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
     setMapping(prev => prev.map(m => (m.index === index ? { ...m, fieldKey: value === '' ? null : value } : m)));
   }
 
-  const monthMapped = mapping ? mapping.some(m => m.fieldKey === 'month') : false;
+  const missingRequiredFields = mapping ? REQUIRED_FIELDS.filter(rf => !mapping.some(m => m.fieldKey === rf.key)) : [];
   const fieldCounts = {};
   if (mapping) {
     mapping.forEach(m => {
@@ -164,7 +167,7 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
   const duplicateFields = Object.entries(fieldCounts).filter(([, c]) => c > 1).map(([k]) => k);
   const matchedCount = mapping ? mapping.filter(m => m.fieldKey && m.fieldKey !== IGNORE).length : 0;
   const unmatchedCount = mapping ? mapping.filter(m => !m.fieldKey).length : 0;
-  const canConfirm = !!mapping && monthMapped && duplicateFields.length === 0 && unmatchedCount === 0;
+  const canConfirm = !!mapping && missingRequiredFields.length === 0 && duplicateFields.length === 0 && unmatchedCount === 0;
 
   function handleConfirmMapping() {
     if (!canConfirm || !mapping || !parsedRows) return;
@@ -172,7 +175,7 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
     let count = 0;
     parsedRows.forEach(row => {
       const period = buildPeriodFromRow(mapping, row);
-      if (!period.month) return;
+      if (REQUIRED_FIELDS.some(rf => !period[rf.key])) return;
       updated = mergePeriod(updated, period);
       count += 1;
     });
@@ -196,8 +199,10 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
   function handleAddManualRow(e) {
     e.preventDefault();
     const month = manualForm.month.trim();
-    if (!month) { setManualError('Month/Period is required.'); setManualSuccess(''); return; }
-    setPeriods(prev => mergePeriod(prev, { ...manualForm, month }));
+    const channel = manualForm.channel.trim();
+    const missing = REQUIRED_FIELDS.filter(f => !manualForm[f.key].trim());
+    if (missing.length) { setManualError(`${missing.map(f => f.label).join(', ')} required.`); setManualSuccess(''); return; }
+    setPeriods(prev => mergePeriod(prev, { ...manualForm, month, channel }));
     setManualError('');
     setManualSuccess(`${month} added to confirmed data.`);
     setManualForm(EMPTY_MANUAL_FORM);
@@ -228,7 +233,7 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
           ref={pasteRef}
           className="fd-textarea"
           rows={6}
-          placeholder={'Month,Spend,Clicks,Leads,MQLs,Opportunities Created,Closed-Won Deals,Deal Value\nJan 2026,15000,4200,180,45,12,3,45000'}
+          placeholder={'Month,Channel,Spend,Clicks,Leads,MQLs,Opportunities Created,Closed-Won Deals,Deal Value\nJan 2026,Google Ads,15000,4200,180,45,12,3,45000'}
         />
         {pasteError && <p className="fd-error" style={{ marginTop: 10 }}>{pasteError}</p>}
         {pasteSuccess && <p className="fd-success" style={{ marginTop: 10 }}>{pasteSuccess}</p>}
@@ -243,7 +248,11 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
               {matchedCount} of {mapping.length} column{mapping.length === 1 ? '' : 's'} matched automatically
               {unmatchedCount > 0 ? `, ${unmatchedCount} need a field selected below` : ''}. Nothing is added to your data until you confirm.
             </p>
-            {!monthMapped && <p className="fd-warn">Month/Period is required. Map a column to Month/Period before confirming.</p>}
+            {missingRequiredFields.length > 0 && (
+              <p className="fd-warn">
+                {missingRequiredFields.map(f => f.label).join(', ')} {missingRequiredFields.length === 1 ? 'is' : 'are'} required. Map a column to each before confirming.
+              </p>
+            )}
             {unmatchedCount > 0 && (
               <p className="fd-warn">
                 {unmatchedCount} column{unmatchedCount === 1 ? '' : 's'} still need{unmatchedCount === 1 ? 's' : ''} a field selected or "Ignore this column" chosen. Unmapped columns are never silently dropped, resolve each one before confirming.
@@ -308,13 +317,27 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
             {FUNNEL_FIELDS.map(f => (
               <div key={f.key}>
                 <label className={`fd-label${f.required ? ' fd-field-required' : ''}`} style={{ marginBottom: 4 }}>{f.label}</label>
-                <input
-                  type={numberFieldKeys.has(f.key) ? 'number' : 'text'}
-                  className="fd-input"
-                  value={manualForm[f.key]}
-                  onChange={e => handleManualChange(f.key, e.target.value)}
-                  style={{ borderColor: f.required && manualError && !manualForm.month.trim() ? '#C0392B' : undefined }}
-                />
+                {f.options ? (
+                  <select
+                    className="fd-select"
+                    value={manualForm[f.key]}
+                    onChange={e => handleManualChange(f.key, e.target.value)}
+                    style={{ borderColor: f.required && manualError && !manualForm[f.key].trim() ? '#C0392B' : undefined }}
+                  >
+                    <option value="">Select...</option>
+                    {f.options.map(opt => (
+                      <option key={opt} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    type={numberFieldKeys.has(f.key) ? 'number' : 'text'}
+                    className="fd-input"
+                    value={manualForm[f.key]}
+                    onChange={e => handleManualChange(f.key, e.target.value)}
+                    style={{ borderColor: f.required && manualError && !manualForm[f.key].trim() ? '#C0392B' : undefined }}
+                  />
+                )}
               </div>
             ))}
           </div>
