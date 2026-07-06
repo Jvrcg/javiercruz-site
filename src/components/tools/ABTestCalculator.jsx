@@ -53,7 +53,7 @@ function calculate(vA, cA, vB, cB) {
   const z = se === 0 ? 0 : (cvrB - cvrA) / se;
   const pValue = 2 * (1 - normalCDF(Math.abs(z)));
   const confidence = (1 - pValue) * 100;
-  return { cvrA, cvrB, relativeLift, pooled, z, confidence, nVA, nCA, nVB, nCB };
+  return { cvrA, cvrB, relativeLift, pooled, z, confidence, pValue, nVA, nCA, nVB, nCB };
 }
 
 function additionalNeeded(zThresh, cvrA, cvrB, pooled, currentN) {
@@ -133,6 +133,11 @@ function DistributionCurve({ cvrA, cvrB, nVA, nVB, xLabel, yLabel }) {
       </div>
     </div>
   );
+}
+
+function formatPValue(p) {
+  if (p < 0.0001) return 'p<0.0001';
+  return `p=${p.toFixed(4)}`;
 }
 
 const STAGE_TABLE = [
@@ -343,7 +348,8 @@ export default function ABTestCalculator() {
           {/* Confidence meter */}
           <div style={{ marginBottom: 24 }}>
             <p style={{ fontSize: 12, fontWeight: 600, marginBottom: 8 }}>
-              Statistical confidence: {result.confidence.toFixed(1)}%
+              Statistical confidence: {result.confidence.toFixed(1)}%{' '}
+              <span style={{ fontWeight: 400, color: '#9b9a97' }}>({formatPValue(result.pValue)})</span>
             </p>
             <div style={{ position: 'relative', height: 12, background: '#e5e7eb', borderRadius: 6, overflow: 'visible' }}>
               <div style={{ position: 'absolute', left: 0, top: 0, height: '100%', width: `${fillPct}%`, background: meterColor, borderRadius: 6, transition: 'width 0.4s ease' }} />
@@ -407,6 +413,12 @@ export default function ABTestCalculator() {
             <div style={{ padding: '14px 16px', fontSize: 13, color: '#4b5563', lineHeight: 1.7 }}>
               <p style={{ marginBottom: 10 }}>
                 This calculator uses a two-tailed frequentist z-test for proportions. It works for any two-step funnel where you are comparing the rate at which {xLabel} converts to {yLabel} across two variations.
+              </p>
+              <p style={{ marginBottom: 10 }}>
+                p-value: how likely it is that the difference you're seeing is just random noise, not a real difference between variations. The lower the number, the more confident you can be that it's real.
+              </p>
+              <p style={{ marginBottom: 10, fontSize: 12, color: '#6b6a68' }}>
+                Example: a p-value of 0.05 means there's a 5% chance the difference you're seeing is random noise.
               </p>
               <p style={{ marginBottom: 10 }}>
                 Sample size estimates include 80% statistical power (z=0.84), meaning the test has an 80% probability of detecting a real difference if one exists. This is the industry standard assumption for experiment design.
