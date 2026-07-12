@@ -631,21 +631,6 @@ export default function KeywordPlanner() {
           </div>
         )}
         <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <Explainer title="How to use this keyword list">
-            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 0 }}>Start with the full list</p>
-            <p style={{ marginBottom: 8 }}>This tool generates 20 to 30 keyword variants per seed. Your job is to curate it down.</p>
-            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Google's best practice</p>
-            <p style={{ marginBottom: 8 }}>5 to 10 tightly themed keywords per ad group, enough to cover intent without diluting relevance or fragmenting Smart Bidding signal.</p>
-            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>How to curate</p>
-            <p style={{ marginBottom: 6 }}>(1) Remove variants that do not match your landing page or offer.</p>
-            <p style={{ marginBottom: 6 }}>(2) Promote your top 5 to 10 exact match terms to a dedicated high-intent ad group.</p>
-            <p style={{ marginBottom: 6 }}>(3) Use phrase match to cover adjacent intent in a separate ad group.</p>
-            <p style={{ marginBottom: 6 }}>(4) Add the broad match seed only after 30 or more conversions per month with Smart Bidding active.</p>
-            <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Add the suggested negatives before launch.</p>
-            <p style={{ fontSize: 11, color: '#9b9a97' }}>
-              Sources: <a href="https://support.google.com/google-ads/answer/2453981" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads Help: Keyword best practices</a>
-            </p>
-          </Explainer>
           <Explainer title="How this keyword list is generated">
             <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
               <span style={{ fontWeight: 600, color: '#1a1a19' }}>Intent classification.</span> Every keyword is scored against a signal library of BOFU terms (pricing, demo, trial, alternatives, vs, migrate) and MOFU terms (software, platform, tool, solution, integration). Keywords that match neither are treated as top-funnel. This determines ad group assignment, not topic.
@@ -665,6 +650,52 @@ export default function KeywordPlanner() {
               {'; '}
               <a href="https://support.google.com/google-ads/answer/7065882" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Smart Bidding guide</a>
               {'; practitioner judgment from years of B2B paid search management.'}
+            </p>
+          </Explainer>
+          <Explainer title="How to validate this list before you spend">
+            <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
+              This tool sorts keywords by funnel stage and query. It does not know the real search volume, competition, or bid range. Treat every keyword here as a hypothesis, not a media plan, until you've checked it against real data.
+            </p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Step 1: Pull real numbers</p>
+            <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
+              Copy your exported CSV. In Google Ads, go to Keyword Planner → Get search volume and forecasts. Paste your list (up to 1,000 keywords) or upload it as a CSV with a "Keyword" header column. This returns real monthly search volume, competition level, and bid range for every term.
+            </p>
+            <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
+              No Google Ads account handy, or want a second data source to cross-check against? Semrush's Keyword Overview (Bulk Analysis) does the same job for up to 100 keywords at a time, and returns volume, CPC, and keyword difficulty.
+            </p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Step 2: Re-tier using the real data, not this tool's labels</p>
+            <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
+              Once you have volume, competition, and bid range, tier the list the way you'd tier any real Keyword Planner export:
+            </p>
+            <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Tier 1 — Core spend.</span> Meaningful volume, a bid range that shows real budget behind the term. Build campaigns around these first.</p>
+            <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Tier 2 — Worth testing.</span> Lower volume, but the bid range still signals real buyer intent. Test in a shared ad group before dedicating budget.</p>
+            <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Tier 3 — Weak or unclear signal.</span> Low or no reported volume. Deprioritize, revisit after your Search Terms Report has data.</p>
+            <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 10 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Exclude.</span> Sharp volume decline (3-month or YoY), no bid data with no other signal, or a "market"/"research" modifier, that's analyst intent, not buyer intent.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>A note on this tool's own tiers</p>
+            <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
+              The funnel-stage labels here (BOFU / MOFU / TOFU, "Tier 1 — Core") describe query structure, not market demand. A keyword can look like a perfect BOFU phrase and still have zero real search volume. Run it through Step 1 before you believe it.
+            </p>
+            <p style={{ fontSize: 11, color: '#9b9a97', lineHeight: 1.6 }}>
+              {'Sources: '}
+              <a href="https://support.google.com/google-ads/answer/7337243" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads Help: Use Keyword Planner</a>
+              {'; '}
+              <a href="https://www.semrush.com/kb/257-keyword-overview" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Semrush: Keyword Overview</a>
+            </p>
+          </Explainer>
+          <Explainer title="How to use this keyword list">
+            <p style={{ marginBottom: 8 }}>You've validated the real numbers in the previous section. Now curate the surviving keywords into ad groups.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 0 }}>Start with the full list</p>
+            <p style={{ marginBottom: 8 }}>This tool generates 20 to 30 keyword variants per seed. Your job is to curate it down.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Google's best practice</p>
+            <p style={{ marginBottom: 8 }}>5 to 10 tightly themed keywords per ad group, enough to cover intent without diluting relevance or fragmenting Smart Bidding signal.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>How to curate</p>
+            <p style={{ marginBottom: 6 }}>(1) Remove variants that do not match your landing page or offer.</p>
+            <p style={{ marginBottom: 6 }}>(2) Promote your top 5 to 10 exact match terms to a dedicated high-intent ad group.</p>
+            <p style={{ marginBottom: 6 }}>(3) Use phrase match to cover adjacent intent in a separate ad group.</p>
+            <p style={{ marginBottom: 6 }}>(4) Add the broad match seed only after 30 or more conversions per month with Smart Bidding active.</p>
+            <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Action: Add the suggested negatives before launch.</p>
+            <p style={{ fontSize: 11, color: '#9b9a97' }}>
+              Sources: <a href="https://support.google.com/google-ads/answer/2453981" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads Help: Keyword best practices</a>
             </p>
           </Explainer>
           <Explainer title="Recommendations for selecting job functions">
@@ -780,6 +811,36 @@ export default function KeywordPlanner() {
               {'; '}
               <a href="https://support.google.com/google-ads/answer/7065882" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Smart Bidding guide</a>
               {'; practitioner judgment from years of B2B paid search management.'}
+            </p>
+          </Explainer>
+          <Explainer title="How to validate this list before you spend">
+            <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
+              This tool sorts keywords by funnel stage and query. It does not know the real search volume, competition, or bid range. Treat every keyword here as a hypothesis, not a media plan, until you've checked it against real data.
+            </p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Step 1: Pull real numbers</p>
+            <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
+              Copy your exported CSV. In Google Ads, go to Keyword Planner → Get search volume and forecasts. Paste your list (up to 1,000 keywords) or upload it as a CSV with a "Keyword" header column. This returns real monthly search volume, competition level, and bid range for every term.
+            </p>
+            <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
+              No Google Ads account handy, or want a second data source to cross-check against? Semrush's Keyword Overview (Bulk Analysis) does the same job for up to 100 keywords at a time, and returns volume, CPC, and keyword difficulty.
+            </p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>Step 2: Re-tier using the real data, not this tool's labels</p>
+            <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
+              Once you have volume, competition, and bid range, tier the list the way you'd tier any real Keyword Planner export:
+            </p>
+            <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Tier 1 — Core spend.</span> Meaningful volume, a bid range that shows real budget behind the term. Build campaigns around these first.</p>
+            <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Tier 2 — Worth testing.</span> Lower volume, but the bid range still signals real buyer intent. Test in a shared ad group before dedicating budget.</p>
+            <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 6 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Tier 3 — Weak or unclear signal.</span> Low or no reported volume. Deprioritize, revisit after your Search Terms Report has data.</p>
+            <p style={{ fontSize: 13, color: '#4b5563', marginBottom: 10 }}><span style={{ fontWeight: 600, color: '#1a1a19' }}>Exclude.</span> Sharp volume decline (3-month or YoY), no bid data with no other signal, or a "market"/"research" modifier, that's analyst intent, not buyer intent.</p>
+            <p style={{ fontWeight: 600, color: '#1a1a19', marginBottom: 4, marginTop: 12 }}>A note on this tool's own tiers</p>
+            <p style={{ fontSize: 13, color: '#4b5563', lineHeight: 1.7, marginBottom: 10 }}>
+              The funnel-stage labels here (BOFU / MOFU / TOFU, "Tier 1 — Core") describe query structure, not market demand. A keyword can look like a perfect BOFU phrase and still have zero real search volume. Run it through Step 1 before you believe it.
+            </p>
+            <p style={{ fontSize: 11, color: '#9b9a97', lineHeight: 1.6 }}>
+              {'Sources: '}
+              <a href="https://support.google.com/google-ads/answer/7337243" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Google Ads Help: Use Keyword Planner</a>
+              {'; '}
+              <a href="https://www.semrush.com/kb/257-keyword-overview" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>Semrush: Keyword Overview</a>
             </p>
           </Explainer>
           <Explainer title="Recommendations for selecting job functions">
