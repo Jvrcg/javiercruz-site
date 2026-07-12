@@ -160,7 +160,6 @@ export default function ABTestCalculator() {
   const [showStage, setShowStage] = useState(false);
   const [showSampleSize, setShowSampleSize] = useState(false);
   const [showGrowth, setShowGrowth] = useState(false);
-  const [showContext, setShowContext] = useState(false);
 
   const [xInput, setXInput] = useState('');
   const [yInput, setYInput] = useState('');
@@ -249,39 +248,33 @@ export default function ABTestCalculator() {
         {errors.general && <p style={{ color: '#dc2626', fontSize: 12, marginTop: 4 }}>{errors.general}</p>}
       </div>
 
-      {/* Label inputs (optional) */}
+      {/* Label inputs (recommended) */}
       <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden', marginBottom: 20 }}>
-        <button
-          onClick={() => setShowContext(v => !v)}
-          style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '10px 14px', fontSize: 13, fontWeight: 500, color: '#6b6a68', cursor: 'pointer' }}
-        >
-          <span>Label your inputs (optional)</span>
-          <Chevron open={showContext} />
-        </button>
-        {showContext && (
-          <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', alignItems: 'center', gap: 12 }}>
-              <p style={{ fontSize: 12, fontWeight: 500, color: '#6b6a68' }}>What is X?</p>
-              <input
-                type="text"
-                placeholder="e.g. Clicks, Impressions, MQLs"
-                value={xInput}
-                onChange={e => setXInput(e.target.value)}
-                style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: '7px 10px', fontSize: 13, color: '#1a1a19', width: '100%' }}
-              />
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', alignItems: 'center', gap: 12 }}>
-              <p style={{ fontSize: 12, fontWeight: 500, color: '#6b6a68' }}>What is Y?</p>
-              <input
-                type="text"
-                placeholder="e.g. Leads, MQLs, Closed-won"
-                value={yInput}
-                onChange={e => setYInput(e.target.value)}
-                style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: '7px 10px', fontSize: 13, color: '#1a1a19', width: '100%' }}
-              />
-            </div>
+        <div style={{ background: '#f8f8f7', padding: '10px 14px', fontSize: 13, fontWeight: 500, color: '#6b6a68' }}>
+          Label your inputs (recommended)
+        </div>
+        <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', alignItems: 'center', gap: 12 }}>
+            <p style={{ fontSize: 12, fontWeight: 500, color: '#6b6a68' }}>What is X?</p>
+            <input
+              type="text"
+              placeholder="e.g. Clicks, Impressions, MQLs"
+              value={xInput}
+              onChange={e => setXInput(e.target.value)}
+              style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: '7px 10px', fontSize: 13, color: '#1a1a19', width: '100%' }}
+            />
           </div>
-        )}
+          <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', alignItems: 'center', gap: 12 }}>
+            <p style={{ fontSize: 12, fontWeight: 500, color: '#6b6a68' }}>What is Y?</p>
+            <input
+              type="text"
+              placeholder="e.g. Leads, MQLs, Closed-won"
+              value={yInput}
+              onChange={e => setYInput(e.target.value)}
+              style={{ border: '1px solid #e5e7eb', borderRadius: 6, padding: '7px 10px', fontSize: 13, color: '#1a1a19', width: '100%' }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Confidence selector */}
