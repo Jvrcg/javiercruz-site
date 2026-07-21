@@ -92,9 +92,13 @@ function buildPeriodFromRow(mapping, row) {
   return period;
 }
 
+function periodKey(period) {
+  return normalize(period.month) + '|' + normalize(period.channel);
+}
+
 function mergePeriod(periods, newPeriod) {
-  const key = normalize(newPeriod.month) + '|' + normalize(newPeriod.channel);
-  const idx = periods.findIndex(p => normalize(p.month) + '|' + normalize(p.channel) === key);
+  const key = periodKey(newPeriod);
+  const idx = periods.findIndex(p => periodKey(p) === key);
   if (idx >= 0) {
     const updated = [...periods];
     updated[idx] = newPeriod;
