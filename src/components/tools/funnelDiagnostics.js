@@ -6,6 +6,8 @@ export const MIN_PERIODS_FLAG = 3;         // deviation flags
 export const MIN_PERIODS_MARGINAL = 4;     // marginal cpMQL (3 to build baseline + 1 to compare)
 export const SIGNAL_STARVATION_FLOOR = 15; // conversions/month (Google Ads Help Center)
 
+const METRIC_KEYS = ['cpl', 'cpmql', 'clickToLead', 'leadToMql', 'mqlToOpp', 'oppToWon', 'spend', 'leads', 'mqls'];
+
 const MONTH_NAMES = {
   jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
   january: 0, february: 1, march: 2, april: 3, june: 5, july: 6, august: 7,
@@ -81,13 +83,11 @@ export function buildBaseline(periods) {
 
     // trailing-3 baseline = median of up-to-3 periods before latest
     const priorWindow = sorted.slice(Math.max(0, n - 4), n - 1); // up to 3 periods before latest
-    const metricKeys = ['cpl', 'cpmql', 'clickToLead', 'leadToMql', 'mqlToOpp', 'oppToWon', 'spend', 'leads', 'mqls'];
     const baseline = {};
-    metricKeys.forEach(k => { baseline[k] = median(priorWindow.map(r => r.derived[k])); });
-
     const deviations = {};
     if (latest && n >= MIN_PERIODS_FLAG) {
-      metricKeys.forEach(k => { deviations[k] = pctDeviation(latest.derived[k], baseline[k]); });
+      METRIC_KEYS.forEach(k => { baseline[k] = median(priorWindow.map(r => r.derived[k])); });
+      METRIC_KEYS.forEach(k => { deviations[k] = pctDeviation(latest.derived[k], baseline[k]); });
     }
 
     // marginal cpMQL: latest cpMQL vs median cpMQL of exactly the 3 prior periods
@@ -141,7 +141,9 @@ function ruleAuctionPressure(c) {
 function ruleVolumeQualityMismatch(c) {
   const d = c.deviations;
   if (!c.hasFlagBaseline) return null;
-  if (d.clickToLead != null && d.leadToMql != null && d.clickToLead > 0 && over(d.leadToMql) && d.leadToMql < 0) {
+  // "holding" = click-to-lead is within the deviation band (not materially up or down),
+  // while lead-to-MQL is down more than the threshold.
+  if (d.clickToLead != null && d.leadToMql != null && !over(d.clickToLead) && over(d.leadToMql) && d.leadToMql < 0) {
     return {
       id: 'volume_quality', name: 'Volume-quality mismatch', severity: Math.abs(d.leadToMql),
       triggerMath: `${c.channel}: click-to-lead is holding (${pct(d.clickToLead)} vs baseline) but lead-to-MQL is ${pct(d.leadToMql)} vs baseline.`,
@@ -229,7 +231,7 @@ function ruleDownstreamLeakFallback(c) {
   const d = c.deviations;
   if (!c.hasFlagBaseline) return null;
   const mqlsDown = over(d.mqls) && d.mqls < 0;
-  const spendFlat = d.spend == null || Math.abs(d.spend) <= DEVIATION_THRESHOLD;
+  const spendFlat = d.spend == null || !over(d.spend);
   if (mqlsDown && spendFlat) {
     return {
       id: 'downstream_leak', name: 'Downstream funnel leak', severity: Math.abs(d.mqls) * 0.9, // slight deprioritize vs specific rules
