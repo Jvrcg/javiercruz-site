@@ -129,13 +129,13 @@ function downloadTemplate() {
 }
 
 export default function FunnelDiagnosticInput({ onDataChange } = {}) {
-  const [activeTab, setActiveTab] = useState('paste');
+  const [activeTab, setActiveTab] = useState('upload');
+  const [stepsOpen, setStepsOpen] = useState(false);
   const [periods, setPeriods] = useState([]);
 
-  const pasteRef = useRef(null);
   const fileInputRef = useRef(null);
-  const [pasteError, setPasteError] = useState('');
-  const [pasteSuccess, setPasteSuccess] = useState('');
+  const [uploadError, setUploadError] = useState('');
+  const [uploadSuccess, setUploadSuccess] = useState('');
   const [parsedRows, setParsedRows] = useState(null);
   const [mapping, setMapping] = useState(null);
 
@@ -148,19 +148,13 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
   }, [periods, onDataChange]);
 
   function processRawText(raw, sourceLabel) {
-    if (!raw || !raw.trim()) { setPasteError('The file looks empty.'); setMapping(null); setParsedRows(null); return; }
+    if (!raw || !raw.trim()) { setUploadError('The file looks empty.'); setMapping(null); setParsedRows(null); return; }
     const parsed = parsePastedData(raw);
-    if (parsed.error) { setPasteError(parsed.error); setMapping(null); setParsedRows(null); return; }
-    setPasteError('');
-    setPasteSuccess('');
+    if (parsed.error) { setUploadError(parsed.error); setMapping(null); setParsedRows(null); return; }
+    setUploadError('');
+    setUploadSuccess('');
     setParsedRows(parsed.rows);
     setMapping(buildMapping(parsed.headers));
-  }
-
-  function handleDetectColumns() {
-    const raw = (pasteRef.current?.value || '');
-    if (!raw.trim()) { setPasteError('Paste your data first.'); setMapping(null); setParsedRows(null); return; }
-    processRawText(raw, 'paste');
   }
 
   function handleFileUpload(e) {
@@ -168,14 +162,14 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
     if (!file) return;
     const name = (file.name || '').toLowerCase();
     if (!name.endsWith('.csv') && !name.endsWith('.tsv') && !name.endsWith('.txt')) {
-      setPasteError('Please upload a .csv, .tsv, or .txt file exported from your spreadsheet or ad platform.');
+      setUploadError('Please upload a .csv, .tsv, or .txt file exported from your spreadsheet or ad platform.');
       setMapping(null); setParsedRows(null);
       e.target.value = '';
       return;
     }
     const reader = new FileReader();
     reader.onload = () => { processRawText(String(reader.result || ''), file.name); };
-    reader.onerror = () => { setPasteError('Could not read that file. Try re-exporting it as CSV.'); };
+    reader.onerror = () => { setUploadError('Could not read that file. Try re-exporting it as CSV.'); };
     reader.readAsText(file);
     e.target.value = ''; // allow re-uploading the same filename
   }
@@ -209,14 +203,13 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
     setPeriods(updated);
     setMapping(null);
     setParsedRows(null);
-    if (pasteRef.current) pasteRef.current.value = '';
-    setPasteSuccess(`${count} period${count === 1 ? '' : 's'} added to confirmed data.`);
+    setUploadSuccess(`${count} period${count === 1 ? '' : 's'} added to confirmed data.`);
   }
 
   function handleCancelMapping() {
     setMapping(null);
     setParsedRows(null);
-    setPasteError('');
+    setUploadError('');
   }
 
   function handleManualChange(key, value) {
@@ -244,16 +237,21 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
   return (
     <div className="fd-wrap">
       <div className="fd-tab-row">
-        <button className={`fd-tab${activeTab === 'paste' ? ' active' : ''}`} onClick={() => setActiveTab('paste')}>Paste from spreadsheet</button>
+        <button className={`fd-tab${activeTab === 'upload' ? ' active' : ''}`} onClick={() => setActiveTab('upload')}>Upload CSV</button>
         <button className={`fd-tab${activeTab === 'manual' ? ' active' : ''}`} onClick={() => setActiveTab('manual')}>Manual row entry</button>
       </div>
 
-      <div style={{ display: activeTab === 'paste' ? 'block' : 'none' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, marginBottom: 8 }}>
-          <span className="fd-label" style={{ marginBottom: 0 }}>Paste monthly data</span>
-          <button type="button" className="fd-btn-secondary" onClick={downloadTemplate}>Download template (recommended)</button>
-        </div>
-        <div style={{ marginBottom: 8 }}>
+      <div style={{ display: activeTab === 'upload' ? 'block' : 'none' }}>
+        <span className="fd-label">Upload your funnel data</span>
+        <p className="fd-note" style={{ marginBottom: 12 }}>
+          Upload your full monthly history as a CSV. The tool reads across your whole timeline, so more history means a sharper diagnosis.
+        </p>
+        <ul style={{ margin: '0 0 16px', paddingLeft: 18, fontSize: 13, color: '#4b5563', lineHeight: 1.6 }}>
+          <li>One row per channel per month</li>
+          <li>Aim for at least 4 months of data per channel, some checks need that much history to run</li>
+          <li>Include the header row</li>
+        </ul>
+        <div style={{ marginBottom: 6 }}>
           <input
             ref={fileInputRef}
             type="file"
@@ -261,26 +259,33 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
             onChange={handleFileUpload}
             style={{ display: 'none' }}
           />
-          <button type="button" className="fd-btn-secondary" onClick={() => fileInputRef.current && fileInputRef.current.click()}>
+          <button type="button" className="fd-btn" onClick={() => fileInputRef.current && fileInputRef.current.click()}>
             Upload CSV file
           </button>
-          <span className="fd-note" style={{ marginLeft: 10, marginBottom: 0, display: 'inline' }}>
-            Uploading reads the file directly, which avoids copy-and-paste issues with large data sets. The next step is the same column mapping.
-          </span>
         </div>
-        <p className="fd-note">
-          Copy cells directly from a spreadsheet, comma or tab-delimited both work, and paste below. Include the header row from your sheet. Paste many months at once, or just the header plus one new row for a quick monthly update. The template download is a recommended starting point.
+        <p className="fd-note" style={{ marginBottom: 16 }}>
+          Accepts .csv, .tsv, or .txt. Not sure of the format? Download the{' '}
+          <a href="#" className="fd-link" onClick={(e) => { e.preventDefault(); downloadTemplate(); }}>template</a>.
         </p>
-        <textarea
-          ref={pasteRef}
-          className="fd-textarea"
-          rows={6}
-          placeholder={'Month,Channel,Spend,Clicks,Leads,MQLs,Opportunities Created,Closed-Won Deals,Deal Value\nJan 2026,Google Ads,15000,4200,180,45,12,3,45000'}
-        />
-        {pasteError && <p className="fd-error" style={{ marginTop: 10 }}>{pasteError}</p>}
-        {pasteSuccess && <p className="fd-success" style={{ marginTop: 10 }}>{pasteSuccess}</p>}
-        <div style={{ marginTop: 10 }}>
-          <button className="fd-btn" onClick={handleDetectColumns}>Map columns</button>
+        {uploadError && <p className="fd-error" style={{ marginTop: 10 }}>{uploadError}</p>}
+        {uploadSuccess && <p className="fd-success" style={{ marginTop: 10 }}>{uploadSuccess}</p>}
+
+        <div className="fd-accordion" style={{ marginBottom: 4 }}>
+          <button type="button" className="fd-accordion-trigger" onClick={() => setStepsOpen(o => !o)} aria-expanded={stepsOpen}>
+            <span>Steps</span>
+            <span className="fd-accordion-chevron">{stepsOpen ? '−' : '+'}</span>
+          </button>
+          {stepsOpen && (
+            <div className="fd-accordion-body">
+              <ol style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#4b5563', lineHeight: 1.7 }}>
+                <li>Download the template or export your own CSV</li>
+                <li>One row per channel per month, include the header row</li>
+                <li>Click Upload CSV file</li>
+                <li>Confirm the column mapping</li>
+                <li>Read the diagnosis below</li>
+              </ol>
+            </div>
+          )}
         </div>
 
         {mapping && (
