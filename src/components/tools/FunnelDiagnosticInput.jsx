@@ -224,10 +224,10 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
       <div style={{ display: activeTab === 'paste' ? 'block' : 'none' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, marginBottom: 8 }}>
           <span className="fd-label" style={{ marginBottom: 0 }}>Paste monthly data</span>
-          <button type="button" className="fd-btn-secondary" onClick={downloadTemplate}>Download template (optional)</button>
+          <button type="button" className="fd-btn-secondary" onClick={downloadTemplate}>Download template (recommended)</button>
         </div>
         <p className="fd-note">
-          Copy cells directly from a spreadsheet, comma or tab-delimited both work, and paste below. Include the header row from your sheet. Paste many months at once, or just the header plus one new row for a quick monthly update. The template download is a helpful starting point, not a requirement.
+          Copy cells directly from a spreadsheet, comma or tab-delimited both work, and paste below. Include the header row from your sheet. Paste many months at once, or just the header plus one new row for a quick monthly update. The template download is a recommended starting point.
         </p>
         <textarea
           ref={pasteRef}

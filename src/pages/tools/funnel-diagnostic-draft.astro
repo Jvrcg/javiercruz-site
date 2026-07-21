@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import FunnelDiagnosticInput from '../../components/tools/FunnelDiagnosticInput.jsx';
+import FunnelDiagnosticApp from '../../components/tools/FunnelDiagnosticApp.jsx';
 ---
 
 <BaseLayout
@@ -23,7 +23,7 @@ import FunnelDiagnosticInput from '../../components/tools/FunnelDiagnosticInput.
         This is a draft page reachable only by direct URL. It is not linked from navigation, the footer, or the sitemap. It covers data entry and column mapping only. Baseline comparison, pattern detection, and dual-audience output are separate layers, not implemented here.
       </p>
     </header>
-    <FunnelDiagnosticInput client:load />
+    <FunnelDiagnosticApp client:load />
   </article>
 </BaseLayout>
 
@@ -61,4 +61,13 @@ import FunnelDiagnosticInput from '../../components/tools/FunnelDiagnosticInput.
   .fd-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; margin-bottom: 16px; }
   .fd-note { font-size: 12px; color: #9ca3af; margin-bottom: 10px; line-height: 1.5; }
   .fd-remove-btn { font-size: 11px; color: #791F1F; background: none; border: none; cursor: pointer; text-decoration: underline; font-family: inherit; padding: 0; }
+
+  .fd-accordion { border: 0.5px solid #e5e7eb; border-radius: 10px; overflow: hidden; }
+  .fd-accordion-trigger { width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #fff; border: none; cursor: pointer; font-family: inherit; font-size: 13px; font-weight: 600; color: #374151; text-align: left; }
+  .fd-accordion-trigger:hover { background: #f9fafb; }
+  .fd-accordion-chevron { font-size: 16px; color: #9ca3af; }
+  .fd-accordion-body { padding: 4px 16px 14px; border-top: 0.5px solid #f3f4f6; }
+  .fd-accordion-body p { font-size: 12px; color: #4b5563; line-height: 1.6; margin-bottom: 8px; }
+  .fd-accordion-body a { color: #2563eb; text-decoration: none; }
+  .fd-accordion-body a:hover { text-decoration: underline; }
 </style>
