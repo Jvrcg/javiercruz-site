@@ -93,8 +93,8 @@ function buildPeriodFromRow(mapping, row) {
 }
 
 function mergePeriod(periods, newPeriod) {
-  const key = normalize(newPeriod.month);
-  const idx = periods.findIndex(p => normalize(p.month) === key);
+  const key = normalize(newPeriod.month) + '|' + normalize(newPeriod.channel);
+  const idx = periods.findIndex(p => normalize(p.month) + '|' + normalize(p.channel) === key);
   if (idx >= 0) {
     const updated = [...periods];
     updated[idx] = newPeriod;
@@ -129,6 +129,7 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
   const [periods, setPeriods] = useState([]);
 
   const pasteRef = useRef(null);
+  const fileInputRef = useRef(null);
   const [pasteError, setPasteError] = useState('');
   const [pasteSuccess, setPasteSuccess] = useState('');
   const [parsedRows, setParsedRows] = useState(null);
@@ -142,15 +143,37 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
     if (onDataChange) onDataChange(periods);
   }, [periods, onDataChange]);
 
-  function handleDetectColumns() {
-    setPasteSuccess('');
-    const raw = (pasteRef.current?.value || '');
-    if (!raw.trim()) { setPasteError('Paste your data first.'); setMapping(null); setParsedRows(null); return; }
+  function processRawText(raw, sourceLabel) {
+    if (!raw || !raw.trim()) { setPasteError('The file looks empty.'); setMapping(null); setParsedRows(null); return; }
     const parsed = parsePastedData(raw);
     if (parsed.error) { setPasteError(parsed.error); setMapping(null); setParsedRows(null); return; }
     setPasteError('');
+    setPasteSuccess('');
     setParsedRows(parsed.rows);
     setMapping(buildMapping(parsed.headers));
+  }
+
+  function handleDetectColumns() {
+    const raw = (pasteRef.current?.value || '');
+    if (!raw.trim()) { setPasteError('Paste your data first.'); setMapping(null); setParsedRows(null); return; }
+    processRawText(raw, 'paste');
+  }
+
+  function handleFileUpload(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    const name = (file.name || '').toLowerCase();
+    if (!name.endsWith('.csv') && !name.endsWith('.tsv') && !name.endsWith('.txt')) {
+      setPasteError('Please upload a .csv, .tsv, or .txt file exported from your spreadsheet or ad platform.');
+      setMapping(null); setParsedRows(null);
+      e.target.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => { processRawText(String(reader.result || ''), file.name); };
+    reader.onerror = () => { setPasteError('Could not read that file. Try re-exporting it as CSV.'); };
+    reader.readAsText(file);
+    e.target.value = ''; // allow re-uploading the same filename
   }
 
   function handleMappingChange(index, value) {
@@ -225,6 +248,21 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, marginBottom: 8 }}>
           <span className="fd-label" style={{ marginBottom: 0 }}>Paste monthly data</span>
           <button type="button" className="fd-btn-secondary" onClick={downloadTemplate}>Download template (recommended)</button>
+        </div>
+        <div style={{ marginBottom: 8 }}>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.tsv,.txt"
+            onChange={handleFileUpload}
+            style={{ display: 'none' }}
+          />
+          <button type="button" className="fd-btn-secondary" onClick={() => fileInputRef.current && fileInputRef.current.click()}>
+            Upload CSV file
+          </button>
+          <span className="fd-note" style={{ marginLeft: 10, marginBottom: 0, display: 'inline' }}>
+            Uploading reads the file directly, which avoids copy-and-paste issues with large data sets. The next step is the same column mapping.
+          </span>
         </div>
         <p className="fd-note">
           Copy cells directly from a spreadsheet, comma or tab-delimited both work, and paste below. Include the header row from your sheet. Paste many months at once, or just the header plus one new row for a quick monthly update. The template download is a recommended starting point.
