@@ -62,7 +62,7 @@ function parseDelimitedLine(line, delimiter) {
 
 function parsePastedData(raw) {
   const lines = raw.split('\n').map(l => l.replace(/\r$/, '')).filter(l => l.trim().length > 0);
-  if (lines.length < 2) return { error: 'Paste a header row and at least one data row. For a single-month update, paste the header row plus one row.' };
+  if (lines.length < 2) return { error: 'Upload a file with a header row and at least one data row.' };
   const delimiter = detectDelimiter(lines[0]);
   const headers = parseDelimitedLine(lines[0], delimiter);
   const rows = lines.slice(1).map(l => parseDelimitedLine(l, delimiter));
@@ -130,7 +130,6 @@ function downloadTemplate() {
 
 export default function FunnelDiagnosticInput({ onDataChange } = {}) {
   const [activeTab, setActiveTab] = useState('upload');
-  const [stepsOpen, setStepsOpen] = useState(false);
   const [periods, setPeriods] = useState([]);
 
   const fileInputRef = useRef(null);
@@ -270,24 +269,6 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
         {uploadError && <p className="fd-error" style={{ marginTop: 10 }}>{uploadError}</p>}
         {uploadSuccess && <p className="fd-success" style={{ marginTop: 10 }}>{uploadSuccess}</p>}
 
-        <div className="fd-accordion" style={{ marginBottom: 4 }}>
-          <button type="button" className="fd-accordion-trigger" onClick={() => setStepsOpen(o => !o)} aria-expanded={stepsOpen}>
-            <span>Steps</span>
-            <span className="fd-accordion-chevron">{stepsOpen ? '−' : '+'}</span>
-          </button>
-          {stepsOpen && (
-            <div className="fd-accordion-body">
-              <ol style={{ margin: 0, paddingLeft: 18, fontSize: 12, color: '#4b5563', lineHeight: 1.7 }}>
-                <li>Download the template or export your own CSV</li>
-                <li>One row per channel per month, include the header row</li>
-                <li>Click Upload CSV file</li>
-                <li>Confirm the column mapping</li>
-                <li>Read the diagnosis below</li>
-              </ol>
-            </div>
-          )}
-        </div>
-
         {mapping && (
           <div className="fd-card" style={{ marginTop: 16 }}>
             <p style={{ fontSize: 14, fontWeight: 600, color: '#111827', marginBottom: 4 }}>Confirm column mapping</p>
@@ -314,7 +295,7 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
               <table className="fd-table">
                 <thead>
                   <tr>
-                    <th>Pasted column header</th>
+                    <th>Detected column header</th>
                     <th>Sample value</th>
                     <th>Status</th>
                     <th>Mapped field</th>
@@ -358,7 +339,7 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
       </div>
 
       <div style={{ display: activeTab === 'manual' ? 'block' : 'none' }}>
-        <p className="fd-note">Enter one month at a time. This writes to the same data set as the paste-in flow above, so you can mix both entry methods.</p>
+        <p className="fd-note">Enter one month at a time. This writes to the same data set as your uploaded file, so you can mix both entry methods.</p>
         <form onSubmit={handleAddManualRow}>
           <div className="fd-form-grid">
             {FUNNEL_FIELDS.map(f => (
