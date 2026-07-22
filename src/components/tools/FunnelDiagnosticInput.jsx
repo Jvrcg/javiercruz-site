@@ -20,6 +20,21 @@ export const FUNNEL_FIELDS = [
 
 const FIELD_LABEL_BY_KEY = Object.fromEntries(FUNNEL_FIELDS.map(f => [f.key, f.label]));
 
+const FIELD_PLACEHOLDERS = {
+  month: 'e.g. Jul 2026',
+  spend: 'e.g. 15000',
+  clicks: 'e.g. 4200',
+  leads: 'e.g. 180',
+  mqls: 'e.g. 45',
+  opportunitiesCreated: 'e.g. 12',
+  closedWonDeals: 'e.g. 3',
+  dealValue: 'e.g. 45000',
+  daysSinceLastCreativeRefresh: 'e.g. 20',
+  channelLaunchDate: 'e.g. 2024-03-01',
+  placementTierOrViewabilityTrend: 'e.g. Tier 1',
+  campaignObjective: 'e.g. Lead Gen',
+};
+
 const REQUIRED_FIELDS = FUNNEL_FIELDS.filter(f => f.required);
 
 const EMPTY_MANUAL_FORM = Object.fromEntries(FUNNEL_FIELDS.map(f => [f.key, '']));
@@ -363,6 +378,7 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
                     className="fd-input"
                     value={manualForm[f.key]}
                     onChange={e => handleManualChange(f.key, e.target.value)}
+                    placeholder={FIELD_PLACEHOLDERS[f.key] || ''}
                     style={{ borderColor: f.required && manualError && !manualForm[f.key].trim() ? '#C0392B' : undefined }}
                   />
                 )}

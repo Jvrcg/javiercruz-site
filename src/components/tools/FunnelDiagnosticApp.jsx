@@ -17,11 +17,11 @@ export default function FunnelDiagnosticApp() {
         <div className="fd-form-grid">
           <div>
             <label className="fd-label" style={{ marginBottom: 4 }}>Average days, MQL to SQL (recommended)</label>
-            <input type="number" className="fd-input" value={mqlToSql} onChange={e => setMqlToSql(e.target.value)} />
+            <input type="number" className="fd-input" value={mqlToSql} onChange={e => setMqlToSql(e.target.value)} placeholder="e.g. 30" />
           </div>
           <div>
             <label className="fd-label" style={{ marginBottom: 4 }}>Average days, SQL to Opp/Won (recommended)</label>
-            <input type="number" className="fd-input" value={sqlToOpp} onChange={e => setSqlToOpp(e.target.value)} />
+            <input type="number" className="fd-input" value={sqlToOpp} onChange={e => setSqlToOpp(e.target.value)} placeholder="e.g. 45" />
           </div>
         </div>
       </div>
