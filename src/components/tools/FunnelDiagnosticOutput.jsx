@@ -8,6 +8,7 @@ const DOWNSTREAM_DISCLAIMER = "Recent periods will structurally understate downs
 
 export default function FunnelDiagnosticOutput({ periods = [], settings = {} }) {
   const [methodOpen, setMethodOpen] = useState(false);
+  const [seeItWorkOpen, setSeeItWorkOpen] = useState(false);
   const hasData = periods && periods.length > 0;
   const result = hasData ? runDiagnostics(periods, settings) : null;
 
@@ -79,6 +80,33 @@ export default function FunnelDiagnosticOutput({ periods = [], settings = {} }) 
             <p style={{ fontSize: 11, color: '#9ca3af', marginTop: 10 }}>
               Sources: <a href="https://improvado.io/blog/cmo-dashboard-examples-metrics-templates" target="_blank" rel="noopener noreferrer">Improvado: CMO Dashboard Examples, Metrics and Templates</a>, <a href="https://support.google.com/google-ads/answer/10285843" target="_blank" rel="noopener noreferrer">Google Ads Help: Smart Bidding conversion guidance</a>
             </p>
+          </div>
+        )}
+      </div>
+
+      <div className="fd-accordion" style={{ marginTop: 16 }}>
+        <button type="button" className="fd-accordion-trigger" onClick={() => setSeeItWorkOpen(o => !o)} aria-expanded={seeItWorkOpen}>
+          <span>See it work</span>
+          <span className="fd-accordion-chevron">{seeItWorkOpen ? '−' : '+'}</span>
+        </button>
+        {seeItWorkOpen && (
+          <div className="fd-accordion-body">
+            <div style={{ marginBottom: 20 }}>
+              <img src="/images/tools/funnel-diagnostic/qa-screenshot-flagged-pattern.png" alt="Two findings triggered from a Google Ads spend spike, each with a trend chart" style={{ width: '100%', borderRadius: 6, border: '1px solid #e5e7eb' }} />
+              <p className="fd-note" style={{ marginTop: 6 }}>Two findings triggered from the same Google Ads spend spike, each with its own trend chart and specific next step.</p>
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <img src="/images/tools/funnel-diagnostic/qa-screenshot-coverage-chart.png" alt="Data coverage by channel showing days of history per channel" style={{ width: '100%', borderRadius: 6, border: '1px solid #e5e7eb' }} />
+              <p className="fd-note" style={{ marginTop: 6 }}>Data coverage by channel: a reality check on how much history was actually entered before any diagnosis runs.</p>
+            </div>
+            <div style={{ marginBottom: 20 }}>
+              <img src="/images/tools/funnel-diagnostic/qa-screenshot-caveat-text.png" alt="Caveat text for thin channel data" style={{ width: '100%', borderRadius: 6, border: '1px solid #e5e7eb' }} />
+              <p className="fd-note" style={{ marginTop: 6 }}>Thin data doesn't get hidden. It gets flagged, with the specific reason why.</p>
+            </div>
+            <div>
+              <img src="/images/tools/funnel-diagnostic/qa-screenshot-no-pattern-matched.png" alt="No known pattern matched result for clean, stable data" style={{ width: '100%', borderRadius: 6, border: '1px solid #e5e7eb' }} />
+              <p className="fd-note" style={{ marginTop: 6 }}>Clean, stable data with no pattern matched. A null result, stated plainly instead of forced into a finding.</p>
+            </div>
           </div>
         )}
       </div>
