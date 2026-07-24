@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { runDiagnostics } from './funnelDiagnostics.js';
+import { FunnelSparkline } from './FunnelSparkline.jsx';
 
 const GARBAGE_IN = "The tool reads the numbers you enter. It can't see anything outside them, meaning no creative changes, sales process shifts, seasonality, or pricing changes are visible in the data you enter. A mismatched column or the wrong metric type might produce a 100% confident, 100% incorrect result! Check your column mapping before trusting the output, and treat every flagged pattern as a place to look, not a verdict.";
 
@@ -36,6 +37,13 @@ export default function FunnelDiagnosticOutput({ periods = [], settings = {} }) 
           <p style={{ fontSize: 13, color: '#374151', marginBottom: 8, lineHeight: 1.5 }}><strong>What triggered it:</strong> {f.triggerMath}</p>
           <p style={{ fontSize: 13, color: '#374151', marginBottom: 8, lineHeight: 1.5 }}>{f.plainLanguage}</p>
           <p style={{ fontSize: 13, color: '#374151', marginBottom: f.benchmarkContext ? 8 : 0, lineHeight: 1.5 }}><strong>Where to look:</strong> {f.nextStep}</p>
+          {result.channels[f.channel] && (
+            <FunnelSparkline
+              rows={result.channels[f.channel].rows}
+              metricKey={f.primaryMetricKey}
+              flaggedIndex={result.channels[f.channel].rows.length - 1}
+            />
+          )}
           {f.benchmarkContext && <p className="fd-note" style={{ marginBottom: 0 }}>{f.benchmarkContext}</p>}
         </div>
       ))}

@@ -1,5 +1,12 @@
 // Layer 2 (baseline engine) + Layer 3 (rules engine) for the B2B Funnel Diagnostic Tool.
 // Pure functions. Consumes the `periods` array emitted by FunnelDiagnosticInput.
+//
+// Input can be daily, weekly, or monthly rows (any granularity `parseReportingDate`
+// understands). `bucketInto90DayWindows()` normalizes everything into non-overlapping
+// 90-day windows, summing raw counts per window, before the baseline/rules math below
+// (which is unchanged) runs against those windows as if they were the periods.
+
+import { parseReportingDate } from './dateParser.js';
 
 export const DEVIATION_THRESHOLD = 0.20;   // 20% off trailing-3 baseline
 export const MIN_PERIODS_FLAG = 3;         // deviation flags
@@ -7,12 +14,8 @@ export const MIN_PERIODS_MARGINAL = 4;     // marginal cpMQL (3 to build baselin
 export const SIGNAL_STARVATION_FLOOR = 15; // conversions/month (Google Ads Help Center)
 
 const METRIC_KEYS = ['cpl', 'cpmql', 'clickToLead', 'leadToMql', 'mqlToOpp', 'oppToWon', 'spend', 'leads', 'mqls'];
-
-const MONTH_NAMES = {
-  jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
-  january: 0, february: 1, march: 2, april: 3, june: 5, july: 6, august: 7,
-  september: 8, october: 9, november: 10, december: 11,
-};
+const SUMMABLE_KEYS = ['spend', 'clicks', 'leads', 'mqls', 'opportunitiesCreated', 'closedWonDeals', 'dealValue'];
+const BUCKET_MS = 90 * 24 * 60 * 60 * 1000; // 90-day bucketing window
 
 function toNum(v) {
   if (v === null || v === undefined) return null;
@@ -20,19 +23,6 @@ function toNum(v) {
   if (s === '') return null;
   const n = Number(s);
   return Number.isFinite(n) ? n : null;
-}
-
-// Returns a sortable integer (year*12 + monthIndex) or null if unparseable.
-export function parseMonthKey(raw) {
-  if (!raw) return null;
-  const s = String(raw).trim().toLowerCase();
-  let m = s.match(/^([a-z]+)[\s\-\/.]+(\d{4})$/);       // "Jan 2026", "January-2026"
-  if (m && MONTH_NAMES[m[1]] !== undefined) return Number(m[2]) * 12 + MONTH_NAMES[m[1]];
-  m = s.match(/^(\d{4})[\s\-\/.]+(\d{1,2})$/);           // "2026-01"
-  if (m) return Number(m[1]) * 12 + (Number(m[2]) - 1);
-  m = s.match(/^(\d{1,2})[\s\-\/.]+(\d{4})$/);           // "01/2026"
-  if (m) return Number(m[2]) * 12 + (Number(m[1]) - 1);
-  return null;
 }
 
 function median(arr) {
@@ -65,19 +55,85 @@ function pctDeviation(current, baseline) {
   return (current - baseline) / baseline;
 }
 
-// ---- Layer 2: baseline ----
-export function buildBaseline(periods) {
+// Sums raw counts across a set of rows that fall in the same 90-day bucket.
+// Missing values are skipped (not treated as zero); a key stays null only if
+// no row in the bucket had a value for it.
+function sumRawRows(rawRows) {
+  const summed = {};
+  SUMMABLE_KEYS.forEach(k => {
+    let total = null;
+    rawRows.forEach(r => {
+      const n = toNum(r[k]);
+      if (n !== null) total = (total ?? 0) + n;
+    });
+    summed[k] = total;
+  });
+  summed.channel = rawRows[0] ? rawRows[0].channel : undefined;
+  return summed;
+}
+
+// Groups periods by channel, parses each row's reporting date, and buckets
+// each channel's rows into non-overlapping 90-day windows counted backward
+// from that channel's latest parsed date. Bucket 0 = [latest - 90d, latest],
+// bucket 1 = [latest - 180d, latest - 90d), and so on. A bucket with zero
+// rows in it is never created (no zero-filled periods). Rows whose date
+// can't be parsed are excluded and counted in `unparsedRowCount` rather than
+// silently dropped without a trace.
+export function bucketInto90DayWindows(periods) {
   const byChannel = {};
   (periods || []).forEach(p => {
     const ch = (p.channel || 'Other').trim() || 'Other';
-    if (!byChannel[ch]) byChannel[ch] = [];
-    byChannel[ch].push({ raw: p, sortKey: parseMonthKey(p.month), derived: derive(p) });
+    if (!byChannel[ch]) byChannel[ch] = { parsedRows: [], unparsedRowCount: 0, hasAmbiguousDates: false };
+    const parsed = parseReportingDate(p.month);
+    if (!parsed) {
+      byChannel[ch].unparsedRowCount += 1;
+      return;
+    }
+    if (!parsed.confident) byChannel[ch].hasAmbiguousDates = true;
+    byChannel[ch].parsedRows.push({ raw: p, timestamp: parsed.timestamp });
   });
 
+  const bucketed = {};
+  Object.entries(byChannel).forEach(([ch, info]) => {
+    const sortedRows = [...info.parsedRows].sort((a, b) => a.timestamp - b.timestamp);
+    const rows = [];
+    if (sortedRows.length) {
+      const latestTs = sortedRows[sortedRows.length - 1].timestamp;
+      const buckets = new Map(); // bucketIndex -> raw rows in that window
+      sortedRows.forEach(r => {
+        const age = latestTs - r.timestamp;
+        // Subtracting 1ms before flooring puts an exact window boundary
+        // (e.g. age === 90 days) into the earlier/more-recent bucket.
+        const bucketIndex = Math.floor(Math.max(0, age - 1) / BUCKET_MS);
+        if (!buckets.has(bucketIndex)) buckets.set(bucketIndex, []);
+        buckets.get(bucketIndex).push(r.raw);
+      });
+      const orderedIndexes = Array.from(buckets.keys()).sort((a, b) => b - a); // oldest first
+      orderedIndexes.forEach(idx => {
+        const rawRows = buckets.get(idx);
+        const summed = sumRawRows(rawRows);
+        const windowStart = latestTs - (idx + 1) * BUCKET_MS;
+        rows.push({ raw: summed, sortKey: windowStart, derived: derive(summed) });
+      });
+    }
+    bucketed[ch] = {
+      rows,
+      unparsedRowCount: info.unparsedRowCount,
+      hasAmbiguousDates: info.hasAmbiguousDates,
+    };
+  });
+
+  return bucketed;
+}
+
+// ---- Layer 2: baseline ----
+export function buildBaseline(periods) {
+  const bucketed = bucketInto90DayWindows(periods);
+
   const channels = {};
-  Object.entries(byChannel).forEach(([ch, rows]) => {
-    const monthOrderReliable = rows.every(r => r.sortKey !== null);
-    const sorted = monthOrderReliable ? [...rows].sort((a, b) => a.sortKey - b.sortKey) : rows;
+  Object.entries(bucketed).forEach(([ch, info]) => {
+    const sorted = info.rows;
+    const monthOrderReliable = info.unparsedRowCount === 0;
     const n = sorted.length;
     const latest = n ? sorted[n - 1] : null;
 
@@ -110,10 +166,26 @@ export function buildBaseline(periods) {
       baseline,
       deviations,
       marginalCpmqlDeviation,
+      unparsedRowCount: info.unparsedRowCount,
+      hasAmbiguousDates: info.hasAmbiguousDates,
     };
   });
 
   return channels;
+}
+
+// ---- Metric formatting (shared by output text and chart labels) ----
+export function formatMetricValue(value, metricKey) {
+  if (value === null || value === undefined || !Number.isFinite(value)) return 'n/a';
+  const currencyMetrics = new Set(['cpl', 'cpmql', 'spend', 'dealValue']);
+  const percentMetrics = new Set(['clickToLead', 'leadToMql', 'mqlToOpp', 'oppToWon']);
+  if (currencyMetrics.has(metricKey)) {
+    return `$${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+  }
+  if (percentMetrics.has(metricKey)) {
+    return `${(value * 100).toFixed(1)}%`;
+  }
+  return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
 // ---- Layer 3: rules ----
@@ -129,6 +201,7 @@ function ruleAuctionPressure(c) {
   if (over(d.cpl) && d.cpl > 0 && !over(d.leads)) {
     return {
       id: 'auction_pressure', name: 'Auction pressure / saturation', severity: Math.abs(d.cpl),
+      channel: c.channel, primaryMetricKey: 'cpl',
       triggerMath: `${c.channel}: CPL is ${pct(d.cpl)} vs its trailing-3 median while lead volume is within 20% of baseline (${pct(d.leads)}).`,
       plainLanguage: `Rising cost per lead without a matching change in volume is consistent with auction pressure or audience saturation on ${c.channel}.`,
       nextStep: `Check whether impression share or CPCs on ${c.channel} rose over the same window, and whether the audience or geo pool has narrowed.`,
@@ -146,6 +219,7 @@ function ruleVolumeQualityMismatch(c) {
   if (d.clickToLead != null && d.leadToMql != null && !over(d.clickToLead) && over(d.leadToMql) && d.leadToMql < 0) {
     return {
       id: 'volume_quality', name: 'Volume-quality mismatch', severity: Math.abs(d.leadToMql),
+      channel: c.channel, primaryMetricKey: 'leadToMql',
       triggerMath: `${c.channel}: click-to-lead is holding (${pct(d.clickToLead)} vs baseline) but lead-to-MQL is ${pct(d.leadToMql)} vs baseline.`,
       plainLanguage: `Leads are converting to MQLs at a lower rate than this channel's own history, which is consistent with looser lead quality or lower-intent traffic on ${c.channel}.`,
       nextStep: `Review the lead source and scoring for ${c.channel} against a period where lead-to-MQL was healthy. Confirm the MQL definition did not change.`,
@@ -165,8 +239,10 @@ function ruleChannelRoleMismatch(c) {
   const highSpend = over(d.spend) && d.spend > 0;
   if (highSpend && topStrong && bottomWeak) {
     const worst = Math.min(d.mqlToOpp ?? 0, d.oppToWon ?? 0);
+    const worstMetricKey = (d.mqlToOpp ?? 0) <= (d.oppToWon ?? 0) ? 'mqlToOpp' : 'oppToWon';
     return {
       id: 'channel_role', name: 'Channel role mismatch', severity: Math.abs(worst),
+      channel: c.channel, primaryMetricKey: worstMetricKey,
       triggerMath: `${c.channel}: spend up ${pct(d.spend)} and top-funnel conversion holding, but bottom-funnel conversion is down (MQL-to-Opp ${pct(d.mqlToOpp)}, Opp-to-Won ${pct(d.oppToWon)}) vs baseline.`,
       plainLanguage: `Strong top-funnel and weak bottom-funnel on rising spend is consistent with ${c.channel} being pushed for cold acquisition when its strength may be warmer, later-funnel roles.`,
       nextStep: `Compare ${c.channel}'s bottom-funnel rates against its own best periods. Consider shifting some spend to retargeting or a warmer audience and re-measuring.`,
@@ -180,10 +256,12 @@ function ruleChannelRoleMismatch(c) {
 
 function ruleSignalStarvation(c) {
   if (!c.latest) return null;
-  const conv = c.latest.derived.mqls != null ? c.latest.derived.mqls : c.latest.derived.leads;
+  const usingMqls = c.latest.derived.mqls != null;
+  const conv = usingMqls ? c.latest.derived.mqls : c.latest.derived.leads;
   if (conv != null && conv < SIGNAL_STARVATION_FLOOR) {
     return {
       id: 'signal_starvation', name: 'Signal starvation', severity: 1 + (SIGNAL_STARVATION_FLOOR - conv) / SIGNAL_STARVATION_FLOOR,
+      channel: c.channel, primaryMetricKey: usingMqls ? 'mqls' : 'leads',
       triggerMath: `${c.channel}: latest period shows ${conv} conversions, below the 15/month floor smart bidding needs to optimize.`,
       plainLanguage: `Below roughly 15 conversions per month, smart bidding has too little signal to optimize reliably on ${c.channel}. This is consistent with erratic delivery and high cost variance.`,
       nextStep: `Consider consolidating campaigns or ad groups on ${c.channel} to pool conversions, or optimizing toward a higher-volume upper-funnel event, so the algorithm clears its learning threshold.`,
@@ -203,6 +281,7 @@ function ruleAttributionLeakage(channels) {
     const s = strong[0], w = weak[0];
     return {
       id: 'attribution_leakage', name: 'Possible attribution leakage', severity: Math.abs(s.deviations.leadToMql) + Math.abs(w.deviations.leadToMql),
+      channel: s.channel, primaryMetricKey: 'leadToMql',
       triggerMath: `${s.channel} lead-to-MQL is up ${pct(s.deviations.leadToMql)} vs its baseline while ${w.channel} is down ${pct(w.deviations.leadToMql)} vs its baseline in the same window.`,
       plainLanguage: `One channel looking much stronger while another looks much weaker in the same window is consistent with a last-touch model crediting ${s.channel} for warm-up work done by ${w.channel}.`,
       nextStep: `Look at ${s.channel} and ${w.channel} under a multi-touch or time-decay view before reallocating. Confirm the shift is real and not a crediting artifact.`,
@@ -217,6 +296,7 @@ function ruleMarginalCpmqlReallocate(c) {
   if (over(c.marginalCpmqlDeviation) && c.marginalCpmqlDeviation > 0) {
     return {
       id: 'marginal_cpmql', name: 'Marginal cpMQL rising, reallocation candidate', severity: Math.abs(c.marginalCpmqlDeviation),
+      channel: c.channel, primaryMetricKey: 'cpmql',
       triggerMath: `${c.channel}: marginal cpMQL is ${pct(c.marginalCpmqlDeviation)} above the median of the prior 3 periods.`,
       plainLanguage: `The incremental cost of the next MQL on ${c.channel} is rising faster than its recent history, which is consistent with diminishing returns at the current spend level.`,
       nextStep: `Test holding or trimming ${c.channel} spend and moving the increment to a channel with a lower marginal cpMQL, then re-measure over the next 3 periods.`,
@@ -235,6 +315,7 @@ function ruleDownstreamLeakFallback(c) {
   if (mqlsDown && spendFlat) {
     return {
       id: 'downstream_leak', name: 'Downstream funnel leak', severity: Math.abs(d.mqls) * 0.9, // slight deprioritize vs specific rules
+      channel: c.channel, primaryMetricKey: 'mqls',
       triggerMath: `${c.channel}: MQLs down ${pct(d.mqls)} vs baseline while spend is roughly flat (${pct(d.spend)}).`,
       plainLanguage: `Fewer MQLs on steady spend, without a cleaner stage-specific pattern, points to a leak somewhere downstream of spend on ${c.channel}.`,
       nextStep: `Walk ${c.channel}'s stage-to-stage rates from click through MQL to find where the drop concentrates, then compare to a healthy period.`,
@@ -269,7 +350,12 @@ export function runDiagnostics(periods, settings = {}) {
   // caveats
   const caveats = [];
   Object.values(channels).forEach(c => {
-    if (!c.monthOrderReliable) caveats.push(`${c.channel}: month values could not all be parsed, so chronological order was not verified. Results assume entry order.`);
+    if (c.unparsedRowCount > 0) {
+      caveats.push(`${c.channel}: ${c.unparsedRowCount} row${c.unparsedRowCount === 1 ? '' : 's'} had an unparseable reporting date and ${c.unparsedRowCount === 1 ? 'was' : 'were'} excluded from the diagnosis.`);
+    }
+    if (c.hasAmbiguousDates) {
+      caveats.push(`${c.channel}: some dates were ambiguous (e.g. 03/04/2026) and were read as MM/DD/YYYY. Confirm this matches your export format.`);
+    }
     if (c.periodCount < MIN_PERIODS_FLAG) caveats.push(`${c.channel}: not enough history (${c.periodCount} period${c.periodCount === 1 ? '' : 's'}) to establish a baseline. Minimum 3.`);
     else if (c.thinBaseline) caveats.push(`${c.channel}: baseline is thin (3 periods). Treat flags as low-confidence until more history accrues.`);
   });

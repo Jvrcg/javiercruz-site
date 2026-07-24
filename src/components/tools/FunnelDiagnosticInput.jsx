@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from 'react';
 const IGNORE = '__ignore__';
 
 export const FUNNEL_FIELDS = [
-  { key: 'month', label: 'Month/Period', required: true, aliases: ['month', 'period', 'monthperiod', 'reportingmonth', 'reportingperiod', 'date', 'monthyear'] },
+  { key: 'month', label: 'Reporting Date', required: true, aliases: ['month', 'period', 'monthperiod', 'reportingmonth', 'reportingperiod', 'reportingdate', 'date', 'monthyear'] },
   { key: 'channel', label: 'Channel', required: true, options: ['Google Ads', 'LinkedIn', 'Meta', 'Programmatic/DSP', 'Other'], aliases: ['channel', 'adchannel', 'mediachannel', 'marketingchannel', 'platform'] },
   { key: 'spend', label: 'Spend', aliases: ['spend', 'adspend', 'totalspend', 'mediaspend', 'cost', 'totalcost'] },
   { key: 'clicks', label: 'Clicks', aliases: ['clicks', 'totalclicks', 'clickcount'] },
@@ -21,7 +21,7 @@ export const FUNNEL_FIELDS = [
 const FIELD_LABEL_BY_KEY = Object.fromEntries(FUNNEL_FIELDS.map(f => [f.key, f.label]));
 
 const FIELD_PLACEHOLDERS = {
-  month: 'e.g. Jul 2026',
+  month: 'e.g. 2026-07-24',
   spend: 'e.g. 15000',
   clicks: 'e.g. 4200',
   leads: 'e.g. 180',
@@ -258,11 +258,11 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
       <div style={{ display: activeTab === 'upload' ? 'block' : 'none' }}>
         <span className="fd-label">Upload your funnel data</span>
         <p className="fd-note" style={{ marginBottom: 12 }}>
-          Upload your full monthly history as a CSV. The tool reads across your whole timeline, so more history means a sharper diagnosis.
+          Upload your performance history as a CSV. One row per channel per date. Daily, weekly, or monthly data all work. The tool groups everything into 90-day windows before running the diagnosis. Include the header row.
         </p>
         <ul style={{ margin: '0 0 16px', paddingLeft: 18, fontSize: 13, color: '#4b5563', lineHeight: 1.6 }}>
-          <li>One row per channel per month</li>
-          <li>Aim for at least 4 months of data per channel, some checks need that much history to run</li>
+          <li>One row per channel per reporting date</li>
+          <li>Aim for at least 90 days of data per channel; some checks need that much history to run</li>
           <li>Include the header row</li>
         </ul>
         <div style={{ marginBottom: 6 }}>
@@ -354,7 +354,7 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
       </div>
 
       <div style={{ display: activeTab === 'manual' ? 'block' : 'none' }}>
-        <p className="fd-note">Enter one month at a time. This writes to the same data set as your uploaded file, so you can mix both entry methods.</p>
+        <p className="fd-note">Enter one reporting date at a time. This writes to the same data set as your uploaded file, so you can mix both entry methods.</p>
         <form onSubmit={handleAddManualRow}>
           <div className="fd-form-grid">
             {FUNNEL_FIELDS.map(f => (
@@ -387,7 +387,7 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
           </div>
           {manualError && <p className="fd-error">{manualError}</p>}
           {manualSuccess && <p className="fd-success">{manualSuccess}</p>}
-          <button type="submit" className="fd-btn">Add month</button>
+          <button type="submit" className="fd-btn">Add entry</button>
         </form>
       </div>
 
