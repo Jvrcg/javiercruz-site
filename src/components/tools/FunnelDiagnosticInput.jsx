@@ -230,7 +230,7 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
       <div>
         <span className="fd-label">Upload your funnel data</span>
         <p className="fd-note" style={{ marginBottom: 12 }}>
-          Upload your performance history as a CSV. One row per channel per date. Daily, weekly, or monthly data all work. The tool groups everything into 90-day windows before running the diagnosis. Include the header row.
+          Upload your performance history as a CSV. One row per channel per date. Daily, weekly, or monthly data all work. The tool groups everything into 30-day periods before running the diagnosis. Include the header row.
         </p>
         <ul style={{ margin: '0 0 16px', paddingLeft: 18, fontSize: 13, color: '#4b5563', lineHeight: 1.6, listStyleType: 'disc' }}>
           <li>One row per channel per reporting date</li>

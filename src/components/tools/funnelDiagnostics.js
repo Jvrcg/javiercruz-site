@@ -2,8 +2,8 @@
 // Pure functions. Consumes the `periods` array emitted by FunnelDiagnosticInput.
 //
 // Input can be daily, weekly, or monthly rows (any granularity `parseReportingDate`
-// understands). `bucketInto90DayWindows()` normalizes everything into non-overlapping
-// 90-day windows, summing raw counts per window, before the baseline/rules math below
+// understands). `bucketInto30DayWindows()` normalizes everything into non-overlapping
+// 30-day windows, summing raw counts per window, before the baseline/rules math below
 // (which is unchanged) runs against those windows as if they were the periods.
 
 import { parseReportingDate } from './dateParser.js';
@@ -15,7 +15,7 @@ export const SIGNAL_STARVATION_FLOOR = 15; // conversions/month (Google Ads Help
 
 const METRIC_KEYS = ['cpl', 'cpmql', 'clickToLead', 'leadToMql', 'mqlToOpp', 'oppToWon', 'spend', 'leads', 'mqls'];
 const SUMMABLE_KEYS = ['spend', 'clicks', 'leads', 'mqls', 'opportunitiesCreated', 'closedWonDeals', 'dealValue'];
-const BUCKET_MS = 90 * 24 * 60 * 60 * 1000; // 90-day bucketing window
+const BUCKET_MS = 30 * 24 * 60 * 60 * 1000; // 30-day bucketing window
 
 function toNum(v) {
   if (v === null || v === undefined) return null;
@@ -55,7 +55,7 @@ function pctDeviation(current, baseline) {
   return (current - baseline) / baseline;
 }
 
-// Sums raw counts across a set of rows that fall in the same 90-day bucket.
+// Sums raw counts across a set of rows that fall in the same 30-day bucket.
 // Missing values are skipped (not treated as zero); a key stays null only if
 // no row in the bucket had a value for it.
 function sumRawRows(rawRows) {
@@ -73,13 +73,13 @@ function sumRawRows(rawRows) {
 }
 
 // Groups periods by channel, parses each row's reporting date, and buckets
-// each channel's rows into non-overlapping 90-day windows counted backward
-// from that channel's latest parsed date. Bucket 0 = [latest - 90d, latest],
-// bucket 1 = [latest - 180d, latest - 90d), and so on. A bucket with zero
+// each channel's rows into non-overlapping 30-day windows counted backward
+// from that channel's latest parsed date. Bucket 0 = [latest - 30d, latest],
+// bucket 1 = [latest - 60d, latest - 30d), and so on. A bucket with zero
 // rows in it is never created (no zero-filled periods). Rows whose date
 // can't be parsed are excluded and counted in `unparsedRowCount` rather than
 // silently dropped without a trace.
-export function bucketInto90DayWindows(periods) {
+export function bucketInto30DayWindows(periods) {
   const byChannel = {};
   (periods || []).forEach(p => {
     const ch = (p.channel || 'Other').trim() || 'Other';
@@ -161,7 +161,7 @@ export function computeChannelCoverage(periods) {
 
 // ---- Layer 2: baseline ----
 export function buildBaseline(periods) {
-  const bucketed = bucketInto90DayWindows(periods);
+  const bucketed = bucketInto30DayWindows(periods);
   const coverage = computeChannelCoverage(periods);
 
   const channels = {};
