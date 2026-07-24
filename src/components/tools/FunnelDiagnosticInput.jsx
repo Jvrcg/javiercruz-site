@@ -39,8 +39,6 @@ const FIELD_PLACEHOLDERS = {
 
 const REQUIRED_FIELDS = FUNNEL_FIELDS.filter(f => f.required);
 
-const EMPTY_MANUAL_FORM = Object.fromEntries(FUNNEL_FIELDS.map(f => [f.key, '']));
-
 function normalize(s) {
   return String(s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
 }
@@ -100,7 +98,7 @@ function buildMapping(headers) {
 }
 
 function buildPeriodFromRow(mapping, row) {
-  const period = { ...EMPTY_MANUAL_FORM };
+  const period = Object.fromEntries(FUNNEL_FIELDS.map(f => [f.key, '']));
   mapping.forEach(m => {
     if (m.fieldKey && m.fieldKey !== IGNORE) {
       period[m.fieldKey] = (row[m.index] ?? '').trim();
@@ -146,7 +144,6 @@ function downloadTemplate() {
 }
 
 export default function FunnelDiagnosticInput({ onDataChange } = {}) {
-  const [activeTab, setActiveTab] = useState('upload');
   const [periods, setPeriods] = useState([]);
 
   const fileInputRef = useRef(null);
@@ -154,10 +151,6 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
   const [uploadSuccess, setUploadSuccess] = useState('');
   const [parsedRows, setParsedRows] = useState(null);
   const [mapping, setMapping] = useState(null);
-
-  const [manualForm, setManualForm] = useState(EMPTY_MANUAL_FORM);
-  const [manualError, setManualError] = useState('');
-  const [manualSuccess, setManualSuccess] = useState('');
 
   useEffect(() => {
     if (onDataChange) onDataChange(periods);
@@ -228,41 +221,18 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
     setUploadError('');
   }
 
-  function handleManualChange(key, value) {
-    setManualForm(prev => ({ ...prev, [key]: value }));
-  }
-
-  function handleAddManualRow(e) {
-    e.preventDefault();
-    const month = manualForm.month.trim();
-    const channel = manualForm.channel.trim();
-    const missing = REQUIRED_FIELDS.filter(f => !manualForm[f.key].trim());
-    if (missing.length) { setManualError(`${missing.map(f => f.label).join(', ')} required.`); setManualSuccess(''); return; }
-    setPeriods(prev => mergePeriod(prev, { ...manualForm, month, channel }));
-    setManualError('');
-    setManualSuccess(`${month} added to confirmed data.`);
-    setManualForm(EMPTY_MANUAL_FORM);
-  }
-
   function handleRemovePeriod(index) {
     setPeriods(prev => prev.filter((_, i) => i !== index));
   }
 
-  const numberFieldKeys = new Set(['spend', 'clicks', 'leads', 'mqls', 'opportunitiesCreated', 'closedWonDeals', 'dealValue', 'daysSinceLastCreativeRefresh']);
-
   return (
     <div className="fd-wrap">
-      <div className="fd-tab-row">
-        <button className={`fd-tab${activeTab === 'upload' ? ' active' : ''}`} onClick={() => setActiveTab('upload')}>Upload CSV</button>
-        <button className={`fd-tab${activeTab === 'manual' ? ' active' : ''}`} onClick={() => setActiveTab('manual')}>Manual row entry</button>
-      </div>
-
-      <div style={{ display: activeTab === 'upload' ? 'block' : 'none' }}>
+      <div>
         <span className="fd-label">Upload your funnel data</span>
         <p className="fd-note" style={{ marginBottom: 12 }}>
           Upload your performance history as a CSV. One row per channel per date. Daily, weekly, or monthly data all work. The tool groups everything into 90-day windows before running the diagnosis. Include the header row.
         </p>
-        <ul style={{ margin: '0 0 16px', paddingLeft: 18, fontSize: 13, color: '#4b5563', lineHeight: 1.6 }}>
+        <ul style={{ margin: '0 0 16px', paddingLeft: 18, fontSize: 13, color: '#4b5563', lineHeight: 1.6, listStyleType: 'disc' }}>
           <li>One row per channel per reporting date</li>
           <li>Aim for at least 90 days of data per channel; some checks need that much history to run</li>
           <li>Include the header row</li>
@@ -353,44 +323,6 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
             </div>
           </div>
         )}
-      </div>
-
-      <div style={{ display: activeTab === 'manual' ? 'block' : 'none' }}>
-        <p className="fd-note">Enter one reporting date at a time. This writes to the same data set as your uploaded file, so you can mix both entry methods.</p>
-        <form onSubmit={handleAddManualRow}>
-          <div className="fd-form-grid">
-            {FUNNEL_FIELDS.map(f => (
-              <div key={f.key}>
-                <label className={`fd-label${f.required ? ' fd-field-required' : ''}`} style={{ marginBottom: 4 }}>{f.label}</label>
-                {f.options ? (
-                  <select
-                    className="fd-select"
-                    value={manualForm[f.key]}
-                    onChange={e => handleManualChange(f.key, e.target.value)}
-                    style={{ borderColor: f.required && manualError && !manualForm[f.key].trim() ? '#C0392B' : undefined }}
-                  >
-                    <option value="">Select...</option>
-                    {f.options.map(opt => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
-                ) : (
-                  <input
-                    type={numberFieldKeys.has(f.key) ? 'number' : 'text'}
-                    className="fd-input"
-                    value={manualForm[f.key]}
-                    onChange={e => handleManualChange(f.key, e.target.value)}
-                    placeholder={FIELD_PLACEHOLDERS[f.key] || ''}
-                    style={{ borderColor: f.required && manualError && !manualForm[f.key].trim() ? '#C0392B' : undefined }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-          {manualError && <p className="fd-error">{manualError}</p>}
-          {manualSuccess && <p className="fd-success">{manualSuccess}</p>}
-          <button type="submit" className="fd-btn">Add entry</button>
-        </form>
       </div>
 
       {periods.length > 0 && (
