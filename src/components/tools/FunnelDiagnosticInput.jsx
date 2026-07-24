@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
+import { computeChannelCoverage } from './funnelDiagnostics.js';
+import { FunnelCoverageChart } from './FunnelCoverageChart.jsx';
 
 const IGNORE = '__ignore__';
 
@@ -130,7 +132,7 @@ function csvField(value) {
 
 function downloadTemplate() {
   const headerRow = FUNNEL_FIELDS.map(f => f.label).map(csvField).join(',');
-  const exampleRow = ['Jan 2026', 'Google Ads', '15000', '4200', '180', '45', '12', '3', '45000', '12', '2024-03-01', 'Tier 1', 'Lead Gen'].map(csvField).join(',');
+  const exampleRow = ['2026-07-24', 'Google Ads', '15000', '4200', '180', '45', '12', '3', '45000', '12', '2024-03-01', 'Tier 1', 'Lead Gen'].map(csvField).join(',');
   const csv = headerRow + '\n' + exampleRow + '\n';
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
@@ -414,6 +416,8 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
               </tbody>
             </table>
           </div>
+          <span className="fd-label">Data coverage by channel</span>
+          <FunnelCoverageChart coverage={computeChannelCoverage(periods)} />
         </div>
       )}
     </div>

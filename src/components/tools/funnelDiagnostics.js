@@ -126,9 +126,43 @@ export function bucketInto90DayWindows(periods) {
   return bucketed;
 }
 
+// Purely descriptive per-channel coverage: how many calendar days does this
+// channel's data actually span, anchored to that channel's own most recent
+// reporting date (not "today", and not a shared anchor across channels).
+// Used by the input-step coverage chart and by the 90-day caveat below.
+// Makes no judgment about whether the coverage is "enough", it just reports
+// the fact; MIN_SPAN_DAYS-based interpretation happens where it's consumed.
+export const MIN_SPAN_DAYS = 90;
+
+export function computeChannelCoverage(periods) {
+  const byChannel = {};
+  (periods || []).forEach(p => {
+    const ch = (p.channel || 'Other').trim() || 'Other';
+    if (!byChannel[ch]) byChannel[ch] = { timestamps: [], rowCount: 0, unparsedCount: 0 };
+    byChannel[ch].rowCount += 1;
+    const parsed = parseReportingDate(p.month);
+    if (!parsed) { byChannel[ch].unparsedCount += 1; return; }
+    byChannel[ch].timestamps.push(parsed.timestamp);
+  });
+
+  const result = {};
+  Object.entries(byChannel).forEach(([ch, info]) => {
+    if (!info.timestamps.length) {
+      result[ch] = { channel: ch, daysSpan: 0, rowCount: info.rowCount, unparsedCount: info.unparsedCount };
+      return;
+    }
+    const earliest = Math.min(...info.timestamps);
+    const latest = Math.max(...info.timestamps);
+    const daysSpan = Math.round((latest - earliest) / (24 * 60 * 60 * 1000));
+    result[ch] = { channel: ch, daysSpan, rowCount: info.rowCount, unparsedCount: info.unparsedCount };
+  });
+  return result;
+}
+
 // ---- Layer 2: baseline ----
 export function buildBaseline(periods) {
   const bucketed = bucketInto90DayWindows(periods);
+  const coverage = computeChannelCoverage(periods);
 
   const channels = {};
   Object.entries(bucketed).forEach(([ch, info]) => {
@@ -168,6 +202,7 @@ export function buildBaseline(periods) {
       marginalCpmqlDeviation,
       unparsedRowCount: info.unparsedRowCount,
       hasAmbiguousDates: info.hasAmbiguousDates,
+      daysSpan: coverage[ch] ? coverage[ch].daysSpan : 0,
     };
   });
 
@@ -355,6 +390,9 @@ export function runDiagnostics(periods, settings = {}) {
     }
     if (c.hasAmbiguousDates) {
       caveats.push(`${c.channel}: some dates were ambiguous (e.g. 03/04/2026) and were read as MM/DD/YYYY. Confirm this matches your export format.`);
+    }
+    if (c.daysSpan < MIN_SPAN_DAYS) {
+      caveats.push(`${c.channel}: data spans ${c.daysSpan} day${c.daysSpan === 1 ? '' : 's'}, short of the 90-day window this tool is built around. Treat any results for this channel as low-confidence until more history accrues.`);
     }
     if (c.periodCount < MIN_PERIODS_FLAG) caveats.push(`${c.channel}: not enough history (${c.periodCount} period${c.periodCount === 1 ? '' : 's'}) to establish a baseline. Minimum 3.`);
     else if (c.thinBaseline) caveats.push(`${c.channel}: baseline is thin (3 periods). Treat flags as low-confidence until more history accrues.`);
