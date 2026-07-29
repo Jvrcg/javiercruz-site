@@ -327,8 +327,8 @@ export default function FunnelDiagnosticInput({ onDataChange } = {}) {
 
       {periods.length > 0 && (
         <div style={{ marginTop: 24 }}>
-          <span className="fd-label">Confirmed periods ({periods.length})</span>
-          <div className="fd-table-wrap">
+          <span className="fd-label">Confirmed rows ({periods.length})</span>
+          <div className="fd-table-wrap" style={{ maxHeight: 341, overflowY: 'auto' }}>
             <table className="fd-table">
               <thead>
                 <tr>

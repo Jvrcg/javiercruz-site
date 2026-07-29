@@ -43,6 +43,7 @@ export default function FunnelDiagnosticOutput({ periods = [], settings = {} }) 
               rows={result.channels[f.channel].rows}
               metricKey={f.primaryMetricKey}
               flaggedIndex={result.channels[f.channel].rows.length - 1}
+              channel={f.channel}
             />
           )}
           {f.benchmarkContext && <p className="fd-note" style={{ marginBottom: 0 }}>{f.benchmarkContext}</p>}
