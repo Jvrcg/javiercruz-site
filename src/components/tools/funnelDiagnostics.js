@@ -344,7 +344,7 @@ function ruleMarginalCpmqlReallocate(c) {
         intro: 'Before moving budget elsewhere, rule out two things:',
         items: [
           `Whether ${c.channel}'s own campaigns or targeting could be optimized directly instead.`,
-          "Whether the MQL definition or lead-scoring changed for this channel (a common cause in PLG motions, where more trial signups auto-qualifying as MQLs looks like a cpMQL spike but isn't a real cost increase).",
+          "Whether trial signups should be auto-qualifying as MQLs at all. Check this channel's MQL-to-Opp rate alongside cpMQL: if MQL-to-Opp is also weak, that's a sign signups aren't actually sales-ready, and the fix is tightening the MQL definition, not reallocating spend.",
         ],
         outro: 'If neither explains it, test holding or trimming spend and moving the increment to a channel with a lower marginal cpMQL, then re-measure over the next 3 periods.',
       },
