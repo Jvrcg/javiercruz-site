@@ -271,18 +271,20 @@ function ruleChannelRoleMismatch(c) {
   const d = c.deviations;
   if (!c.hasFlagBaseline) return null;
   const topStrong = d.clickToLead != null && d.clickToLead >= 0;
-  const bottomWeak = (over(d.mqlToOpp) && d.mqlToOpp < 0) || (over(d.oppToWon) && d.oppToWon < 0);
+  const mqlToOppDown = over(d.mqlToOpp) && d.mqlToOpp < 0;
+  const oppToWonDown = over(d.oppToWon) && d.oppToWon < 0;
+  const bottomWeak = mqlToOppDown || oppToWonDown;
   const highSpend = over(d.spend) && d.spend > 0;
   if (highSpend && topStrong && bottomWeak) {
     const worst = Math.min(d.mqlToOpp ?? 0, d.oppToWon ?? 0);
     const worstMetricKey = (d.mqlToOpp ?? 0) <= (d.oppToWon ?? 0) ? 'mqlToOpp' : 'oppToWon';
-    const worstLabel = worstMetricKey === 'mqlToOpp' ? 'MQL-to-Opp' : 'Opp-to-Won';
-    const otherLabel = worstMetricKey === 'mqlToOpp' ? 'Opp-to-Won' : 'MQL-to-Opp';
-    const otherValue = worstMetricKey === 'mqlToOpp' ? d.oppToWon : d.mqlToOpp;
+    const downParts = [];
+    if (mqlToOppDown) downParts.push(`MQL-to-Opp ${absPct(d.mqlToOpp)}`);
+    if (oppToWonDown) downParts.push(`Opp-to-Won ${absPct(d.oppToWon)}`);
     return {
       id: 'channel_role', name: 'Channel role mismatch', severity: Math.abs(worst),
       channel: c.channel, primaryMetricKey: worstMetricKey,
-      triggerMath: `${c.channel}: spend up ${pct(d.spend)} and top-funnel conversion holding, but ${worstLabel} is down ${absPct(worst)} vs baseline (${otherLabel}: ${pct(otherValue)}).`,
+      triggerMath: `${c.channel}: spend up ${pct(d.spend)} and top-funnel conversion holding, but bottom-funnel conversion is down (${downParts.join(' and ')}) vs baseline.`,
       plainLanguage: `Strong top-funnel and weak bottom-funnel on rising spend is consistent with ${c.channel} being pushed for cold acquisition when its strength may be warmer, later-funnel roles.`,
       nextStep: `Compare ${c.channel}'s bottom-funnel rates against its own best periods. Consider shifting some spend to retargeting or a warmer audience and re-measuring.`,
       benchmarkContext: c.channel === 'LinkedIn'
