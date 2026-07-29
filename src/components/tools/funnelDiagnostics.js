@@ -229,6 +229,7 @@ export function formatMetricValue(value, metricKey) {
 
 const over = (dev, t = DEVIATION_THRESHOLD) => dev != null && Math.abs(dev) > t;
 const pct = d => (d == null ? 'n/a' : `${(d * 100).toFixed(0)}%`);
+const absPct = d => (d == null ? 'n/a' : `${(Math.abs(d) * 100).toFixed(0)}%`);
 
 function ruleAuctionPressure(c) {
   const d = c.deviations;
@@ -237,7 +238,7 @@ function ruleAuctionPressure(c) {
     return {
       id: 'auction_pressure', name: 'Auction pressure / saturation', severity: Math.abs(d.cpl),
       channel: c.channel, primaryMetricKey: 'cpl',
-      triggerMath: `${c.channel}: CPL is ${pct(d.cpl)} vs its trailing-3 median while lead volume is within 20% of baseline (${pct(d.leads)}).`,
+      triggerMath: `${c.channel}: CPL is ${pct(d.cpl)} above its trailing-3 median, while lead volume moved only ${pct(d.leads)} (within the 20% threshold).`,
       plainLanguage: `Rising cost per lead without a matching change in volume is consistent with auction pressure or audience saturation on ${c.channel}.`,
       nextStep: `Pull ${c.channel}'s impression-share-lost breakdown (lost to budget vs. lost to rank) rather than reading impression share alone; that split tells you whether this is a spend cap or a Quality Score/Ad Rank problem, which need different fixes. Confirm CPCs actually rose over the same window, and check whether targeting or keyword scope narrowed, or the competitive set shifted.`,
       benchmarkContext: null,
@@ -255,7 +256,7 @@ function ruleVolumeQualityMismatch(c) {
     return {
       id: 'volume_quality', name: 'Volume-quality mismatch', severity: Math.abs(d.leadToMql),
       channel: c.channel, primaryMetricKey: 'leadToMql',
-      triggerMath: `${c.channel}: click-to-lead is holding (${pct(d.clickToLead)} vs baseline) but lead-to-MQL is ${pct(d.leadToMql)} vs baseline.`,
+      triggerMath: `${c.channel}: click-to-lead is holding (moved ${pct(d.clickToLead)}), but lead-to-MQL is down ${absPct(d.leadToMql)} vs baseline.`,
       plainLanguage: `Leads are converting to MQLs at a lower rate than this channel's own history, which is consistent with looser lead quality or lower-intent traffic on ${c.channel}.`,
       nextStep: `Review the lead source and scoring for ${c.channel} against a period where lead-to-MQL was healthy. Confirm the MQL definition did not change.`,
       benchmarkContext: c.channel === 'Google Ads'
@@ -275,10 +276,13 @@ function ruleChannelRoleMismatch(c) {
   if (highSpend && topStrong && bottomWeak) {
     const worst = Math.min(d.mqlToOpp ?? 0, d.oppToWon ?? 0);
     const worstMetricKey = (d.mqlToOpp ?? 0) <= (d.oppToWon ?? 0) ? 'mqlToOpp' : 'oppToWon';
+    const worstLabel = worstMetricKey === 'mqlToOpp' ? 'MQL-to-Opp' : 'Opp-to-Won';
+    const otherLabel = worstMetricKey === 'mqlToOpp' ? 'Opp-to-Won' : 'MQL-to-Opp';
+    const otherValue = worstMetricKey === 'mqlToOpp' ? d.oppToWon : d.mqlToOpp;
     return {
       id: 'channel_role', name: 'Channel role mismatch', severity: Math.abs(worst),
       channel: c.channel, primaryMetricKey: worstMetricKey,
-      triggerMath: `${c.channel}: spend up ${pct(d.spend)} and top-funnel conversion holding, but bottom-funnel conversion is down (MQL-to-Opp ${pct(d.mqlToOpp)}, Opp-to-Won ${pct(d.oppToWon)}) vs baseline.`,
+      triggerMath: `${c.channel}: spend up ${pct(d.spend)} and top-funnel conversion holding, but ${worstLabel} is down ${absPct(worst)} vs baseline (${otherLabel}: ${pct(otherValue)}).`,
       plainLanguage: `Strong top-funnel and weak bottom-funnel on rising spend is consistent with ${c.channel} being pushed for cold acquisition when its strength may be warmer, later-funnel roles.`,
       nextStep: `Compare ${c.channel}'s bottom-funnel rates against its own best periods. Consider shifting some spend to retargeting or a warmer audience and re-measuring.`,
       benchmarkContext: c.channel === 'LinkedIn'
@@ -317,7 +321,7 @@ function ruleAttributionLeakage(channels) {
     return {
       id: 'attribution_leakage', name: 'Possible attribution leakage', severity: Math.abs(s.deviations.leadToMql) + Math.abs(w.deviations.leadToMql),
       channel: s.channel, primaryMetricKey: 'leadToMql',
-      triggerMath: `${s.channel} lead-to-MQL is up ${pct(s.deviations.leadToMql)} vs its baseline while ${w.channel} is down ${pct(w.deviations.leadToMql)} vs its baseline in the same window.`,
+      triggerMath: `${s.channel} lead-to-MQL is up ${pct(s.deviations.leadToMql)} vs its baseline while ${w.channel} is down ${absPct(w.deviations.leadToMql)} vs its baseline in the same window.`,
       plainLanguage: `One channel looking much stronger while another looks much weaker in the same window is consistent with a last-touch model crediting ${s.channel} for warm-up work done by ${w.channel}.`,
       nextStep: `Look at ${s.channel} and ${w.channel} under a multi-touch or time-decay view before reallocating. Confirm the shift is real and not a crediting artifact.`,
       benchmarkContext: null,
@@ -334,7 +338,14 @@ function ruleMarginalCpmqlReallocate(c) {
       channel: c.channel, primaryMetricKey: 'cpmql',
       triggerMath: `${c.channel}: marginal cpMQL is ${pct(c.marginalCpmqlDeviation)} above the median of the prior 3 periods.`,
       plainLanguage: `The incremental cost of the next MQL on ${c.channel} is rising faster than its recent history, which is consistent with diminishing returns at the current spend level.`,
-      nextStep: `Before moving budget elsewhere, rule out two things: whether ${c.channel}'s own campaigns or targeting could be optimized directly instead, and whether the MQL definition or lead-scoring changed for this channel (a common cause in PLG motions, where more trial signups auto-qualifying as MQLs looks like a cpMQL spike but isn't a real cost increase). If neither explains it, test holding or trimming spend and moving the increment to a channel with a lower marginal cpMQL, then re-measure over the next 3 periods.`,
+      nextStep: {
+        intro: 'Before moving budget elsewhere, rule out two things:',
+        items: [
+          `Whether ${c.channel}'s own campaigns or targeting could be optimized directly instead.`,
+          "Whether the MQL definition or lead-scoring changed for this channel (a common cause in PLG motions, where more trial signups auto-qualifying as MQLs looks like a cpMQL spike but isn't a real cost increase).",
+        ],
+        outro: 'If neither explains it, test holding or trimming spend and moving the increment to a channel with a lower marginal cpMQL, then re-measure over the next 3 periods.',
+      },
       benchmarkContext: null,
     };
   }
@@ -351,7 +362,7 @@ function ruleDownstreamLeakFallback(c) {
     return {
       id: 'downstream_leak', name: 'Downstream funnel leak', severity: Math.abs(d.mqls) * 0.9, // slight deprioritize vs specific rules
       channel: c.channel, primaryMetricKey: 'mqls',
-      triggerMath: `${c.channel}: MQLs down ${pct(d.mqls)} vs baseline while spend is roughly flat (${pct(d.spend)}).`,
+      triggerMath: `${c.channel}: MQLs down ${absPct(d.mqls)} vs baseline while spend is roughly flat (${pct(d.spend)}).`,
       plainLanguage: `Fewer MQLs on steady spend, without a cleaner stage-specific pattern, points to a leak somewhere downstream of spend on ${c.channel}.`,
       nextStep: `Walk ${c.channel}'s stage-to-stage rates from click through MQL to find where the drop concentrates, then compare to a healthy period.`,
       benchmarkContext: null,

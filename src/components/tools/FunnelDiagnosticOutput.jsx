@@ -37,7 +37,17 @@ export default function FunnelDiagnosticOutput({ periods = [], settings = {} }) 
           <p style={{ fontSize: 15, fontWeight: 600, color: '#111827', marginBottom: 8 }}>{f.name}</p>
           <p style={{ fontSize: 13, color: '#374151', marginBottom: 8, lineHeight: 1.5 }}><strong>What triggered it:</strong> {f.triggerMath}</p>
           <p style={{ fontSize: 13, color: '#374151', marginBottom: 8, lineHeight: 1.5 }}>{f.plainLanguage}</p>
-          <p style={{ fontSize: 13, color: '#374151', marginBottom: f.benchmarkContext ? 8 : 0, lineHeight: 1.5 }}><strong>Where to look:</strong> {f.nextStep}</p>
+          {typeof f.nextStep === 'string' ? (
+            <p style={{ fontSize: 13, color: '#374151', marginBottom: f.benchmarkContext ? 8 : 0, lineHeight: 1.5 }}><strong>Where to look:</strong> {f.nextStep}</p>
+          ) : (
+            <div style={{ fontSize: 13, color: '#374151', marginBottom: f.benchmarkContext ? 8 : 0, lineHeight: 1.5 }}>
+              <p style={{ marginBottom: 4 }}><strong>Where to look:</strong> {f.nextStep.intro}</p>
+              <ul style={{ margin: '0 0 8px', paddingLeft: 18, listStyleType: 'disc' }}>
+                {f.nextStep.items.map((item, idx) => <li key={idx}>{item}</li>)}
+              </ul>
+              {f.nextStep.outro && <p style={{ marginBottom: 0 }}>{f.nextStep.outro}</p>}
+            </div>
+          )}
           {result.channels[f.channel] && (
             <FunnelSparkline
               rows={result.channels[f.channel].rows}
