@@ -239,7 +239,7 @@ function ruleAuctionPressure(c) {
       channel: c.channel, primaryMetricKey: 'cpl',
       triggerMath: `${c.channel}: CPL is ${pct(d.cpl)} vs its trailing-3 median while lead volume is within 20% of baseline (${pct(d.leads)}).`,
       plainLanguage: `Rising cost per lead without a matching change in volume is consistent with auction pressure or audience saturation on ${c.channel}.`,
-      nextStep: `Check whether impression share or CPCs on ${c.channel} rose over the same window, and whether the audience or geo pool has narrowed.`,
+      nextStep: `Pull ${c.channel}'s impression-share-lost breakdown (lost to budget vs. lost to rank) rather than reading impression share alone; that split tells you whether this is a spend cap or a Quality Score/Ad Rank problem, which need different fixes. Confirm CPCs actually rose over the same window, and check whether targeting or keyword scope narrowed, or the competitive set shifted.`,
       benchmarkContext: null,
     };
   }
@@ -334,7 +334,7 @@ function ruleMarginalCpmqlReallocate(c) {
       channel: c.channel, primaryMetricKey: 'cpmql',
       triggerMath: `${c.channel}: marginal cpMQL is ${pct(c.marginalCpmqlDeviation)} above the median of the prior 3 periods.`,
       plainLanguage: `The incremental cost of the next MQL on ${c.channel} is rising faster than its recent history, which is consistent with diminishing returns at the current spend level.`,
-      nextStep: `Test holding or trimming ${c.channel} spend and moving the increment to a channel with a lower marginal cpMQL, then re-measure over the next 3 periods.`,
+      nextStep: `Before moving budget elsewhere, rule out two things: whether ${c.channel}'s own campaigns or targeting could be optimized directly instead, and whether the MQL definition or lead-scoring changed for this channel (a common cause in PLG motions, where more trial signups auto-qualifying as MQLs looks like a cpMQL spike but isn't a real cost increase). If neither explains it, test holding or trimming spend and moving the increment to a channel with a lower marginal cpMQL, then re-measure over the next 3 periods.`,
       benchmarkContext: null,
     };
   }
