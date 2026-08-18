@@ -16,6 +16,8 @@ export const SIGNAL_STARVATION_FLOOR = 15; // conversions/month (Google Ads Help
 const METRIC_KEYS = ['cpl', 'cpmql', 'clickToLead', 'leadToMql', 'mqlToOpp', 'oppToWon', 'spend', 'leads', 'mqls'];
 const SUMMABLE_KEYS = ['spend', 'clicks', 'leads', 'mqls', 'opportunitiesCreated', 'closedWonDeals', 'dealValue'];
 const BUCKET_MS = 30 * 24 * 60 * 60 * 1000; // 30-day bucketing window
+const BUCKET_DAYS = BUCKET_MS / 86400000;          // 30
+const MEAN_MATURITY_DAYS = BUCKET_DAYS / 2;        // 15, average aging available in the latest bucket
 
 function toNum(v) {
   if (v === null || v === undefined) return null;
@@ -267,7 +269,7 @@ function ruleVolumeQualityMismatch(c) {
   return null;
 }
 
-function ruleChannelRoleMismatch(c) {
+function ruleChannelRoleMismatch(c, settings = {}) {
   const d = c.deviations;
   if (!c.hasFlagBaseline) return null;
   const topStrong = d.clickToLead != null && d.clickToLead >= 0;
@@ -278,13 +280,22 @@ function ruleChannelRoleMismatch(c) {
   if (highSpend && topStrong && bottomWeak) {
     const worst = Math.min(d.mqlToOpp ?? 0, d.oppToWon ?? 0);
     const worstMetricKey = (d.mqlToOpp ?? 0) <= (d.oppToWon ?? 0) ? 'mqlToOpp' : 'oppToWon';
+    const mqlToSqlDays = toNum(settings.mqlToSql);
+    const sqlToOppDays = toNum(settings.sqlToOpp);
+    const enteredParts = [];
+    if (mqlToSqlDays != null && mqlToSqlDays > 0) enteredParts.push(`${mqlToSqlDays} days MQL to SQL`);
+    if (sqlToOppDays != null && sqlToOppDays > 0) enteredParts.push(`${sqlToOppDays} days SQL to Opp`);
+    const cycleDays = (mqlToSqlDays > 0 ? mqlToSqlDays : 0) + (sqlToOppDays > 0 ? sqlToOppDays : 0);
+    const cycleCaveat = (enteredParts.length && cycleDays > MEAN_MATURITY_DAYS)
+      ? ` Sales cycle caveat: you entered ${enteredParts.join(' and ')}, a ${cycleDays}-day cycle. Records in this ${BUCKET_DAYS}-day window have had between 0 and ${BUCKET_DAYS} days to mature, ${MEAN_MATURITY_DAYS} on average, so a ${cycleDays}-day cycle is not fully represented in it. Treat this bottom-funnel deviation as directional.`
+      : '';
     const downParts = [];
     if (mqlToOppDown) downParts.push(`MQL-to-Opp ${absPct(d.mqlToOpp)}`);
     if (oppToWonDown) downParts.push(`Opp-to-Won ${absPct(d.oppToWon)}`);
     return {
       id: 'channel_role', name: 'Channel role mismatch', severity: Math.abs(worst),
       channel: c.channel, primaryMetricKey: worstMetricKey,
-      triggerMath: `${c.channel}: spend up ${pct(d.spend)} and top-funnel conversion holding, but bottom-funnel conversion is down (${downParts.join(' and ')}) vs baseline.`,
+      triggerMath: `${c.channel}: spend up ${pct(d.spend)} and top-funnel conversion holding, but bottom-funnel conversion is down (${downParts.join(' and ')}) vs baseline.${cycleCaveat}`,
       plainLanguage: `Strong top-funnel and weak bottom-funnel on rising spend is consistent with ${c.channel} being pushed for cold acquisition when its strength may be warmer, later-funnel roles.`,
       nextStep: `Compare ${c.channel}'s bottom-funnel rates against its own best periods. Consider shifting some spend to retargeting or a warmer audience and re-measuring.`,
       benchmarkContext: c.channel === 'LinkedIn'
@@ -383,7 +394,7 @@ export function runDiagnostics(periods, settings = {}) {
   const findings = [];
   Object.values(channels).forEach(c => {
     const specific = [];
-    perChannelRules.forEach(fn => { const r = fn(c); if (r) specific.push(r); });
+    perChannelRules.forEach(fn => { const r = fn(c, settings); if (r) specific.push(r); });
     // fallback only if no specific per-channel rule fired for this channel
     if (!specific.length) { const fb = ruleDownstreamLeakFallback(c); if (fb) specific.push(fb); }
     findings.push(...specific);
