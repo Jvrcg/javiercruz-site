@@ -292,7 +292,7 @@ function SummaryTab({ model }) {
         padding:"4px 9px",fontSize:11,borderRadius:6,
         border:"none",cursor:"pointer",background:"#2563EB",color:"#fff"
       }}>Download Template</button>
-      <p style={{fontSize:11,color:"#9b9a97",margin:"6px 0 0"}}>syncflow_attribution_template.xlsx — 6 tabs — raw data + pre-built analysis</p>
+      <p style={{fontSize:11,color:"#9b9a97",margin:"6px 0 0"}}>syncflow_attribution_template.xlsx, 6 tabs, raw data + pre-built analysis</p>
     </div>
   </div>;
 }
