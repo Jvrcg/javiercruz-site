@@ -33,7 +33,7 @@ I built a mock version of this using a fictional B2B SaaS company called Syncflo
 Before we get into the build, let me set expectations.
 
 **This framework covers:**
-- Channel-level performance (leads, MQLs, SQLs, closed-won, CPL, ROAS) — this will be part of your MVP
+- Channel-level performance (leads, MQLs, SQLs, closed-won, CPL, ROAS). This will be part of your MVP
 - Multi-touch attribution modeling with four model types
 - Seasonality-adjusted monthly and quarterly pacing against annual goals: this will be part of your MVP
 - Deal efficiency by buyer seniority and sales motion
