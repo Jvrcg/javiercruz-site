@@ -4,7 +4,6 @@ const navLinks = [
   { href: '/playbooks', label: 'Playbooks' },
   { href: '/lab-notes', label: 'Lab Notes' },
   { href: '/tools', label: 'Tools' },
-  { href: '/newsletter', label: 'Newsletter' },
   { href: '/about', label: 'About' },
 ];
 
@@ -24,28 +23,37 @@ const currentPath = Astro.url.pathname;
       Javier Cruz Galera
     </a>
 
-    <ul class="flex items-center gap-6 list-none m-0 p-0" role="list">
-      {navLinks.map(({ href, label }) => {
-        const isActive =
-          href === '/'
-            ? currentPath === '/'
-            : currentPath.startsWith(href);
-        return (
-          <li>
-            <a
-              href={href}
-              class={`text-sm font-medium transition-colors ${
-                isActive
-                  ? 'text-blue-600'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-              aria-current={isActive ? 'page' : undefined}
-            >
-              {label}
-            </a>
-          </li>
-        );
-      })}
-    </ul>
+    <div class="flex items-center gap-6 min-w-0 flex-1 justify-end">
+      <ul class="flex items-center gap-6 list-none m-0 p-0 overflow-x-auto min-w-0" role="list">
+        {navLinks.map(({ href, label }) => {
+          const isActive =
+            href === '/'
+              ? currentPath === '/'
+              : currentPath.startsWith(href);
+          return (
+            <li>
+              <a
+                href={href}
+                class={`text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+                aria-current={isActive ? 'page' : undefined}
+              >
+                {label}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+
+      <a
+        href="/contact"
+        class="flex-shrink-0 inline-flex items-center justify-center min-h-11 px-4 py-2 border border-gray-900 rounded-md text-sm font-medium text-gray-900 hover:bg-gray-900 hover:text-white transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-900"
+      >
+        Get in touch
+      </a>
+    </div>
   </nav>
 </header>
