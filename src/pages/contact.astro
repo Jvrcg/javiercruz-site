@@ -162,8 +162,11 @@ const DROPDOWN_OPTIONS = ['Need your services', 'Tool Idea'];
   <!-- Full-bleed gradient: page background -> exact footer bg (#1a1a19), so it
        meets the footer with no seam. Breaks out of the article's max-w-2xl
        column on purpose; inner div below re-applies that same column width
-       so the text lines up exactly as it did before. -->
-  <div class="bg-linear-to-b from-white to-[#1a1a19]">
+       so the text lines up exactly as it did before. The "to" stop is
+       pinned to 40px (== the pt-10 below, the heading's top offset) so the
+       transition fully completes before any text starts — the heading down
+       to the footer all sit on solid #1a1a19, not the transition zone. -->
+  <div class="bg-linear-to-b from-white to-[#1a1a19] to-[40px]">
     <div class="max-w-2xl mx-auto px-6 pt-10 pb-20">
       <section>
         <h2 class="text-lg font-semibold mb-3" style="color: #ffffff;">What to include</h2>
