@@ -10,7 +10,7 @@ const DROPDOWN_OPTIONS = ['Need your services', 'Tool Idea'];
   title="Contact | Javier Cruz Galera"
   description="Get in touch with Javier Cruz Galera, a B2B SaaS performance marketer based online. Best reached via LinkedIn or email."
 >
-  <article class="max-w-2xl mx-auto px-6 pt-20">
+  <article class="max-w-2xl mx-auto px-6 py-20">
 
     <header class="mb-14">
       <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-3">Contact</p>
@@ -153,33 +153,18 @@ const DROPDOWN_OPTIONS = ['Need your services', 'Tool Idea'];
       <span id="contact-conversion-email" hidden></span>
     </section>
 
-    <!-- Divider stays on the light page background; the gradient below starts
-         after it, per design spec (rule must render on the light bg). -->
-    <div class="mt-14 border-t border-gray-100" aria-hidden="true"></div>
+    <section class="mt-14 border-t border-gray-100 pt-10">
+      <h2 class="text-lg font-semibold text-gray-900 mb-3">What to include</h2>
+      <p class="text-gray-600 mb-4">
+        To make our first conversation as useful as possible, please share:
+      </p>
+      <ul class="list-disc list-inside space-y-2 text-gray-600">
+        <li>What you're working on and your current marketing situation</li>
+        <li>The role, opportunity, or conversation type you have in mind</li>
+      </ul>
+    </section>
 
   </article>
-
-  <!-- Full-bleed gradient: page background -> exact footer bg (#1a1a19), so it
-       meets the footer with no seam. Breaks out of the article's max-w-2xl
-       column on purpose; inner div below re-applies that same column width
-       so the text lines up exactly as it did before. The "to" stop is
-       pinned to 40px (== the pt-10 below, the heading's top offset) so the
-       transition fully completes before any text starts — the heading down
-       to the footer all sit on solid #1a1a19, not the transition zone. -->
-  <div class="bg-linear-to-b from-white to-[#1a1a19] to-[40px]">
-    <div class="max-w-2xl mx-auto px-6 pt-10 pb-20">
-      <section>
-        <h2 class="text-lg font-semibold mb-3" style="color: #ffffff;">What to include</h2>
-        <p class="mb-4" style="color: #9b9a97;">
-          To make our first conversation as useful as possible, please share:
-        </p>
-        <ul class="list-disc list-inside space-y-2" style="color: #9b9a97;">
-          <li>What you're working on and your current marketing situation</li>
-          <li>The role, opportunity, or conversation type you have in mind</li>
-        </ul>
-      </section>
-    </div>
-  </div>
 
   <script
     is:inline
