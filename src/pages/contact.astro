@@ -1,5 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY;
+const NOTE_MAX_LENGTH = 600;
+const DROPDOWN_OPTIONS = ['Need your services', 'Tool Idea'];
 ---
 
 <BaseLayout
@@ -43,6 +47,112 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     </section>
 
+    <section class="mt-14 border-t border-gray-100 pt-10" aria-labelledby="contact-form-heading">
+      <h2 id="contact-form-heading" class="text-lg font-semibold text-gray-900 mb-1">Or send a message directly</h2>
+      <p class="text-gray-600 mb-8">I'll reply to the email address you provide, usually within 48 hours.</p>
+
+      <div
+        id="contact-error-summary"
+        class="hidden border border-red-200 bg-red-50 rounded-xl p-4 mb-6"
+        role="alert"
+        tabindex="-1"
+      >
+        <p class="font-semibold text-red-700 mb-2">There was a problem with your submission</p>
+        <ul id="contact-error-list" class="list-disc list-inside space-y-1 text-sm text-red-700"></ul>
+      </div>
+
+      <div id="contact-success" class="hidden border border-blue-100 bg-blue-50 rounded-xl p-6" role="status">
+        <p class="font-semibold text-gray-900 mb-1">Thanks — your message is on its way.</p>
+        <p class="text-gray-600 text-sm">I'll get back to you within 48 hours.</p>
+      </div>
+
+      <form id="contact-form" class="space-y-6" novalidate>
+        <div>
+          <label for="contact-name" class="block text-sm font-medium text-gray-900 mb-1.5">Name</label>
+          <input
+            type="text"
+            id="contact-name"
+            name="name"
+            required
+            aria-describedby="contact-name-error"
+            class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+          />
+          <p id="contact-name-error" class="text-sm text-red-600 mt-1.5 hidden"></p>
+        </div>
+
+        <div>
+          <label for="contact-email" class="block text-sm font-medium text-gray-900 mb-1.5">Email</label>
+          <input
+            type="email"
+            id="contact-email"
+            name="email"
+            required
+            aria-describedby="contact-email-error"
+            class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+          />
+          <p id="contact-email-error" class="text-sm text-red-600 mt-1.5 hidden"></p>
+        </div>
+
+        <div>
+          <label for="contact-reason" class="block text-sm font-medium text-gray-900 mb-1.5">What's this about?</label>
+          <select
+            id="contact-reason"
+            name="reason"
+            required
+            aria-describedby="contact-reason-error"
+            class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+          >
+            {DROPDOWN_OPTIONS.map((option) => <option value={option}>{option}</option>)}
+          </select>
+          <p id="contact-reason-error" class="text-sm text-red-600 mt-1.5 hidden"></p>
+        </div>
+
+        <div>
+          <label for="contact-note" class="block text-sm font-medium text-gray-900 mb-1.5">Note</label>
+          <textarea
+            id="contact-note"
+            name="note"
+            rows="5"
+            maxlength={NOTE_MAX_LENGTH}
+            aria-describedby="contact-note-counter contact-note-error"
+            class="w-full border border-gray-200 rounded-lg px-4 py-2.5 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+          ></textarea>
+          <p id="contact-note-counter" class="text-sm text-gray-500 mt-1.5" aria-live="polite">
+            {NOTE_MAX_LENGTH} characters remaining
+          </p>
+          <p id="contact-note-error" class="text-sm text-red-600 mt-1.5 hidden"></p>
+        </div>
+
+        <!-- Honeypot field: hidden from sighted users, off-screen (not display:none)
+             so bots that inspect basic visibility still tend to fill it. -->
+        <div style="position:absolute; left:-9999px; top:-9999px; height:0; overflow:hidden;" aria-hidden="true">
+          <label for="contact-company">Company</label>
+          <input type="text" id="contact-company" name="company" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div>
+          <div id="turnstile-container"></div>
+          <p id="contact-submit-hint" class="text-sm text-gray-500 mt-2" aria-live="polite">
+            Complete the verification above to enable the submit button.
+          </p>
+        </div>
+
+        <button
+          type="submit"
+          id="contact-submit"
+          disabled
+          aria-describedby="contact-submit-hint"
+          class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600"
+        >
+          Send message
+        </button>
+      </form>
+
+      <!-- Read by the GTM "user-provided data" (Enhanced Conversions) tag on
+           genuine submit. Selector: #contact-conversion-email -->
+      <span id="contact-conversion-email" hidden></span>
+    </section>
+
     <section class="mt-14 border-t border-gray-100 pt-10">
       <h2 class="text-lg font-semibold text-gray-900 mb-3">What to include</h2>
       <p class="text-gray-600 mb-4">
@@ -56,4 +166,211 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     </section>
 
   </article>
+
+  <script
+    is:inline
+    src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit"
+    async
+    defer
+  ></script>
+
+  <script define:vars={{ turnstileSiteKey, NOTE_MAX_LENGTH, DROPDOWN_OPTIONS }}>
+    const form = document.getElementById('contact-form');
+    const nameInput = document.getElementById('contact-name');
+    const emailInput = document.getElementById('contact-email');
+    const reasonSelect = document.getElementById('contact-reason');
+    const noteInput = document.getElementById('contact-note');
+    const noteCounter = document.getElementById('contact-note-counter');
+    const honeypotInput = document.getElementById('contact-company');
+    const submitButton = document.getElementById('contact-submit');
+    const errorSummary = document.getElementById('contact-error-summary');
+    const errorList = document.getElementById('contact-error-list');
+    const successBox = document.getElementById('contact-success');
+    const conversionEmailEl = document.getElementById('contact-conversion-email');
+
+    const fieldErrorEls = {
+      name: document.getElementById('contact-name-error'),
+      email: document.getElementById('contact-email-error'),
+      reason: document.getElementById('contact-reason-error'),
+      note: document.getElementById('contact-note-error'),
+    };
+    const fieldInputEls = {
+      name: nameInput,
+      email: emailInput,
+      reason: reasonSelect,
+      note: noteInput,
+    };
+
+    let turnstileWidgetId = null;
+    let turnstileToken = null;
+    let submitting = false;
+
+    const submitHint = document.getElementById('contact-submit-hint');
+
+    function updateSubmitState() {
+      const shouldEnable = Boolean(turnstileToken) && !submitting;
+      submitButton.disabled = !shouldEnable;
+      submitButton.setAttribute('aria-disabled', String(!shouldEnable));
+      if (submitting) {
+        submitHint.textContent = 'Sending your message…';
+      } else if (!turnstileToken) {
+        submitHint.textContent = 'Complete the verification above to enable the submit button.';
+      } else {
+        submitHint.textContent = 'Verification complete. Ready to send.';
+      }
+    }
+
+    function updateNoteCounter() {
+      if (noteInput.value.length > NOTE_MAX_LENGTH) {
+        noteInput.value = noteInput.value.slice(0, NOTE_MAX_LENGTH);
+      }
+      const remaining = NOTE_MAX_LENGTH - noteInput.value.length;
+      noteCounter.textContent = `${remaining} character${remaining === 1 ? '' : 's'} remaining`;
+    }
+
+    noteInput.addEventListener('input', updateNoteCounter);
+    updateNoteCounter();
+
+    function clearErrors() {
+      errorSummary.classList.add('hidden');
+      errorList.innerHTML = '';
+      for (const key of Object.keys(fieldErrorEls)) {
+        fieldErrorEls[key].classList.add('hidden');
+        fieldErrorEls[key].textContent = '';
+        fieldInputEls[key].removeAttribute('aria-invalid');
+      }
+    }
+
+    function showFieldErrors(fields, fallbackMessage) {
+      errorList.innerHTML = '';
+      const messages = fields || { form: fallbackMessage };
+      for (const [key, message] of Object.entries(messages)) {
+        const li = document.createElement('li');
+        li.textContent = message;
+        errorList.appendChild(li);
+
+        const fieldEl = fieldErrorEls[key];
+        const inputEl = fieldInputEls[key];
+        if (fieldEl && inputEl) {
+          fieldEl.textContent = message;
+          fieldEl.classList.remove('hidden');
+          inputEl.setAttribute('aria-invalid', 'true');
+        }
+      }
+      errorSummary.classList.remove('hidden');
+      errorSummary.focus();
+    }
+
+    function onTurnstileSuccess(token) {
+      turnstileToken = token;
+      updateSubmitState();
+    }
+
+    function onTurnstileExpired() {
+      turnstileToken = null;
+      updateSubmitState();
+      if (turnstileWidgetId !== null && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId);
+      }
+    }
+
+    function onTurnstileError() {
+      turnstileToken = null;
+      updateSubmitState();
+    }
+
+    function waitForTurnstile() {
+      if (window.turnstile) {
+        turnstileWidgetId = window.turnstile.render('#turnstile-container', {
+          sitekey: turnstileSiteKey,
+          theme: 'light',
+          callback: onTurnstileSuccess,
+          'expired-callback': onTurnstileExpired,
+          'error-callback': onTurnstileError,
+        });
+        return;
+      }
+      setTimeout(waitForTurnstile, 50);
+    }
+    waitForTurnstile();
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (submitting || !turnstileToken) return;
+
+      clearErrors();
+      submitting = true;
+      updateSubmitState();
+
+      const payload = {
+        name: nameInput.value.trim(),
+        email: emailInput.value.trim(),
+        reason: reasonSelect.value,
+        note: noteInput.value,
+        honeypot: honeypotInput.value,
+        turnstileToken,
+      };
+
+      try {
+        const response = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        let data = {};
+        try {
+          data = await response.json();
+        } catch {
+          data = {};
+        }
+
+        if (response.status === 429) {
+          showFieldErrors(null, data.message || 'Too many submissions. Please try again in an hour.');
+          return;
+        }
+
+        if (data.error === 'validation_failed') {
+          showFieldErrors(data.fields, 'Please check the highlighted fields.');
+          return;
+        }
+
+        if (data.error === 'turnstile_failed') {
+          showFieldErrors(null, data.message || 'Verification failed. Please complete the challenge again.');
+          turnstileToken = null;
+          if (turnstileWidgetId !== null && window.turnstile) {
+            window.turnstile.reset(turnstileWidgetId);
+          }
+          return;
+        }
+
+        if (!response.ok || data.error === 'send_failed' || !data.success) {
+          showFieldErrors(
+            null,
+            data.message || 'Something went wrong sending your message. Please reach out on LinkedIn instead.'
+          );
+          return;
+        }
+
+        // Genuine success. Order matters: write the conversion element to the
+        // DOM first, then push to dataLayer, so the GTM Enhanced Conversions
+        // tag has something to read at the moment the event fires.
+        conversionEmailEl.textContent = payload.email;
+
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ event: 'contact_form_submit', form_type: payload.reason });
+
+        form.classList.add('hidden');
+        successBox.classList.remove('hidden');
+      } catch {
+        showFieldErrors(
+          null,
+          'Something went wrong sending your message. Please reach out on LinkedIn instead.'
+        );
+      } finally {
+        submitting = false;
+        updateSubmitState();
+      }
+    });
+  </script>
 </BaseLayout>

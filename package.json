@@ -14,10 +14,12 @@
   "dependencies": {
     "@astrojs/react": "^5.0.7",
     "@astrojs/sitemap": "^3.7.2",
+    "@astrojs/vercel": "^10.0.8",
     "@tailwindcss/vite": "^4.3.0",
     "astro": "^6.3.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
+    "resend": "^6.25.0",
     "tailwindcss": "^4.3.0"
   },
   "devDependencies": {
