@@ -18,7 +18,7 @@ const DROPDOWN_OPTIONS = ['Need your services', 'Tool Idea'];
         Let's talk.
       </h1>
       <p class="text-lg text-gray-600">
-        I try to respond within 48 hours.
+        I try my best to respond within 48 hours.
       </p>
     </header>
 
@@ -49,7 +49,6 @@ const DROPDOWN_OPTIONS = ['Need your services', 'Tool Idea'];
 
     <section class="mt-14 border-t border-gray-100 pt-10" aria-labelledby="contact-form-heading">
       <h2 id="contact-form-heading" class="text-lg font-semibold text-gray-900 mb-1">Or send a message directly</h2>
-      <p class="text-gray-600 mb-8">I'll reply to the email address you provide, usually within 48 hours.</p>
 
       <div
         id="contact-error-summary"
@@ -107,6 +106,10 @@ const DROPDOWN_OPTIONS = ['Need your services', 'Tool Idea'];
           <p id="contact-reason-error" class="text-sm text-red-600 mt-1.5 hidden"></p>
         </div>
 
+        <p class="text-xs text-gray-500">
+          Share what you are working on, your current marketing situation, and the specific role, opportunity, or conversation type you have in mind.
+        </p>
+
         <div>
           <label for="contact-note" class="block text-sm font-medium text-gray-900 mb-1.5">Note</label>
           <textarea
@@ -151,17 +154,6 @@ const DROPDOWN_OPTIONS = ['Need your services', 'Tool Idea'];
       <!-- Read by the GTM "user-provided data" (Enhanced Conversions) tag on
            genuine submit. Selector: #contact-conversion-email -->
       <span id="contact-conversion-email" hidden></span>
-    </section>
-
-    <section class="mt-14 border-t border-gray-100 pt-10">
-      <h2 class="text-lg font-semibold text-gray-900 mb-3">What to include</h2>
-      <p class="text-gray-600 mb-4">
-        To make our first conversation as useful as possible, please share:
-      </p>
-      <ul class="list-disc list-inside space-y-2 text-gray-600">
-        <li>What you're working on and your current marketing situation</li>
-        <li>The role, opportunity, or conversation type you have in mind</li>
-      </ul>
     </section>
 
   </article>
