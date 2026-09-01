@@ -22,34 +22,7 @@ const DROPDOWN_OPTIONS = ['Need your services', 'Tool Idea'];
       </p>
     </header>
 
-    <section aria-label="Contact options" class="space-y-6">
-
-      <!-- LinkedIn -->
-      <div class="flex items-start gap-4 border border-gray-100 rounded-xl p-6">
-        <div class="flex-shrink-0 w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center" aria-hidden="true">
-          <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-          </svg>
-        </div>
-        <div>
-          <h2 class="font-semibold text-gray-900 mb-1">LinkedIn</h2>
-          <a
-            href="https://www.linkedin.com/in/javiercruzgalera/"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            linkedin.com/in/javiercruzgalera
-          </a>
-          <p class="text-sm text-gray-500 mt-1">Shoot me a message</p>
-        </div>
-      </div>
-
-    </section>
-
-    <section class="mt-14 border-t border-gray-100 pt-10" aria-labelledby="contact-form-heading">
-      <h2 id="contact-form-heading" class="text-lg font-semibold text-gray-900 mb-1">Or send a message directly</h2>
-
+    <section class="mt-14 border-t border-gray-100 pt-10" aria-label="Or send a message directly">
       <div
         id="contact-error-summary"
         class="hidden border border-red-200 bg-red-50 rounded-xl p-4 mb-6"
@@ -154,6 +127,10 @@ const DROPDOWN_OPTIONS = ['Need your services', 'Tool Idea'];
       <!-- Read by the GTM "user-provided data" (Enhanced Conversions) tag on
            genuine submit. Selector: #contact-conversion-email -->
       <span id="contact-conversion-email" hidden></span>
+
+      <p class="mt-6 text-sm text-gray-600">
+        Or send a message directly on <a href="https://www.linkedin.com/in/javiercruzgalera" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 transition-colors">LinkedIn</a>.
+      </p>
     </section>
 
   </article>
