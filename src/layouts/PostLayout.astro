@@ -126,6 +126,7 @@ const backLabel = collection === 'playbooks' ? 'Playbooks' : 'Lab Notes';
       document.addEventListener('DOMContentLoaded', () => {
         const images = document.querySelectorAll('.prose img');
         images.forEach((img) => {
+          if (img.closest('a')) return;
           img.style.cursor = 'zoom-in';
           img.addEventListener('click', () => {
             const overlay = document.createElement('div');
