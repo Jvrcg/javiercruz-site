@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Google Ads Conversion Tracking: A Manual for B2B Marketers</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F6F8FA; --card:#FFFFFF;
+    --ink:#14161A; --ink-2:#454D57; --ink-3:#79828C;
+    --rule:#DCE2E8; --rule-2:#EDF1F4;
+    --signal:#1F5FD9; --signal-soft:#E7EEFB;
+    --warn:#B45309; --warn-soft:#FBF0E2;
+    --ok:#1B7A4B; --ok-soft:#E4F2EA;
+    --dev:#5B21B6; --dev-soft:#F1EBFC;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:"IBM Plex Sans",system-ui,sans-serif;
+    font-size:17px; line-height:1.6; -webkit-font-smoothing:antialiased;}
+  code{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:0.86em;
+    background:var(--signal-soft); color:#12336F; padding:0.1em 0.36em; border-radius:3px; word-break:break-word;}
+  .wrap{max-width:820px; margin:0 auto; padding:0 28px 120px;}
+  p{margin:0 0 14px; max-width:68ch;}
+  ul{margin:0 0 14px; padding-left:22px; max-width:68ch;}
+  li{margin-bottom:6px;}
+  a{color:var(--signal);}
+
+  header.masthead{border-bottom:2px solid var(--ink); padding:70px 0 26px; margin-bottom:30px;}
+  .doctype{font-family:"IBM Plex Mono",monospace; font-size:0.78rem; color:var(--signal); margin:0 0 14px; letter-spacing:0.04em;}
+  h1{font-size:clamp(1.9rem,4.6vw,2.7rem); line-height:1.1; letter-spacing:-0.025em; font-weight:700; margin:0 0 16px; max-width:20ch;}
+  .standfirst{font-size:1.08rem; color:var(--ink-2); max-width:62ch; margin:0 0 22px;}
+  .meta{display:flex; flex-wrap:wrap; gap:8px 26px; font-size:0.84rem; color:var(--ink-3); border-top:1px solid var(--rule); padding-top:14px;}
+  .meta span strong{color:var(--ink-2); font-weight:500;}
+
+  /* time panel */
+  .timebox{background:var(--card); border:1px solid var(--rule); padding:20px 24px; margin:0 0 30px;}
+  .timebox h2{font-size:0.8rem; font-family:"IBM Plex Mono",monospace; color:var(--ink-3); border:none; padding:0; margin:0 0 16px; letter-spacing:0.04em; font-weight:500;}
+  .timerow{display:grid; grid-template-columns:1fr 128px; gap:0 20px; padding:9px 0; border-bottom:1px solid var(--rule-2); font-size:0.94rem;}
+  .timerow:last-of-type{border-bottom:none;}
+  .timerow .t{text-align:right; font-family:"IBM Plex Mono",monospace; font-size:0.84rem; color:var(--ink-2); white-space:nowrap;}
+  .timerow.total{border-top:1.5px solid var(--ink); border-bottom:none; margin-top:6px; padding-top:11px; font-weight:600;}
+  .timerow.total .t{color:var(--ink);}
+  .timerow .opt{font-size:0.72rem; color:var(--ink-3); font-weight:400;}
+  .timenote{font-size:0.86rem; color:var(--ink-3); margin:16px 0 0; padding-top:14px; border-top:1px solid var(--rule);}
+
+  .contents{background:var(--card); border:1px solid var(--rule); padding:22px 26px; margin:0 0 52px;}
+  .contents h2{font-size:0.8rem; font-family:"IBM Plex Mono",monospace; color:var(--ink-3); border:none; padding:0; margin:0 0 14px; letter-spacing:0.04em; font-weight:500;}
+  .contents ol{list-style:none; padding:0; margin:0; max-width:none;}
+  .contents > ol > li{padding:7px 0; border-bottom:1px solid var(--rule-2); font-size:0.96rem;}
+  .contents > ol > li:last-child{border:none;}
+  .contents a{text-decoration:none; color:var(--ink); font-weight:500;}
+  .contents a:hover{color:var(--signal);}
+  .contents .cnum{font-family:"IBM Plex Mono",monospace; color:var(--signal); font-size:0.84rem; margin-right:12px;}
+  .contents .stop{background:var(--ok-soft); color:#12522F; font-size:0.76rem; font-weight:600; padding:6px 12px; margin:4px 0; border-left:2px solid var(--ok);}
+
+  .chapter{margin:0 0 20px; padding:26px 0 0; border-top:3px solid var(--ink);}
+  .chapter-kicker{font-family:"IBM Plex Mono",monospace; font-size:0.78rem; color:var(--signal); margin:0 0 8px;}
+  .chapter-kicker .badge{background:var(--signal-soft); padding:2px 7px; border-radius:2px; margin-left:8px;}
+  .chapter-kicker .badge.opt{background:var(--dev-soft); color:#5B21B6;}
+  .chapter h2{font-size:1.7rem; letter-spacing:-0.02em; line-height:1.18; font-weight:600; margin:0 0 12px; border:none; padding:0;}
+  .chapter-intro{font-size:1rem; color:var(--ink-2); max-width:66ch; margin:0 0 6px;}
+  .chapter-loc{font-size:0.83rem; color:var(--ink-3); margin:12px 0 0; padding-top:12px; border-top:1px solid var(--rule); display:flex; flex-wrap:wrap; gap:4px 24px;}
+  .chapter-loc strong{color:var(--ink-2); font-weight:500;}
+
+  h2{font-size:1.5rem; letter-spacing:-0.018em; font-weight:600; margin:0 0 6px; padding-top:20px; border-top:1px solid var(--ink);}
+  .section-sub{color:var(--ink-3); font-size:0.92rem; margin:0 0 22px; max-width:64ch;}
+  h3{font-size:1.04rem; font-weight:600; margin:26px 0 8px;}
+
+  .step{background:var(--card); border:1px solid var(--rule); margin:0 0 14px;}
+  .step-head{padding:16px 22px 0;}
+  .step-head h3{margin:0; font-size:1.05rem; font-weight:600; letter-spacing:-0.008em; display:flex; gap:12px; align-items:baseline;}
+  .step-head h3 .n{font-family:"IBM Plex Mono",monospace; font-size:0.84rem; color:var(--signal); font-weight:500; flex:0 0 auto;}
+  .step-body{padding:12px 22px 18px;}
+
+  .clicks{list-style:none; padding:0; margin:0 0 4px;}
+  .clicks li{display:grid; grid-template-columns:52px 1fr; gap:0 12px; padding:7px 0; border-bottom:1px solid var(--rule-2); font-size:0.95rem;}
+  .clicks li:last-child{border-bottom:none;}
+  .clicks .sn{font-family:"IBM Plex Mono",monospace; font-size:0.79rem; color:var(--ink-3); padding-top:3px;}
+  .clicks .sc strong{font-weight:600;}
+  .clicks .sc em{color:var(--ink-3); font-style:normal; font-size:0.9em; display:block; margin-top:2px;}
+
+  .explain{border-top:1px solid var(--rule); margin:14px -22px 0; padding:16px 22px 0; background:#FCFDFE;}
+  .explain h4{margin:0 0 8px; font-size:0.82rem; font-family:"IBM Plex Mono",monospace; color:var(--ink-3); letter-spacing:0.04em; font-weight:500;}
+  .explain p{font-size:0.95rem; color:var(--ink-2); margin:0 0 12px;}
+  .explain p:last-child{margin:0;}
+  .explain ul{font-size:0.95rem; color:var(--ink-2); margin-bottom:12px;}
+  .explain h5{font-size:0.95rem; font-weight:600; color:var(--ink); margin:16px 0 6px;}
+
+  .note{border-left:2px solid var(--signal); background:var(--signal-soft); padding:12px 16px; margin:14px 0 0; font-size:0.92rem;}
+  .note p:last-child{margin:0;} .note p{max-width:none; color:#12336F;}
+  .trap{border-left:2px solid var(--warn); background:var(--warn-soft); padding:12px 16px; margin:14px 0 0; font-size:0.92rem;}
+  .trap p:last-child{margin:0;} .trap p{max-width:none; color:#7A3D06;}
+  .gate{background:var(--ok-soft); border-left:2px solid var(--ok); padding:11px 15px; margin:14px 0 0; font-size:0.9rem;}
+  .gate p{margin:0 0 8px; max-width:none; color:#12522F;} .gate p:last-child{margin:0;}
+  .dream{border-left:2px solid var(--dev); background:var(--dev-soft); padding:12px 16px; margin:14px 0 0; font-size:0.92rem;}
+  .dream p{margin:0; max-width:none; color:#3B0F73; font-style:italic;}
+
+  .ask{background:var(--dev-soft); border-left:3px solid var(--dev); padding:16px 20px; margin:14px 0 0;}
+  .ask h5{margin:0 0 4px; font-size:0.93rem; font-weight:600; color:#3B0F73;}
+  .ask .who{font-size:0.78rem; color:#6D4CA8; margin:0 0 10px;}
+  .ask p{font-size:0.92rem; color:#3B0F73; margin:0 0 10px; max-width:none;}
+  .ask p:last-child{margin:0;}
+  .ask code{background:#E4D9F7; color:#3B0F73;}
+
+  .brief{background:var(--dev-soft); border-left:3px solid var(--dev); padding:18px 20px; margin:14px 0 0;}
+  .brief h4{margin:0 0 4px; font-size:0.94rem; font-weight:600; color:#3B0F73; font-family:inherit; letter-spacing:0;}
+  .brief .who{font-size:0.78rem; color:#6D4CA8; margin:0 0 12px;}
+  .brief ol{margin:0; padding-left:20px; max-width:none;}
+  .brief li{font-size:0.92rem; color:#3B0F73; margin-bottom:7px;}
+  .brief code{background:#E4D9F7; color:#3B0F73;}
+
+  .concept{background:var(--card); border:1px solid var(--rule); padding:18px 22px; margin:0 0 12px;}
+  .concept h3{margin:0 0 4px; font-size:1.04rem; font-weight:600;}
+  .concept .loc{font-size:0.78rem; color:var(--ink-3); margin:0 0 10px;}
+  .concept p{font-size:0.95rem; color:var(--ink-2); margin:0 0 10px; max-width:none;}
+  .concept p:last-child{margin:0;}
+  .concept .analogy{background:var(--signal-soft); border-left:2px solid var(--signal); padding:10px 14px; font-size:0.92rem; margin:10px 0 0;}
+  .concept .analogy p{color:#12336F; margin:0;}
+
+  .diagram{background:var(--card); border:1px solid var(--rule); padding:20px 18px 14px; margin:0 0 12px; overflow-x:auto;}
+  .diagram svg{display:block; min-width:660px; width:100%; height:auto;}
+  .caption{font-size:0.83rem; color:var(--ink-3); max-width:66ch; margin:0 0 26px;}
+
+
+  .ts{background:var(--card); border:1px solid var(--rule); padding:18px 22px; margin:0 0 12px;}
+  .ts h4{margin:0 0 12px; font-size:1rem; font-weight:600; font-family:inherit; letter-spacing:0; color:var(--ink);}
+  .ts ol{margin:0; padding-left:20px; max-width:none;}
+  .ts ol li{margin-bottom:9px; font-size:0.94rem; color:var(--ink-2);}
+  .ts ol li strong{color:var(--ink); font-weight:600;}
+
+  .glossary{border-top:1px solid var(--rule); margin:8px 0 26px;}
+  .gl-head{font-family:"IBM Plex Mono",monospace; font-size:0.76rem; color:var(--signal); letter-spacing:0.04em; margin:26px 0 2px;}
+  .term{display:grid; grid-template-columns:190px 1fr; gap:0 24px; padding:14px 0; border-bottom:1px solid var(--rule);}
+  .term dt{font-weight:600; font-size:0.95rem; line-height:1.4;}
+  .term dt .where{display:block; font-weight:400; font-size:0.73rem; color:var(--ink-3); margin-top:2px;}
+  .term dd{margin:0; color:var(--ink-2); font-size:0.93rem;}
+
+  .sources li{margin-bottom:8px; color:var(--ink-2); font-size:0.92rem;}
+  .rec{background:var(--card); border:1px solid var(--rule); border-left:3px solid var(--ok); padding:16px 20px; margin:20px 0 0;}
+  .rec h4{margin:0 0 8px; font-size:0.98rem; font-weight:600;}
+  .rec p{font-size:0.93rem; color:var(--ink-2); margin:0 0 10px;}
+  .rec p:last-child{margin:0;}
+
+  footer{border-top:1px solid var(--rule); padding-top:20px; font-size:0.85rem; color:var(--ink-3); max-width:66ch;}
+
+  @media (max-width:640px){
+    body{font-size:16px;}
+    .wrap{padding:0 18px 80px;}
+    header.masthead{padding-top:44px;}
+    .term{grid-template-columns:1fr; gap:4px;}
+    .step-body,.step-head{padding-left:16px; padding-right:16px;}
+    .explain{margin-left:-16px; margin-right:-16px; padding-left:16px; padding-right:16px;}
+    .clicks li{grid-template-columns:42px 1fr; gap:0 8px;}
+    .contents,.timebox{padding:18px;}
+    .timerow{grid-template-columns:1fr 100px; gap:0 10px;}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="masthead">
+  <p class="doctype">MANUAL · B2B PAID SEARCH</p>
+  <h1>Google Ads conversion tracking, start to finish</h1>
+  <p class="standfirst">Written for marketers rather than developers. Every click is numbered, and every step carries the reasoning behind it.</p>
+  <div class="meta">
+    <span><strong>Worked example</strong> A contact form on a B2B site</span>
+    <span><strong>Tools</strong> Google Ads · Tag Manager · GA4</span>
+    <span><strong>Current as of</strong> September 2026</span>
+  </div>
+</header>
+
+<!-- ===== TIME ===== -->
+<div class="timebox">
+  <h2>HOW LONG THIS TAKES</h2>
+
+  <div class="timerow"><span>Chapter 2 &mdash; Decide and check what exists</span><span class="t">20&ndash;30 min</span></div>
+  <div class="timerow"><span>Chapter 3 &mdash; Brief the website change <span class="opt">your part only</span></span><span class="t">15 min</span></div>
+  <div class="timerow"><span>Chapter 3 &mdash; Waiting on the developer <span class="opt">the real variable</span></span><span class="t">1 hour &ndash; 2 weeks</span></div>
+  <div class="timerow"><span>Chapter 4 &mdash; Create the conversion action</span><span class="t">20&ndash;30 min</span></div>
+  <div class="timerow"><span>Chapter 5 &mdash; Wire it up in Tag Manager</span><span class="t">20 min</span></div>
+  <div class="timerow"><span>Chapter 6 &mdash; Publish and verify</span><span class="t">15 min</span></div>
+  <div class="timerow"><span>Chapter 7 &mdash; Enhanced conversions <span class="opt">optional</span></span><span class="t">25 min</span></div>
+  <div class="timerow total"><span>Your hands-on time, required path</span><span class="t">~1.5&ndash;2 hours</span></div>
+
+  <p class="timenote"><strong>Then you wait, twice.</strong></p>
+  <p class="timenote" style="border:none; padding-top:0; margin-top:4px;">
+    <strong>A few hours</strong> before your first test conversion appears in Google Ads reporting. Do not conclude anything is broken before this.<br><br>
+    <strong>Two to four weeks</strong> before you have enough conversion volume to make decisions from. Do not change bidding strategy, judge keyword performance, or draw conclusions about campaign quality until the account has accumulated real data. Building the tracking is the fast part; earning the right to act on it is not.
+  </p>
+  <p class="timenote" style="border:none; padding-top:0; font-size:0.82rem;">These are estimates from a live build, not measured averages. Chapter 3 is the one that varies most, because it depends on somebody else's queue.</p>
+</div>
+
+<nav class="contents">
+  <h2>CONTENTS</h2>
+  <ol>
+    <li><a href="#ch0"><span class="cnum">0</span>Before you begin</a></li>
+    <li><a href="#ch1"><span class="cnum">1</span>How the system works</a></li>
+    <li><a href="#ch2"><span class="cnum">2</span>Decide what counts, and check what exists</a></li>
+    <li><a href="#ch3"><span class="cnum">3</span>Make your website announce the action</a></li>
+    <li><a href="#ch4"><span class="cnum">4</span>Create the conversion action in Google Ads</a></li>
+    <li><a href="#ch5"><span class="cnum">5</span>Wire it up in Google Tag Manager</a></li>
+    <li><a href="#ch6"><span class="cnum">6</span>Publish and verify</a></li>
+  </ol>
+  <p class="stop">Conversion tracking is working at the end of Chapter 6. Everything below is optional.</p>
+  <ol>
+    <li><a href="#ch7"><span class="cnum">7</span>Add enhanced conversions <span style="color:#79828C; font-weight:400;">optional</span></a></li>
+    <li><a href="#ts"><span class="cnum">A</span>Troubleshooting by symptom</a></li>
+    <li><a href="#gl"><span class="cnum">B</span>Glossary, in chapter order</a></li>
+    <li><a href="#src"><span class="cnum">C</span>Sources and further reading</a></li>
+  </ol>
+</nav>
+
+<!-- ================= CHAPTER 0 ================= -->
+<div class="chapter" id="ch0">
+  <p class="chapter-kicker">CHAPTER 0</p>
+  <h2>Before you begin</h2>
+  <p class="chapter-intro">What this manual covers, who it is for, and what you need in place before step one.</p>
+</div>
+
+<h3>0.1 What you are trying to achieve</h3>
+<p>Get Google Ads to record a conversion every time someone completes a meaningful action on your website, so you can see which keywords and ads produced real leads, and so automated bidding has something worth optimizing toward.</p>
+<p>Without it you can see clicks and cost, but not results. Every optimization decision becomes a guess, and Smart Bidding has nothing to learn from.</p>
+
+<h3>0.2 Why this takes six chapters and not one setting</h3>
+<p><strong>Google Ads does not watch your website.</strong> It sits and waits for a signal to arrive. Everything in this manual exists to build that signal, label it correctly, and deliver it to the right address.</p>
+<p>Three consequences follow, and they explain most of the difficulty:</p>
+<ul>
+  <li>If nothing sends the signal, Google Ads reports zero and gives you no error.</li>
+  <li>If the signal goes to the wrong address, same result.</li>
+  <li>If it arrives at the wrong moment, it may record but carry incomplete data, which looks fine until you go looking months later.</li>
+</ul>
+<p>One symptom, many possible causes. That is why each chapter ends with a verification gate, and why Appendix A is organized by symptom rather than by cause.</p>
+
+<h3>0.3 Two paths through this manual</h3>
+<p>Chapters 2 through 6 are the <strong>required path</strong>. Complete them and you have working conversion tracking.</p>
+<p>Chapter 7 adds <strong>enhanced conversions</strong>, which improves how reliably Google matches your conversions but does not create conversions that would not otherwise exist. It is genuinely optional and it adds a website requirement, so it lives in its own chapter rather than being scattered through the others.</p>
+<p>The only place the two paths touch before Chapter 7 is the brief in step 3.1, which contains two extra points you include only if you intend to do Chapter 7. Decide now so you brief the change once.</p>
+
+<h3>0.4 Scope</h3>
+<ul>
+  <li><strong>B2B lead generation.</strong> The worked example is a contact form. The same structure applies to demo requests, trials, and gated content.</li>
+  <li><strong>A custom-built website</strong> where you can brief a developer or an AI coding tool. Hosted platforms have their own, usually simpler paths. The concepts still apply; the implementation details do not.</li>
+  <li><strong>Out of scope:</strong> consent mode implementation, attribution modeling, offline conversion import from a CRM. Each is named where it becomes relevant.</li>
+</ul>
+
+<h3>0.5 Prerequisites</h3>
+<p>Confirm all four before starting, rather than discovering a gap in Chapter 4.</p>
+<ul>
+  <li>Admin access to a Google Ads account</li>
+  <li>Admin access to a Google Tag Manager account</li>
+  <li>Google Tag Manager already installed on your website</li>
+  <li>Someone who can make a small change to your website, whether a developer, an agency, or an AI coding tool</li>
+</ul>
+
+<!-- ================= CHAPTER 1 ================= -->
+<div class="chapter" id="ch1">
+  <p class="chapter-kicker">CHAPTER 1</p>
+  <h2>How the system works</h2>
+  <p class="chapter-intro">Read this before touching anything. Every chapter that follows assumes you know these terms and how they connect. Skipping it is the main reason people find the steps confusing.</p>
+</div>
+
+<h3>1.1 The three places work happens</h3>
+<p>You will move between three environments, and knowing which one you are in at any moment removes most of the confusion.</p>
+<ul>
+  <li><strong>Your website.</strong> Where the action happens and where the announcement originates. Chapter 3.</li>
+  <li><strong>Google Tag Manager.</strong> The switchboard in the middle. It listens to your website and sends data onward. Chapters 5, 6, and 7.</li>
+  <li><strong>Google Ads.</strong> The destination. It receives the signal and counts it. Chapter 4.</li>
+</ul>
+
+<h3>1.2 Google Tag Manager's own furniture</h3>
+<p>GTM has four concepts of its own that are easy to mix up. Understanding them now makes Chapters 5 and 6 straightforward.</p>
+
+<div class="concept">
+  <h3>Container</h3>
+  <p class="loc">One per website. ID looks like <code>GTM-XXXXXXX</code>.</p>
+  <p>The container is a box of tracking code that sits on every page of your site. A developer installs it once, and from then on you can add, change, and remove tracking inside it without touching the website's code again.</p>
+  <div class="dream"><p>My dream is for this part to be automated or for AI to be able to install it and QA it.</p></div>
+  <p style="margin-top:12px;">Everything you build in this manual lives inside your container: the triggers, the variables, the tags. When someone says "is GTM installed," they mean "is the container on the site."</p>
+  <div class="analogy"><p>Think of it as a plug socket your developer wires into the wall once. After that, you can plug things in and unplug them yourself without calling an electrician.</p></div>
+</div>
+
+<div class="concept">
+  <h3>Workspace</h3>
+  <p class="loc">Your editing area inside the container.</p>
+  <p>When you add a tag or change a trigger, you are editing a draft. That draft is your workspace. Nothing you do there affects your live website.</p>
+  <p>This is why a change can look perfectly configured in GTM and do nothing at all on the site. It is still a draft.</p>
+</div>
+
+<div class="concept">
+  <h3>Version</h3>
+  <p class="loc">A saved snapshot of the container.</p>
+  <p>When you finish editing, you submit your workspace, which creates a numbered version with a name and description. Versions are a history you can look back through, and roll back to if a change causes a problem.</p>
+  <p>Write a real description each time. Six months later, "Version 12" tells you nothing and "Added Google Ads conversion tag for contact form" tells you everything.</p>
+</div>
+
+<div class="concept">
+  <h3>Publishing</h3>
+  <p class="loc">The act of making a version live.</p>
+  <p>Publishing takes a version and pushes it to your website. Until you publish, your visitors are running whatever was published last, no matter what your workspace contains.</p>
+  <div class="analogy"><p>Preview mode runs your draft. The live site runs the last published version. "It worked in Preview but not live" almost always means the container was never published.</p></div>
+</div>
+
+<h3>1.3 The five moving parts</h3>
+<p>These are the pieces you will build. Four of them live in GTM; one lives in Google Ads.</p>
+
+<div class="concept">
+  <h3>Data layer</h3>
+  <p class="loc">On your website &mdash; built in Chapter 3</p>
+  <p>A message board that sits on the page. Your website posts short messages to it, and GTM reads them. Neither side needs to know how the other works, which is the point.</p>
+  <p>Nothing appears there automatically. If your website never posts a message, GTM has nothing to react to. This is the piece most often missing.</p>
+</div>
+
+<div class="concept">
+  <h3>Trigger</h3>
+  <p class="loc">In GTM, answers <em>when</em> &mdash; built in step 5.1</p>
+  <p>A condition GTM watches for. When the condition is met, anything attached to that trigger runs. A trigger does nothing by itself; it only decides the moment.</p>
+  <p>Types include: a page loads, a link is clicked, or, as here, a specific named message appears on the data layer.</p>
+</div>
+
+<div class="concept">
+  <h3>Variable</h3>
+  <p class="loc">In GTM, answers <em>what</em> &mdash; built in Chapter 7</p>
+  <p>A named container holding a value that GTM looks up at the moment a tag fires. You build one whenever a tag needs information that changes from visit to visit.</p>
+  <p>Variables can read from the data layer, from the page's own HTML, from the URL, or from a value you type in. The required path does not need one; enhanced conversions does.</p>
+</div>
+
+<div class="concept">
+  <h3>Tag</h3>
+  <p class="loc">In GTM, answers <em>send it, and to whom</em> &mdash; built in steps 5.2 and 5.3</p>
+  <p>The thing that actually sends data somewhere. A tag can send to Google Ads, GA4, LinkedIn, anywhere. The tag type determines the destination and which fields it expects.</p>
+  <p>Every tag needs at least one trigger, or it never runs.</p>
+</div>
+
+<div class="concept">
+  <h3>Conversion action</h3>
+  <p class="loc">In Google Ads &mdash; built in Chapter 4</p>
+  <p>The record on Google's side that receives the signal and counts it. It defines what kind of action this is, how many to count per click, and how long after a click you will still credit it.</p>
+  <p>Creating one produces a <strong>Conversion ID</strong> and a <strong>Conversion Label</strong>. Together they are the address the tag sends to. Without both, the signal goes nowhere.</p>
+</div>
+
+<div class="trap" style="margin-top:22px;">
+  <p><strong>The distinction people get wrong.</strong> A trigger is <em>when</em>. A variable is <em>what</em>. A tag is <em>send it</em>. A conversion action is <em>receive it</em>. Four separate objects across two products. Building three of the four gets you nothing at all.</p>
+</div>
+
+<h3 style="margin-top:34px;">1.4 The whole chain, with chapter references</h3>
+<p>Every box carries the step that builds it. When a later step is confusing, come back here to see where it sits in the chain.</p>
+
+<div class="diagram">
+  <svg viewBox="0 0 960 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagram of the conversion tracking chain across your website, Google Tag Manager, and Google Ads, with the manual step that builds each piece labelled on every box.">
+    <defs>
+      <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1F5FD9"/></marker>
+      <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#79828C"/></marker>
+      <marker id="v" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#5B21B6"/></marker>
+    </defs>
+
+    <!-- LANE 1 -->
+    <rect x="8" y="8" width="944" height="248" fill="#FFFFFF" stroke="#DCE2E8"/>
+    <text x="22" y="29" font-family="IBM Plex Mono, monospace" font-size="11" fill="#79828C">YOUR WEBSITE</text>
+
+    <rect x="26" y="44" width="150" height="50" rx="2" fill="#F6F8FA" stroke="#14161A" stroke-width="1.5"/>
+    <text x="101" y="65" text-anchor="middle" font-size="12" font-weight="600" fill="#14161A" font-family="IBM Plex Sans, sans-serif">Someone fills in</text>
+    <text x="101" y="81" text-anchor="middle" font-size="12" font-weight="600" fill="#14161A" font-family="IBM Plex Sans, sans-serif">your form</text>
+
+    <line x1="176" y1="69" x2="218" y2="69" stroke="#1F5FD9" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <rect x="220" y="38" width="188" height="98" rx="2" fill="#F6F8FA" stroke="#14161A" stroke-width="1.5"/>
+    <text x="314" y="57" text-anchor="middle" font-size="12" font-weight="600" fill="#14161A" font-family="IBM Plex Sans, sans-serif">Your site checks it</text>
+    <text x="234" y="78" font-size="10.5" fill="#454D57" font-family="IBM Plex Sans, sans-serif">Is it spam?</text>
+    <text x="234" y="95" font-size="10.5" fill="#454D57" font-family="IBM Plex Sans, sans-serif">Are the fields valid?</text>
+    <text x="234" y="112" font-size="10.5" fill="#454D57" font-family="IBM Plex Sans, sans-serif">Did the email send?</text>
+    <text x="234" y="128" font-size="10" fill="#79828C" font-family="IBM Plex Sans, sans-serif">Any "no" = nothing fires</text>
+
+    <line x1="408" y1="62" x2="450" y2="62" stroke="#1F5FD9" stroke-width="1.5" marker-end="url(#a)"/>
+    <rect x="452" y="40" width="132" height="44" rx="2" fill="#E4F2EA" stroke="#1B7A4B" stroke-width="1.5"/>
+    <text x="518" y="67" text-anchor="middle" font-size="12" font-weight="600" fill="#1B7A4B" font-family="IBM Plex Sans, sans-serif">You get the lead</text>
+
+    <line x1="314" y1="136" x2="314" y2="160" stroke="#1F5FD9" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="324" y="154" font-size="10" fill="#79828C" font-family="IBM Plex Sans, sans-serif">only if everything passed</text>
+
+    <rect x="150" y="162" width="182" height="76" rx="2" fill="#F1EBFC" stroke="#5B21B6" stroke-width="1.5"/>
+    <text x="164" y="180" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#5B21B6">STEP 3.1 · CH 7 ONLY</text>
+    <text x="241" y="200" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3B0F73" font-family="IBM Plex Sans, sans-serif">FIRST: store the email in</text>
+    <text x="241" y="215" text-anchor="middle" font-size="10.5" font-weight="600" fill="#3B0F73" font-family="IBM Plex Sans, sans-serif">a hidden element</text>
+    <text x="241" y="231" text-anchor="middle" font-size="9.5" fill="#6D4CA8" font-family="IBM Plex Sans, sans-serif">optional, for enhanced conversions</text>
+
+    <line x1="332" y1="200" x2="362" y2="200" stroke="#1F5FD9" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <rect x="364" y="162" width="192" height="76" rx="2" fill="#F6F8FA" stroke="#14161A" stroke-width="1.5"/>
+    <text x="378" y="180" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#1F5FD9">STEP 3.1 · REQUIRED</text>
+    <text x="460" y="200" text-anchor="middle" font-size="10.5" font-weight="600" fill="#14161A" font-family="IBM Plex Sans, sans-serif">THEN: post it to the</text>
+    <text x="460" y="215" text-anchor="middle" font-size="10.5" font-weight="600" fill="#14161A" font-family="IBM Plex Sans, sans-serif">data layer</text>
+    <text x="460" y="231" text-anchor="middle" font-size="9.5" fill="#1F5FD9" font-family="IBM Plex Mono, monospace">contact_form_submit</text>
+
+    <rect x="578" y="162" width="356" height="76" rx="2" fill="#FBF0E2" stroke="#B45309" stroke-width="1.5"/>
+    <text x="756" y="184" text-anchor="middle" font-size="10.5" font-weight="600" fill="#B45309" font-family="IBM Plex Sans, sans-serif">If you are doing Chapter 7, order matters. Get it backwards</text>
+    <text x="756" y="199" text-anchor="middle" font-size="10.5" font-weight="600" fill="#B45309" font-family="IBM Plex Sans, sans-serif">and the conversion still records, but with no email attached.</text>
+    <text x="756" y="220" text-anchor="middle" font-size="10" fill="#8A5A11" font-family="IBM Plex Sans, sans-serif">Nothing looks broken. Verified in step 7.3.</text>
+
+    <!-- LANE 2 -->
+    <rect x="8" y="270" width="944" height="270" fill="#FFFFFF" stroke="#DCE2E8"/>
+    <text x="22" y="291" font-family="IBM Plex Mono, monospace" font-size="11" fill="#79828C">GOOGLE TAG MANAGER</text>
+
+    <line x1="460" y1="238" x2="460" y2="304" stroke="#1F5FD9" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <rect x="356" y="306" width="208" height="58" rx="2" fill="#E7EEFB" stroke="#1F5FD9" stroke-width="1.5"/>
+    <text x="370" y="324" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#1F5FD9">STEP 5.1</text>
+    <text x="460" y="342" text-anchor="middle" font-size="12" font-weight="600" fill="#12336F" font-family="IBM Plex Sans, sans-serif">TRIGGER: the "when"</text>
+    <text x="460" y="357" text-anchor="middle" font-size="10" fill="#12336F" font-family="IBM Plex Sans, sans-serif">Waits for that exact message</text>
+
+    <!-- variables, ch7 -->
+    <rect x="26" y="306" width="308" height="164" rx="2" fill="#F1EBFC" stroke="#5B21B6" stroke-dasharray="5 3"/>
+    <text x="42" y="325" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#5B21B6">CHAPTER 7 · OPTIONAL</text>
+    <text x="42" y="343" font-size="11.5" font-weight="600" fill="#3B0F73" font-family="IBM Plex Sans, sans-serif">VARIABLES: the "what"</text>
+
+    <rect x="42" y="352" width="132" height="52" rx="2" fill="#FFFFFF" stroke="#5B21B6"/>
+    <text x="54" y="368" font-family="IBM Plex Mono, monospace" font-size="9" fill="#5B21B6">7.1</text>
+    <text x="108" y="384" text-anchor="middle" font-size="10" font-weight="600" fill="#3B0F73" font-family="IBM Plex Sans, sans-serif">Reads the email</text>
+    <text x="108" y="397" text-anchor="middle" font-size="9" fill="#6D4CA8" font-family="IBM Plex Sans, sans-serif">out of the hidden element</text>
+
+    <line x1="174" y1="378" x2="200" y2="378" stroke="#5B21B6" stroke-width="1.3" marker-end="url(#v)" stroke-dasharray="4 3"/>
+
+    <rect x="202" y="352" width="120" height="52" rx="2" fill="#FFFFFF" stroke="#5B21B6"/>
+    <text x="214" y="368" font-family="IBM Plex Mono, monospace" font-size="9" fill="#5B21B6">7.2</text>
+    <text x="262" y="384" text-anchor="middle" font-size="10" font-weight="600" fill="#3B0F73" font-family="IBM Plex Sans, sans-serif">Hashes it</text>
+    <text x="262" y="397" text-anchor="middle" font-size="9" fill="#6D4CA8" font-family="IBM Plex Sans, sans-serif">before it leaves the browser</text>
+
+    <rect x="42" y="416" width="280" height="42" rx="2" fill="#FFFFFF" stroke="#5B21B6"/>
+    <text x="54" y="432" font-family="IBM Plex Mono, monospace" font-size="9" fill="#5B21B6">7.4</text>
+    <text x="182" y="447" text-anchor="middle" font-size="10" fill="#3B0F73" font-family="IBM Plex Sans, sans-serif">Added to the tag as a user_data parameter</text>
+
+    <line x1="460" y1="364" x2="460" y2="392" stroke="#1F5FD9" stroke-width="1.5" marker-end="url(#a)"/>
+    <text x="470" y="384" font-size="10" fill="#79828C" font-family="IBM Plex Sans, sans-serif">sets off</text>
+
+    <rect x="346" y="394" width="228" height="76" rx="2" fill="#E7EEFB" stroke="#1F5FD9" stroke-width="1.5"/>
+    <text x="360" y="412" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#1F5FD9">STEP 5.3</text>
+    <text x="460" y="430" text-anchor="middle" font-size="12" font-weight="600" fill="#12336F" font-family="IBM Plex Sans, sans-serif">TAG: the "send it"</text>
+    <text x="360" y="448" font-size="10" fill="#12336F" font-family="IBM Plex Sans, sans-serif">Conversion ID + Label from step 4.7</text>
+    <text x="360" y="462" font-size="10" fill="#6D4CA8" font-family="IBM Plex Sans, sans-serif">+ user_data if you did Chapter 7</text>
+
+    <line x1="322" y1="437" x2="346" y2="437" stroke="#5B21B6" stroke-width="1.3" marker-end="url(#v)" stroke-dasharray="4 3"/>
+
+    <rect x="596" y="394" width="330" height="76" rx="2" fill="#FAFBFC" stroke="#79828C"/>
+    <text x="610" y="412" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#1F5FD9">STEP 5.2</text>
+    <text x="761" y="430" text-anchor="middle" font-size="11.5" font-weight="600" fill="#14161A" font-family="IBM Plex Sans, sans-serif">A second tag: the Conversion Linker</text>
+    <text x="761" y="447" text-anchor="middle" font-size="10" fill="#454D57" font-family="IBM Plex Sans, sans-serif">Runs on every page. Remembers which ad brought</text>
+    <text x="761" y="461" text-anchor="middle" font-size="10" fill="#454D57" font-family="IBM Plex Sans, sans-serif">them, so the lead gets credited to it.</text>
+
+    <rect x="346" y="486" width="228" height="40" rx="2" fill="#E4F2EA" stroke="#1B7A4B" stroke-width="1.5"/>
+    <text x="460" y="504" text-anchor="middle" font-size="11" font-weight="600" fill="#12522F" font-family="IBM Plex Sans, sans-serif">STEP 6.1: PUBLISH</text>
+    <text x="460" y="518" text-anchor="middle" font-size="9.5" fill="#12522F" font-family="IBM Plex Sans, sans-serif">Nothing above is live until you do this</text>
+
+    <line x1="460" y1="470" x2="460" y2="484" stroke="#1B7A4B" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <!-- LANE 3 -->
+    <rect x="8" y="554" width="944" height="158" fill="#FFFFFF" stroke="#DCE2E8"/>
+    <text x="22" y="575" font-family="IBM Plex Mono, monospace" font-size="11" fill="#79828C">GOOGLE ADS</text>
+
+    <line x1="460" y1="526" x2="460" y2="592" stroke="#1F5FD9" stroke-width="1.5" marker-end="url(#a)"/>
+
+    <rect x="346" y="594" width="228" height="96" rx="2" fill="#F6F8FA" stroke="#14161A" stroke-width="1.5"/>
+    <text x="360" y="612" font-family="IBM Plex Mono, monospace" font-size="9.5" fill="#1F5FD9">CHAPTER 4</text>
+    <text x="460" y="632" text-anchor="middle" font-size="12" font-weight="600" fill="#14161A" font-family="IBM Plex Sans, sans-serif">CONVERSION ACTION</text>
+    <text x="460" y="650" text-anchor="middle" font-size="10" fill="#454D57" font-family="IBM Plex Sans, sans-serif">Receives the signal and counts it</text>
+    <text x="460" y="670" text-anchor="middle" font-size="9.5" fill="#79828C" font-family="IBM Plex Sans, sans-serif">Built before the tag, because step 4.7</text>
+    <text x="460" y="683" text-anchor="middle" font-size="9.5" fill="#79828C" font-family="IBM Plex Sans, sans-serif">hands you the ID and Label.</text>
+
+    <rect x="26" y="594" width="292" height="96" rx="2" fill="#FAFBFC" stroke="#DCE2E8"/>
+    <text x="172" y="616" text-anchor="middle" font-size="11.5" font-weight="600" fill="#454D57" font-family="IBM Plex Sans, sans-serif">GA4: a separate destination</text>
+    <text x="172" y="636" text-anchor="middle" font-size="10" fill="#79828C" font-family="IBM Plex Sans, sans-serif">The same trigger can feed GA4 too.</text>
+    <text x="172" y="651" text-anchor="middle" font-size="10" fill="#79828C" font-family="IBM Plex Sans, sans-serif">Different system, different numbers.</text>
+    <text x="172" y="672" text-anchor="middle" font-size="10" fill="#B45309" font-family="IBM Plex Sans, sans-serif">Do not import GA4 events into Ads.</text>
+    <text x="172" y="685" text-anchor="middle" font-size="10" fill="#B45309" font-family="IBM Plex Sans, sans-serif">See step 4.1.</text>
+
+    <line x1="346" y1="440" x2="190" y2="592" stroke="#79828C" stroke-width="1.2" stroke-dasharray="3 4"/>
+  </svg>
+</div>
+<p class="caption">Solid arrows are data moving. Dashed grey arrows are one thing reading another. Purple is the optional enhanced conversions path from Chapter 7. A break anywhere gives the same symptom: zero conversions, no error message.</p>
+
+<!-- ================= CHAPTER 2 ================= -->
+<div class="chapter" id="ch2">
+  <p class="chapter-kicker">CHAPTER 2 <span class="badge">REQUIRED</span></p>
+  <h2>Decide what counts, and check what exists</h2>
+  <p class="chapter-intro">Three decisions before any tool is opened: what action you are calling a conversion, whether the plumbing exists, and whether you have a consent obligation.</p>
+  <p class="chapter-loc"><span><strong>Where you work:</strong> Your website, Tag Manager, GA4</span><span><strong>Time:</strong> 20&ndash;30 minutes</span></p>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">2.1</span> Choose the action worth counting</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">2.1.1</span><span class="sc">List every action a visitor can complete on your site. Form submissions, demo requests, trial signups, gated downloads, phone clicks.</span></li>
+      <li><span class="sn">2.1.2</span><span class="sc">For each one, ask: does completing this require genuine intent, or would a casual browser do it by accident?</span></li>
+      <li><span class="sn">2.1.3</span><span class="sc">Select <strong>one</strong> action to build first.</span></li>
+      <li><span class="sn">2.1.4</span><span class="sc">Complete that action yourself and watch the address bar the whole way through. Write down every domain you pass through, including the page you land on at the end.<em>If any part of it leaves your own domain, read the section below before going further.</em></span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>A page view is not a conversion. Neither is a scroll, a session, or a click on your nav. Google will happily let you count any of them, and the moment you do, automated bidding starts optimizing toward people who browse rather than people who buy.</p>
+      <p>Start with one action rather than three. You can add more later, but the primary versus secondary decision in step 4.4 is what makes multiple actions safe, and you need to understand that first.</p>
+
+      <h5>Where the action completes matters more than what it is</h5>
+      <p>Step 2.1.4 exists because in B2B the conversion frequently finishes somewhere you do not control. Three versions of this, in increasing order of difficulty:</p>
+      <ul>
+        <li><strong>A third-party form host.</strong> Gated assets and newsletter signups that hand off to a vendor's page. The submission completes on their domain, so nothing on your site can see it. Either embed the form properly and redirect to a thank-you page you own, or choose a different action.</li>
+        <li><strong>A trial or signup that completes inside the product.</strong> This one catches people out most often. Free trials, product-led signups, and self-serve onboarding usually finish inside the app, at something like <code>app.yourcompany.com</code> or on a different domain entirely. That surface is owned by engineering, not marketing, and getting the GTM container installed on it is a different conversation from getting a change to your marketing site.</li>
+        <li><strong>A checkout or booking tool on a separate domain.</strong> Same problem, same fix.</li>
+      </ul>
+      <p>There is a useful distinction inside that second case. If your app sits on a <strong>subdomain</strong> of the same domain as your marketing site, this is not technically cross-domain tracking, and the handoff is handled automatically <em>provided the same measurement setup is installed on both</em>. The barrier is access and cooperation, not configuration.</p>
+      <p>If the app sits on a <strong>genuinely different domain</strong>, you have a cross-domain tracking problem as well, which requires explicit configuration so the visitor is not counted as two separate people. Be aware that the standard cross-domain mechanism works by appending an identifier to links a visitor clicks. Signup flows that navigate by form submission or by a server-side redirect can drop that identifier, which means a working cross-domain setup on your marketing pages does not guarantee a working one through your signup flow.</p>
+      <div class="trap"><p><strong>Practical advice.</strong> If your primary action lives inside the product, do not start there. Pick a marketing-site action you fully control, get the whole chain working end to end, and open the engineering conversation about the app separately. Learning conversion tracking and negotiating access to the product codebase at the same time is how this stalls for months.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">2.2</span> Confirm the GTM container is live on your site</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">2.2.1</span><span class="sc">Go to <strong>tagmanager.google.com</strong> and sign in.</span></li>
+      <li><span class="sn">2.2.2</span><span class="sc">Find the container for your website. Note its ID at the top right of the workspace, in the form <code>GTM-XXXXXXX</code>.</span></li>
+      <li><span class="sn">2.2.3</span><span class="sc">Click <strong>Preview</strong> at the top right.</span></li>
+      <li><span class="sn">2.2.4</span><span class="sc">Enter your website's URL and click <strong>Connect</strong>.</span></li>
+      <li><span class="sn">2.2.5</span><span class="sc">Your site opens in a new window. Confirm a "Tag Assistant Connected" panel appears.<em>If it does not connect, the container is not installed, and that is a prerequisite you must resolve first.</em></span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>This confirms the container from section 1.2 is actually on the site. Everything in Chapters 5, 6, and 7 lives inside it, so a container that is not installed makes the rest of the manual unusable.</p>
+      <p>Preview mode is also the tool you will use to verify every later step, so getting familiar with connecting it now is worth the two minutes.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">2.3</span> Verify your GA4 Measurement ID</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">2.3.1</span><span class="sc">Open GA4 and click <strong>Admin</strong> in the left navigation.</span></li>
+      <li><span class="sn">2.3.2</span><span class="sc">Click <strong>Data Streams</strong>.</span></li>
+      <li><span class="sn">2.3.3</span><span class="sc">Click the stream for your website.</span></li>
+      <li><span class="sn">2.3.4</span><span class="sc">Read the <strong>Measurement ID</strong> off the panel. It looks like <code>G-XXXXXXXXXX</code>. Write it down.</span></li>
+      <li><span class="sn">2.3.5</span><span class="sc">Return to GTM, open <strong>Tags</strong>, and click your Google tag.</span></li>
+      <li><span class="sn">2.3.6</span><span class="sc">Compare the ID in that tag against the one you wrote down. They must match character for character.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>GA4 and Google Ads are separate systems that happen to share a tag manager. GA4 answers "what are people doing on my site." Google Ads answers "which ads produced results." They will not agree on numbers, and they are not supposed to.</p>
+
+      <h5>Your CRM and BI tool will not agree either</h5>
+      <p>Expect three or four numbers for the same thing, and expect the ad platforms to sit at the top. Directional guidance from published tracking audits puts Google Ads roughly 10 to 30 percent above GA4 on form-fill conversions. Against a CRM the gap is often wider still.</p>
+      <p>The reasons are structural, not faults:</p>
+      <ul>
+        <li><strong>Modeled conversions.</strong> Google estimates conversions it cannot directly observe, where consent was declined or cookies were blocked. GA4 models separately, with its own thresholds. Your CRM models nothing.</li>
+        <li><strong>View-through and engaged-view credit.</strong> Google Ads can credit conversions where an ad was seen rather than clicked. GA4's default reporting does not.</li>
+        <li><strong>Different attribution rules.</strong> Data-driven attribution assigns fractional credit across touchpoints, and those fractions are summed in reporting. Your CRM typically attributes to one source.</li>
+        <li><strong>Different definitions.</strong> A form submission is one conversion to Google Ads. To your CRM it may be a duplicate of an existing contact, a rejected submission, spam, or a record that never arrived because an integration failed.</li>
+      </ul>
+      <p>The useful framing: <strong>your CRM is the source of truth for how many real leads you got. The ad platforms are the source of truth for which channel produced them.</strong> Neither is trying to answer the other's question.</p>
+      <p>That said, do not assume the CRM is automatically the clean one. Failed integrations, deduplication rules, and lead-routing logic all remove records that were genuine conversions. A large unexplained gap is worth investigating on both sides.</p>
+
+      <div class="trap"><p>Read the Measurement ID off the Data Streams panel, not from a document or your memory. A wrong Measurement ID produces a site that looks perfectly tagged and reports nothing. It is the most common tracking bug there is, and it can go unnoticed for months. The whole point of the check is that your records may be wrong.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">2.4</span> Establish whether you need consent mode</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">2.4.1</span><span class="sc">Open your Google Ads or GA4 geographic report and check whether any traffic comes from the EEA, the UK, or Switzerland.</span></li>
+      <li><span class="sn">2.4.2</span><span class="sc">If yes, confirm whether your site already runs a Google-certified consent management platform.</span></li>
+      <li><span class="sn">2.4.3</span><span class="sc">If it does, open its settings and confirm consent mode is enabled.</span></li>
+      <li><span class="sn">2.4.4</span><span class="sc">If it does not, note this as required work before your tracking will measure correctly in those regions.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>Consent mode passes each visitor's cookie-banner choice to Google, so Google tags adjust their behavior according to what that person agreed to. This is a compliance question, not an optimization one, and it has to be settled before you build rather than after.</p>
+      <p>To keep using Google tags for measurement, ad personalization, and remarketing, you must collect consent from end users based in the EEA and share those consent signals with Google. Since March 2024, Google has required websites and apps serving visitors in the EEA and UK to use Consent Mode v2 through a Google-certified consent management platform, regardless of where your company is based.</p>
+      <p>Consent Mode v2 added two signals to the original set: <code>ad_user_data</code>, governing whether data can be sent to Google for advertising measurement, and <code>ad_personalization</code>, governing remarketing. Google requires implementation for users in the EEA, UK, and Switzerland, though implementing globally simplifies your setup and prepares you for regulation elsewhere.</p>
+      <div class="note"><p>Implementing consent mode is a substantial piece of work in its own right and sits outside this manual. What matters here is that you decide whether you need it before building, not after.</p></div>
+      <div class="gate"><p><strong>Gate &mdash; before Chapter 3:</strong> one action chosen, confirmed it completes on your own domain, GTM container confirmed live, GA4 ID verified, consent question settled, and a decision made on whether you are doing Chapter 7.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CHAPTER 3 ================= -->
+<div class="chapter" id="ch3">
+  <p class="chapter-kicker">CHAPTER 3 <span class="badge">REQUIRED</span></p>
+  <h2>Make your website announce the action</h2>
+  <p class="chapter-intro">The only chapter you cannot complete in a settings screen. Your website has to say "this just happened." It is a small job, but it has to be specified precisely, and it is the step most likely to be done subtly wrong.</p>
+  <p class="chapter-loc"><span><strong>Where you work:</strong> A brief to a developer or an AI coding tool</span><span><strong>Your time:</strong> 15 min</span><span><strong>Their turnaround:</strong> hours to weeks</span></p>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">3.1</span> Brief the change</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">3.1.1</span><span class="sc">Choose a name for the event, in lowercase with underscores. For example <code>contact_form_submit</code>.<em>Write it down. You will type it again in step 5.1.5, and it must match exactly.</em></span></li>
+      <li><span class="sn">3.1.2</span><span class="sc">Decide whether you are doing Chapter 7. If not, delete points 2, 4, and the second half of point 8 from the brief below.</span></li>
+      <li><span class="sn">3.1.3</span><span class="sc">Copy the brief and replace the example event name with the one you chose.</span></li>
+      <li><span class="sn">3.1.4</span><span class="sc">Send it to your developer, or paste it into your AI coding tool.</span></li>
+      <li><span class="sn">3.1.5</span><span class="sc">When the work comes back, collect two things from them: the exact ID used on the hidden element, and their written confirmation on the ordering question.<em>You need the ID in step 7.1.6.</em></span></li>
+    </ol>
+
+    <div class="brief">
+      <h4>Brief: fire a conversion event on successful form submission</h4>
+      <p class="who">Hand this over as written</p>
+      <ol>
+        <li>When the form submits <strong>successfully</strong>, and only then, do the following in this exact order.</li>
+        <li><strong>First:</strong> write the submitter's email address into a hidden element on the page with a stable, documented ID. For example <code>&lt;span id="conversion-email" hidden&gt;</code>. Tell me the exact ID you used.</li>
+        <li><strong>Then:</strong> push an event to the data layer:<br><code>dataLayer.push({ event: 'contact_form_submit', form_type: '...' })</code></li>
+        <li>The hidden element must exist in the page <strong>before</strong> the push runs. If the push runs first, the email cannot be read and enhanced conversions will silently capture nothing.</li>
+        <li>Do <strong>not</strong> include the email address or name inside the push itself. It only needs to be in the hidden element.</li>
+        <li>Do <strong>not</strong> fire on validation failure, spam rejection, or a failed send. A lead I never received is not a lead.</li>
+        <li>Keep the event name identical every time, lowercase with underscores.</li>
+        <li>When you are finished, report back with: every file you changed, the exact element ID you used, written confirmation that the element is written before the push rather than after, and anything in this brief you could not implement or were unsure about.</li>
+      </ol>
+    </div>
+
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>You are asking for two things to happen the moment a submission genuinely succeeds. Not when the button is clicked. Not when validation fails. Only when the lead actually landed.</p>
+      <p>Every clause exists because of a specific failure. The order requirement prevents a silent enhanced-conversions failure. Excluding the email from the push keeps personal data out of the tag container, where every tag could read it. Not firing on failure paths prevents a conversion count higher than your actual lead count.</p>
+
+      <h5>If you are using an AI coding tool, ask it to QA itself</h5>
+      <p>AI coding tools are fast, and they are also confidently wrong more often than you would like. Point 8 asks the tool to report what it could not do, which most will answer honestly when asked directly. Then ask it these three follow-ups, which cost nothing and catch the common errors:</p>
+      <ul>
+        <li>"Show me the exact lines where the hidden element is written and where the dataLayer push happens, so I can see the order."</li>
+        <li>"Confirm the event does not fire on validation failure or a failed send, and tell me which code path prevents it."</li>
+        <li>"Confirm no email address or name appears inside the dataLayer push object."</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">3.2</span> Verify what you can verify yourself</h3></div>
+  <div class="step-body">
+    <p>This step confirms the event exists and is clean. It cannot confirm the ordering requirement from point 4 of the brief. That check comes in step 7.3, and if you are not doing Chapter 7 you do not need it.</p>
+    <ol class="clicks">
+      <li><span class="sn">3.2.1</span><span class="sc">In GTM, click <strong>Preview</strong>.</span></li>
+      <li><span class="sn">3.2.2</span><span class="sc">Enter the URL of the page containing your form, and click <strong>Connect</strong>.</span></li>
+      <li><span class="sn">3.2.3</span><span class="sc">Wait until the Tag Assistant panel says <strong>Connected</strong>.<em>Do not reload or navigate after connecting. That drops the session and you will have to start again.</em></span></li>
+      <li><span class="sn">3.2.4</span><span class="sc">Go to your website and fill in the form the way a real visitor would, then submit it.</span></li>
+      <li><span class="sn">3.2.5</span><span class="sc">Switch to the Tag Assistant browser tab, which is a separate tab from your website.</span></li>
+      <li><span class="sn">3.2.6</span><span class="sc">Look down the left-hand column of events for your event name.<em>If it is not there, nothing downstream will work. Stop and go back to step 3.1.</em></span></li>
+      <li><span class="sn">3.2.7</span><span class="sc">Click that event, then click the <strong>Data Layer</strong> tab.</span></li>
+      <li><span class="sn">3.2.8</span><span class="sc">Read the payload. Confirm the fields you expected are present and spelled as you expect.</span></li>
+      <li><span class="sn">3.2.9</span><span class="sc">Press Ctrl+F or Cmd+F and search for <code>@</code>. It should return no results.</span></li>
+    </ol>
+
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>Everything in Chapters 4 through 7 assumes this event exists and is visible to GTM. Building a trigger, two tags, and a conversion action on top of an event that never fires is the most expensive mistake available in this process.</p>
+      <p>The search for <code>@</code> in 3.2.9 confirms no email address is sitting in the data layer message itself. It should only ever be in the hidden element, where a single variable reads it deliberately, rather than in a message every tag in the container can see.</p>
+
+      <h5>The one thing you cannot check yourself, and what to ask for</h5>
+      <p>Point 4 of the brief requires the hidden element to be written <em>before</em> the data layer push. Verifying that means reading the page's source code as it executes, which is a developer task, not a marketing one. This manual is not going to pretend otherwise.</p>
+      <p>You have two ways to close the gap. Do the first now, and the second in Chapter 7 if you are doing it.</p>
+
+      <div class="ask">
+        <h5>Ask for this in writing</h5>
+        <p class="who">Send to whoever made the change</p>
+        <p>"Can you confirm in writing that the hidden element containing the email is written into the page <em>before</em> the <code>dataLayer.push</code> runs, not after? And can you paste the two lines of code so I have them on record?"</p>
+        <p>If they answer "after" or "at the same time," or cannot say, the change needs revisiting. If they answer "before" and show you two lines where the element write comes first, you are covered.</p>
+      </div>
+
+      <p style="margin-top:14px;">The second and stronger check is <strong>step 7.3</strong>, which observes the result in Tag Assistant rather than trusting a written answer. It requires the variable from step 7.1 to exist, which is why it lives in Chapter 7 rather than here.</p>
+
+      <div class="gate">
+        <p><strong>Gate &mdash; before Chapter 4:</strong></p>
+        <p>&#9744; Your event name appears in the Tag Assistant event list<br>
+        &#9744; The expected fields are in the payload<br>
+        &#9744; Searching for <code>@</code> returns nothing<br>
+        &#9744; If doing Chapter 7: you have written confirmation of the element ordering</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CHAPTER 4 ================= -->
+<div class="chapter" id="ch4">
+  <p class="chapter-kicker">CHAPTER 4 <span class="badge">REQUIRED</span></p>
+  <h2>Create the conversion action in Google Ads</h2>
+  <p class="chapter-intro">This comes before any tag work, because creating it produces the two values GTM needs. It also contains the two settings most likely to quietly damage an account: primary versus secondary, and conversion value.</p>
+  <p class="chapter-loc"><span><strong>Where you work:</strong> Google Ads &rarr; Goals</span><span><strong>Time:</strong> 20&ndash;30 minutes</span></p>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">4.1</span> Start the conversion action and set the data source</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">4.1.1</span><span class="sc">In Google Ads, click <strong>Goals</strong> in the left navigation.</span></li>
+      <li><span class="sn">4.1.2</span><span class="sc">Click <strong>Summary</strong>.</span></li>
+      <li><span class="sn">4.1.3</span><span class="sc">Click <strong>New conversion action</strong>.</span></li>
+      <li><span class="sn">4.1.4</span><span class="sc">Tick <strong>Conversions on a website</strong>.</span></li>
+      <li><span class="sn">4.1.5</span><span class="sc">Untick <strong>Conversions from phone calls</strong>, <strong>Conversions on an app</strong>, and <strong>Conversions offline</strong>.</span></li>
+      <li><span class="sn">4.1.6</span><span class="sc">Under "Conversions on a website," click <strong>Edit data sources</strong>.</span></li>
+      <li><span class="sn">4.1.7</span><span class="sc">Tick <strong>Google tag</strong>.</span></li>
+      <li><span class="sn">4.1.8</span><span class="sc">Untick the Google Analytics property, listed with a long number beside it.<em>This is the step most people miss.</em></span></li>
+      <li><span class="sn">4.1.9</span><span class="sc">Click <strong>Done</strong>, then <strong>Save and continue</strong>.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>While the Analytics property remains attached as a data source, every route to creating a conversion loops you back into a list of GA4 events. That list is usually <code>page_view</code>, <code>scroll</code>, <code>session_start</code>, and <code>user_engagement</code>, none of which are conversions. Importing them makes your conversion count roughly equal your click count, which is worse than having no data at all.</p>
+      <div class="trap"><p>There is a second reason to avoid the GA4 import path. Conversions measured by importing Google Analytics goals are not supported for enhanced conversions. Choosing that route closes off Chapter 7 entirely.</p></div>
+      <p>You may see a warning that no Google tag was found. This is expected. Nothing has fired yet because you have not built the tag. Continue past it.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">4.2</span> Choose the category and name it</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">4.2.1</span><span class="sc">From the category list, click the one matching your action. For a contact form, click <strong>Submit lead form</strong>.</span></li>
+      <li><span class="sn">4.2.2</span><span class="sc">Ignore the "Create multiple conversion actions from a linked account" option at the bottom.<em>That is the GA4 import path again.</em></span></li>
+      <li><span class="sn">4.2.3</span><span class="sc">In the <strong>Conversion name</strong> field, delete the default text.</span></li>
+      <li><span class="sn">4.2.4</span><span class="sc">Type a descriptive name. For example <code>Contact Form Submit</code>.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>The category groups similar conversions together and helps Google's reporting make sense of what you are measuring. Pick the closest match; if none fits well, choose the next best rather than forcing an inappropriate one.</p>
+      <p>The name is what you will see in reports. "Contact Form Submit" beats "Conversion 1" when you return to this account in six months, or when someone else inherits it.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">4.3</span> Set the count</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">4.3.1</span><span class="sc">Find the <strong>Count</strong> section.</span></li>
+      <li><span class="sn">4.3.2</span><span class="sc">Click the radio button next to <strong>One</strong>.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>"Every" counts each submission separately. "One" counts a maximum of one conversion per ad click, no matter how many times the person submits.</p>
+      <p>For lead generation, One is correct. Somebody who fills in your form twice from the same click is still one lead, and counting them twice inflates your numbers and misleads bidding. "Every" is for ecommerce, where two purchases genuinely are two purchases.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">4.4</span> Set primary or secondary</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">4.4.1</span><span class="sc">Find the <strong>Action optimization</strong> section, usually at the top of the settings.</span></li>
+      <li><span class="sn">4.4.2</span><span class="sc">For your single main action, select <strong>Primary action used for bidding optimization</strong>.</span></li>
+      <li><span class="sn">4.4.3</span><span class="sc">For any additional, lower-value action you add later, select <strong>Secondary action not used for bidding optimization</strong> instead.</span></li>
+      <li><span class="sn">4.4.4</span><span class="sc">If you inherit an existing account, go to <strong>Goals &rarr; Summary</strong> and audit every conversion action's setting before changing anything else.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>This is the setting that decides what your budget chases, and it is routinely set wrong.</p>
+      <p>Primary actions are reported in the "Conversions" column and are used for bidding, as long as the standard goal they belong to is being used for bidding. Secondary actions are for observation only: they appear in the "All conversions" column, but are not used for bidding, even if the goal they sit in is used for bidding.</p>
+      <p>When you run Target CPA, Maximize Conversions, or Target ROAS, the algorithm needs a single north star. If your campaign optimizes toward a low-intent action, the algorithm will drive more of that behavior, even where it does not equate to revenue. Marking everything as primary means Google treats newsletter signups, contact form views, and ebook downloads with equal importance.</p>
+
+      <h5>Why this bites harder in B2B</h5>
+      <p>A demo request, a gated PDF download, and a newsletter signup are separated by an order of magnitude in value. Set all three primary and Smart Bidding will chase whichever is cheapest and most abundant, which is almost never the demo request. Your conversion count rises, your pipeline does not, and the reporting looks healthy throughout.</p>
+
+      <h5>How to decide</h5>
+      <ul>
+        <li><strong>Primary:</strong> the action closest to revenue that still has enough volume for the algorithm to learn from. Usually a demo request or a qualified contact form.</li>
+        <li><strong>Secondary:</strong> everything upstream. Content downloads, webinar registrations, pricing page visits. Worth measuring, not worth bidding on.</li>
+      </ul>
+
+      <div class="trap"><p><strong>The exception people are caught by.</strong> Conversion actions included in a custom goal are used for both reporting and bidding regardless of whether they are set as primary or secondary. A secondary action placed inside a custom goal will influence bidding.</p></div>
+      <div class="trap"><p>Be deliberate about keeping only one primary action per goal. Multiple primary conversions can cause double or triple counting for campaign optimization.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">4.5</span> Set the conversion value</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">4.5.1</span><span class="sc">Find the <strong>Value</strong> section.</span></li>
+      <li><span class="sn">4.5.2</span><span class="sc">Click the radio button next to <strong>Use the same value for each conversion</strong>.<em>Not "use different values for each conversion," which is preselected by default.</em></span></li>
+      <li><span class="sn">4.5.3</span><span class="sc">A currency dropdown and a value field appear. Leave the currency as your account currency.</span></li>
+      <li><span class="sn">4.5.4</span><span class="sc">Click into the value field and enter your figure. If this is your only conversion action, enter <code>1</code> and treat it as a placeholder.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>Most guides tell you which button to click and move on. The choice determines whether value-based bidding is available to you later, so it is worth understanding.</p>
+      <p><strong>Value-based bidding</strong> means strategies that optimize for total conversion <em>value</em> rather than conversion <em>count</em>. Target ROAS and Maximize Conversion Value are the two you will meet. They only work if your conversions carry meaningful, differentiated values.</p>
+      <p>If every conversion carries the same value, or no value, you are optimizing for volume. Maximize Conversions and Target CPA treat every lead identically. For a business where all leads genuinely are equivalent, that is fine. For most B2B, it is not.</p>
+
+      <h5>Staggered conversion values</h5>
+      <p>This is how B2B marketers approximate revenue before revenue exists. Your CRM knows which leads became pipeline, but Google Ads does not, and the sales cycle is too long to wait. So you assign each conversion action a value reflecting its historical worth, and let the algorithm optimize for the weighted total rather than the raw count.</p>
+      <p>A worked example. Suppose historically your demo requests close at 12% with an average contract value of $40,000, your trial signups close at 4%, and your gated downloads close at 0.5%. Expected values are roughly $4,800, $1,600, and $200. You do not need those exact figures in the platform. What matters is the <em>ratio</em>, so you might set demo requests at 100, trials at 33, and downloads at 4. The algorithm now knows a demo is worth roughly twenty-five downloads, and bids accordingly.</p>
+      <p>Refinements once you have volume: value enterprise-segment leads above commercial, weight by firmographic fit if you can pass that at submission, or move to importing actual closed-won values from your CRM, which is the highest-leverage version and a separate build.</p>
+
+      <div class="trap"><p><strong>Why not to leave the default.</strong> "Use different values for each conversion" expects your tag to pass a value with every conversion. If it does not, Google records everything at the default of 1 unit of currency, and that fabricated figure will appear in your reports and can feed value-based bidding.</p></div>
+      <div class="note"><p>The close rates and contract value above are illustrative arithmetic, not benchmarks. Derive your own ratios from your CRM, and note the date you derived them, because close rates move.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">4.6</span> Set the conversion window</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">4.6.1</span><span class="sc">Find the <strong>Click-through conversion window</strong> row and click the chevron on its right to expand it.</span></li>
+      <li><span class="sn">4.6.2</span><span class="sc">Open the dropdown and choose your window.</span></li>
+      <li><span class="sn">4.6.3</span><span class="sc">Leave <strong>Engaged-view</strong> and <strong>View-through</strong> windows at their defaults.</span></li>
+      <li><span class="sn">4.6.4</span><span class="sc">Leave <strong>Attribution</strong> on <strong>Data-driven</strong>.</span></li>
+      <li><span class="sn">4.6.5</span><span class="sc">Write down the window you chose and the date.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>The click-through conversion window is how long after an ad click you are still willing to credit a conversion to that click.</p>
+      <ul>
+        <li><strong>Longer windows</strong> suit B2B, where a lead may return weeks after first clicking. Thirty to ninety days is common.</li>
+        <li><strong>Shorter windows</strong> suit short tests, where a long window would credit clicks after you stopped spending and give you a misleading read.</li>
+      </ul>
+      <p>Record your choice. A change here shifts your reported numbers with no other cause, and it is a frequent source of "why did the data move" confusion months later.</p>
+      <p>The <strong>attribution model</strong> on the same screen controls how credit is divided when someone interacts with several ads before converting. Data-driven is the default and is right for most accounts. Attribution is a large topic in its own right and sits outside this manual, but you should know the setting exists.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">4.7</span> Copy the Conversion ID and Label</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">4.7.1</span><span class="sc">Click <strong>Done</strong>, then <strong>Save and continue</strong>.</span></li>
+      <li><span class="sn">4.7.2</span><span class="sc">On the finish screen, find the tab strip with three options. Click <strong>Use Google Tag Manager</strong>.<em>Not "Set up with a Google tag," which is selected by default.</em></span></li>
+      <li><span class="sn">4.7.3</span><span class="sc">A small table appears with three columns: Conversion name, Conversion label, Conversion ID.</span></li>
+      <li><span class="sn">4.7.4</span><span class="sc">Copy the <strong>Conversion ID</strong>, a number roughly eleven digits long, into a scratch file.</span></li>
+      <li><span class="sn">4.7.5</span><span class="sc">Copy the <strong>Conversion Label</strong>, a string of mixed characters, into the same file.<em>Label both clearly. You will paste them in steps 5.3.3 and 5.3.4.</em></span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>These two values together are the address the tag sends to. The ID identifies your account; the label identifies which conversion action within it. Without both, the signal goes nowhere and Google Ads reports zero.</p>
+      <p>This is why Chapter 4 comes before Chapter 5. You cannot configure the tag until this address exists.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">4.8</span> Turn on enhanced conversions <span class="optional">optional</span></h3></div>
+  <div class="step-body">
+    <p>Skip this step if you are not doing Chapter 7.</p>
+    <ol class="clicks">
+      <li><span class="sn">4.8.1</span><span class="sc">Click <strong>Goals</strong> in the left navigation, then <strong>Settings</strong>.</span></li>
+      <li><span class="sn">4.8.2</span><span class="sc">Find the <strong>Enhanced conversions</strong> row and click the chevron on its right to expand it.</span></li>
+      <li><span class="sn">4.8.3</span><span class="sc">Tick <strong>Turn on enhanced conversions</strong>.</span></li>
+      <li><span class="sn">4.8.4</span><span class="sc">A method dropdown appears, showing "Google Tag" by default. Click it.</span></li>
+      <li><span class="sn">4.8.5</span><span class="sc">Select <strong>Google Tag Manager</strong>.</span></li>
+      <li><span class="sn">4.8.6</span><span class="sc">Click <strong>Save</strong>.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>Enhanced conversions sends a hashed version of the person's email alongside the conversion, so Google can still match it to a signed-in user when cookies fail. It improves match rates; it does not create conversions that would not otherwise exist. The email is hashed in the browser before it leaves, so Google never receives the real address.</p>
+      <p>This is an account-level setting, not a per-conversion one, which is why there is no toggle on the conversion action screen itself. Setting the method to Google Tag Manager is what tells Google to expect the data from your container rather than from a directly installed tag.</p>
+      <div class="gate"><p><strong>Gate &mdash; before Chapter 5:</strong> Conversion ID and Label written down, and deliberate choices made on primary versus secondary, count, value, and window.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CHAPTER 5 ================= -->
+<div class="chapter" id="ch5">
+  <p class="chapter-kicker">CHAPTER 5 <span class="badge">REQUIRED</span></p>
+  <h2>Wire it up in Google Tag Manager</h2>
+  <p class="chapter-intro">Connect the announcement from Chapter 3 to the address from Chapter 4. Three things to build, in this order, because the last one references the first.</p>
+  <p class="chapter-loc"><span><strong>Where you work:</strong> Google Tag Manager</span><span><strong>Time:</strong> 20 minutes</span></p>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">5.1</span> Build the trigger</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">5.1.1</span><span class="sc">In GTM, click <strong>Triggers</strong> in the left navigation.</span></li>
+      <li><span class="sn">5.1.2</span><span class="sc">Click <strong>New</strong>.</span></li>
+      <li><span class="sn">5.1.3</span><span class="sc">Name it after the action. For example <code>Contact Form Submit</code>.</span></li>
+      <li><span class="sn">5.1.4</span><span class="sc">Click the <strong>Trigger Configuration</strong> box and select <strong>Custom Event</strong>.</span></li>
+      <li><span class="sn">5.1.5</span><span class="sc">In the <strong>Event name</strong> field, type the event name from step 3.1.1 exactly, character for character.<em><code>contact_form_submit</code> is not the same as <code>Contact Form Submit</code>. Capitalization and underscores matter.</em></span></li>
+      <li><span class="sn">5.1.6</span><span class="sc">Leave <strong>Use regex matching</strong> unticked.</span></li>
+      <li><span class="sn">5.1.7</span><span class="sc">Leave <strong>All Custom Events</strong> selected.</span></li>
+      <li><span class="sn">5.1.8</span><span class="sc">Click <strong>Save</strong>.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>A Custom Event trigger means "watch the data layer message board for a specific message." When that exact message appears, anything attached to this trigger runs.</p>
+      <p>The exact-match requirement in 5.1.5 causes more failures than any other single thing in GTM. A trigger that does not match produces no error; the tag simply never fires, and you get zero conversions with nothing to diagnose.</p>
+
+      <h5>When to use "Some Custom Events" instead</h5>
+      <p>"All Custom Events" means the trigger fires every time that event name appears, anywhere on the site, under any circumstances. That is correct here, because the event name is already specific to one action and your site only fires it in one place.</p>
+      <p>"Some Custom Events" adds further conditions on top of the event name. You reach for it when the same event name fires in more than one situation and you only want some of them. Common cases:</p>
+      <ul>
+        <li><strong>One event name, several forms.</strong> If your site fires <code>form_submit</code> for the contact form, the newsletter form, and a support request, you would use Some Custom Events with a condition on a field in the payload, such as <code>form_type equals Contact</code>, so each form can feed a different conversion action.</li>
+        <li><strong>Restricting by page.</strong> Firing only when the event happens on a specific landing page, using a condition on Page Path.</li>
+        <li><strong>Filtering out internal or test traffic</strong> before the tag fires.</li>
+        <li><strong>Value thresholds.</strong> Firing only when a value carried in the payload exceeds some amount.</li>
+      </ul>
+      <p>The general rule: if your event name uniquely identifies the thing you care about, use All Custom Events. If the event name is generic and you need to narrow it, use Some Custom Events and add a condition on a field the event carries. That is also a good argument for naming events specifically in the first place, since a precise name in Chapter 3 saves you conditions here.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">5.2</span> Build the Conversion Linker tag</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">5.2.1</span><span class="sc">Click <strong>Tags</strong> in the left navigation.</span></li>
+      <li><span class="sn">5.2.2</span><span class="sc">Click <strong>New</strong>.</span></li>
+      <li><span class="sn">5.2.3</span><span class="sc">Name it <code>Conversion Linker</code>.</span></li>
+      <li><span class="sn">5.2.4</span><span class="sc">Click the <strong>Tag Configuration</strong> box and select <strong>Conversion Linker</strong>.</span></li>
+      <li><span class="sn">5.2.5</span><span class="sc">Leave all its settings at their defaults.</span></li>
+      <li><span class="sn">5.2.6</span><span class="sc">Click the <strong>Triggering</strong> box and select <strong>All Pages</strong>.</span></li>
+      <li><span class="sn">5.2.7</span><span class="sc">Click <strong>Save</strong>.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>When someone clicks your ad, Google appends an identifier to the landing page URL. The Conversion Linker's job is to capture that identifier and store it, so that when the person converts later, possibly on a different page, the conversion can be credited back to the click that produced it.</p>
+      <p>It fires on All Pages because you cannot know in advance which page a visitor will land on. Without it, attribution degrades and conversions may go uncredited.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">5.3</span> Build the conversion tag</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">5.3.1</span><span class="sc">In <strong>Tags</strong>, click <strong>New</strong>. Name it <code>Google Ads - Contact Form Submit</code>.</span></li>
+      <li><span class="sn">5.3.2</span><span class="sc">Click the <strong>Tag Configuration</strong> box and select <strong>Google Ads Conversion Tracking</strong>.</span></li>
+      <li><span class="sn">5.3.3</span><span class="sc">Paste your <strong>Conversion ID</strong> from step 4.7.4 into the Conversion ID field.</span></li>
+      <li><span class="sn">5.3.4</span><span class="sc">Paste your <strong>Conversion Label</strong> from step 4.7.5 into the Conversion Label field.</span></li>
+      <li><span class="sn">5.3.5</span><span class="sc">Leave <strong>Conversion Value</strong>, <strong>Transaction ID</strong>, and <strong>Currency Code</strong> blank.</span></li>
+      <li><span class="sn">5.3.6</span><span class="sc">Leave the three checkboxes for product-level, new customer, and shipping data unticked.</span></li>
+      <li><span class="sn">5.3.7</span><span class="sc">Scroll to the <strong>Triggering</strong> box, click it, and select the trigger from step 5.1.</span></li>
+      <li><span class="sn">5.3.8</span><span class="sc">Click <strong>Save</strong>.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>This is the tag that actually sends the conversion to Google Ads. The ID and Label are the address. The trigger decides the moment.</p>
+      <div class="note"><p>You may see a warning reading "No Google tag found in this container." Ignore it and do not click "Create tag." It refers to a separate Google Ads base tag you do not need, because the Conversion Linker from step 5.2 covers the linking requirement.</p></div>
+      <div class="gate"><p><strong>Gate &mdash; before Chapter 6:</strong> both tags appear in your Tags list, each showing its correct trigger in the Firing Triggers column. The Conversion Linker should show All Pages; the conversion tag should show your custom event trigger.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CHAPTER 6 ================= -->
+<div class="chapter" id="ch6">
+  <p class="chapter-kicker">CHAPTER 6 <span class="badge">REQUIRED</span></p>
+  <h2>Publish and verify</h2>
+  <p class="chapter-intro">Everything so far exists only in your workspace. Publishing makes it live, and then you test the whole chain end to end on the version real visitors see.</p>
+  <p class="chapter-loc"><span><strong>Where you work:</strong> GTM, your live site, Google Ads</span><span><strong>Time:</strong> 15 min, then a wait</span></p>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">6.1</span> Publish the container</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">6.1.1</span><span class="sc">In GTM, click <strong>Submit</strong> at the top right.</span></li>
+      <li><span class="sn">6.1.2</span><span class="sc">In the <strong>Version Name</strong> field, type something descriptive. For example <code>Contact form conversion tracking</code>.</span></li>
+      <li><span class="sn">6.1.3</span><span class="sc">In <strong>Version Description</strong>, write what you added and why, in a sentence or two.</span></li>
+      <li><span class="sn">6.1.4</span><span class="sc">Click <strong>Continue</strong>.</span></li>
+      <li><span class="sn">6.1.5</span><span class="sc">Click <strong>Publish</strong>.</span></li>
+      <li><span class="sn">6.1.6</span><span class="sc">On the version summary screen that follows, confirm every item you built is listed under Version Changes.<em>Anything missing was never saved.</em></span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>This is where the workspace, version, and publishing concepts from section 1.2 become concrete. Submitting turns your draft workspace into a numbered version. Publishing pushes that version to your live website.</p>
+      <p>Until you publish, your visitors are running whatever was published last, no matter how correct your workspace looks. "It worked in Preview but not live" almost always means this step was skipped.</p>
+      <p>Write a real description. Six months from now, when a number moves and you are looking for what changed, "Version 12" tells you nothing.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">6.2</span> Test the whole chain</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">6.2.1</span><span class="sc">In GTM, click <strong>Preview</strong>.</span></li>
+      <li><span class="sn">6.2.2</span><span class="sc">Enter your <strong>live</strong> production URL, not a staging or preview address.</span></li>
+      <li><span class="sn">6.2.3</span><span class="sc">Wait for Tag Assistant to say <strong>Connected</strong>.</span></li>
+      <li><span class="sn">6.2.4</span><span class="sc">Go to your site and fill in the form the way a real visitor would, then submit it.</span></li>
+      <li><span class="sn">6.2.5</span><span class="sc">Switch to the Tag Assistant tab and click your event in the left-hand list.</span></li>
+      <li><span class="sn">6.2.6</span><span class="sc">Click the <strong>Tags</strong> tab and confirm both tags appear under <strong>Tags Fired</strong>.<em>If either is under "Tags Not Fired," the trigger does not match. Go back to step 5.1.5.</em></span></li>
+      <li><span class="sn">6.2.7</span><span class="sc">Check the real-world outcome actually happened. The lead notification email should have arrived.</span></li>
+      <li><span class="sn">6.2.8</span><span class="sc">Wait several hours, then open Google Ads and go to <strong>Goals &rarr; Summary</strong>.</span></li>
+      <li><span class="sn">6.2.9</span><span class="sc">Confirm your conversion action shows recorded activity.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>Each earlier verification tested a single link. This one tests all of them together, on the version real visitors are running.</p>
+      <p>Step 6.2.7 matters more than it looks. A conversion that records without the lead actually arriving means you are counting something that did not happen, which is worse than counting nothing.</p>
+      <div class="trap"><p>Always test on your production address. Spam protection services and some tag configurations check the page's hostname against a fixed list, and staging environments that generate a new URL on every deployment will be rejected every time. Chasing those addresses is a losing game.</p></div>
+      <div class="gate">
+        <p><strong>Gate &mdash; conversion tracking is complete when:</strong></p>
+        <p>&#9744; Both tags fired on your event<br>
+        &#9744; The lead notification actually arrived<br>
+        &#9744; The conversion is visible in Google Ads &rarr; Goals</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CHAPTER 7 ================= -->
+<div class="chapter" id="ch7">
+  <p class="chapter-kicker">CHAPTER 7 <span class="badge opt">OPTIONAL</span></p>
+  <h2>Add enhanced conversions</h2>
+  <p class="chapter-intro">Improves how reliably Google matches your conversions when cookies fail. It does not create conversions that would not otherwise exist, which is why it is optional. It also contains the strongest check on the ordering requirement from Chapter 3.</p>
+  <p class="chapter-loc"><span><strong>Where you work:</strong> Google Ads, then Tag Manager</span><span><strong>Time:</strong> 25 minutes</span><span><strong>Requires:</strong> points 2 and 4 of the step 3.1 brief</span></p>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">7.0</span> Understand what this does before you build it</h3></div>
+  <div class="step-body">
+    <div class="explain" style="border-top:none; margin-top:0; padding-top:0; background:transparent;">
+      <p>Enhanced conversions sends a hashed version of the person's email alongside the conversion, so Google can still match it to a signed-in user when cookies are blocked or consent limits tracking. The email is hashed in the browser before it leaves, so Google never receives the real address.</p>
+      <p>What it improves: match rates, and therefore the completeness of your reported conversions. What it does not do: create conversions, change what a conversion means, or make bidding smarter on its own.</p>
+      <p><strong>Skip this chapter if:</strong> your conversion volume is very low, in which case the measurable difference will be close to nothing; or your website change from Chapter 3 did not include the hidden element; or your conversion action was created by importing a GA4 event, in which case enhanced conversions is unavailable regardless of what you configure here.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">7.1</span> Build the variable that reads the email</h3></div>
+  <div class="step-body">
+    <p>This step assumes you completed step 4.8, which turns enhanced conversions on at account level. If you skipped it, go back and do it first.</p>
+    <ol class="clicks">
+      <li><span class="sn">7.1.1</span><span class="sc">In GTM, click <strong>Variables</strong> in the left navigation.</span></li>
+      <li><span class="sn">7.1.2</span><span class="sc">Scroll to the <strong>User-Defined Variables</strong> panel and click <strong>New</strong>.</span></li>
+      <li><span class="sn">7.1.3</span><span class="sc">Name it <code>DOM - Conversion Email</code>.</span></li>
+      <li><span class="sn">7.1.4</span><span class="sc">Click the <strong>Variable Configuration</strong> box and select <strong>DOM Element</strong>.</span></li>
+      <li><span class="sn">7.1.5</span><span class="sc">Open the <strong>Selection Method</strong> dropdown and choose <strong>CSS Selector</strong>.</span></li>
+      <li><span class="sn">7.1.6</span><span class="sc">In <strong>Element Selector</strong>, type the ID from step 3.1.5, prefixed with <code>#</code>. For example <code>#conversion-email</code>.</span></li>
+      <li><span class="sn">7.1.7</span><span class="sc">Leave <strong>Attribute Name</strong> blank, then click <strong>Save</strong>.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>This variable's job is to reach into the page, find the hidden element your developer created, and read the email out of it.</p>
+      <p>A <strong>CSS selector</strong> is an address for a specific piece of a web page. The <code>#</code> means "the element with this ID." Leaving Attribute Name blank tells GTM to read the element's text content rather than one of its HTML attributes, which is what you want here.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">7.2</span> Build the variable that hashes it</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">7.2.1</span><span class="sc">In the same <strong>User-Defined Variables</strong> panel, click <strong>New</strong> again.</span></li>
+      <li><span class="sn">7.2.2</span><span class="sc">Name it <code>UPD - Contact Form</code>.</span></li>
+      <li><span class="sn">7.2.3</span><span class="sc">Click the <strong>Variable Configuration</strong> box and select <strong>User-Provided Data</strong>. You may need to scroll.</span></li>
+      <li><span class="sn">7.2.4</span><span class="sc">Under <strong>Type</strong>, click the radio button for <strong>Manual configuration</strong>.<em>Not "Automatic collection."</em></span></li>
+      <li><span class="sn">7.2.5</span><span class="sc">Click the <strong>Email</strong> dropdown, which reads "Not set."</span></li>
+      <li><span class="sn">7.2.6</span><span class="sc">Select <code>DOM - Conversion Email</code> from the list.</span></li>
+      <li><span class="sn">7.2.7</span><span class="sc">Leave <strong>Phone</strong> and everything under <strong>Name and Address</strong> as "Not set."</span></li>
+      <li><span class="sn">7.2.8</span><span class="sc">Click <strong>Save</strong>.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>The variable from 7.1 produces a plain email address. This one wraps it in the structure Google expects, and handles the hashing before anything leaves the browser.</p>
+      <p>Choose Manual over Automatic deliberately. Automatic collection scans the whole page for anything resembling contact details, which can pick up your own address from the footer and send that instead of the visitor's.</p>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">7.3</span> Confirm the variable actually finds the email</h3></div>
+  <div class="step-body">
+    <p>This is the check that closes the gap left open in step 3.2. It observes the result rather than trusting a written answer, and it is the only marketer-accessible way to prove the ordering requirement was met.</p>
+    <ol class="clicks">
+      <li><span class="sn">7.3.1</span><span class="sc">In GTM, click <strong>Preview</strong>.</span></li>
+      <li><span class="sn">7.3.2</span><span class="sc">Enter the URL of the page containing your form, and click <strong>Connect</strong>.</span></li>
+      <li><span class="sn">7.3.3</span><span class="sc">Wait for Tag Assistant to say <strong>Connected</strong>. Do not reload after connecting.</span></li>
+      <li><span class="sn">7.3.4</span><span class="sc">Fill in the form using a real email address you can recognize, and submit it.</span></li>
+      <li><span class="sn">7.3.5</span><span class="sc">Switch to the Tag Assistant tab and click your event in the left-hand list.</span></li>
+      <li><span class="sn">7.3.6</span><span class="sc">Click the <strong>Variables</strong> tab, next to Tags, Data Layer, and Consent.</span></li>
+      <li><span class="sn">7.3.7</span><span class="sc">Find <code>DOM - Conversion Email</code> in the list. It is alphabetical, so look under D.</span></li>
+      <li><span class="sn">7.3.8</span><span class="sc">Read its <strong>Value</strong> column.</span></li>
+    </ol>
+
+    <div class="explain">
+      <h4>HOW TO READ THE RESULT</h4>
+      <ul>
+        <li><strong>You see the email address you typed.</strong> Everything is correct. The element exists, it is written before the event fires, and your selector matches. Continue to step 7.4.</li>
+        <li><strong>You see <code>undefined</code> or an empty value.</strong> The variable found nothing. Either the hidden element does not exist, the element is written after the event fires, or the selector in step 7.1.9 does not match the actual ID. Work through those three in that order.</li>
+        <li><strong>You see a different email, such as your own company address.</strong> The selector is matching the wrong element on the page. Go back to step 7.1.9 and confirm the ID with whoever made the change.</li>
+      </ul>
+
+      <div class="ask">
+        <h5>If the value is undefined, send this</h5>
+        <p class="who">To whoever made the website change</p>
+        <p>"In GTM Preview, my DOM Element variable pointed at <code>#your-element-id</code> is returning undefined at the moment the <code>your_event_name</code> event fires. Can you confirm the element exists in the DOM at that point, and that it is written before the <code>dataLayer.push</code> rather than after? Paste the two lines so I can see the order."</p>
+      </div>
+
+      <p style="margin-top:14px;">That message is specific enough that a developer can act on it immediately, and it names the exact symptom rather than asking them to guess what is wrong.</p>
+
+      <div class="gate"><p><strong>Gate &mdash; before step 7.4:</strong> the variable resolves to the email you typed, not to undefined.</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-head"><h3><span class="n">7.4</span> Attach it to the conversion tag and republish</h3></div>
+  <div class="step-body">
+    <ol class="clicks">
+      <li><span class="sn">7.4.1</span><span class="sc">In GTM, click <strong>Tags</strong> and open <code>Google Ads - Contact Form Submit</code> from step 5.3.</span></li>
+      <li><span class="sn">7.4.2</span><span class="sc">Scroll down and click <strong>Event Parameters</strong> to expand it.</span></li>
+      <li><span class="sn">7.4.3</span><span class="sc">Click <strong>Add parameter</strong>.</span></li>
+      <li><span class="sn">7.4.4</span><span class="sc">In the parameter name field, type <code>user_data</code>.</span></li>
+      <li><span class="sn">7.4.5</span><span class="sc">Click the block icon beside the Value field and select <code>UPD - Contact Form</code> from step 7.2.</span></li>
+      <li><span class="sn">7.4.6</span><span class="sc">Click <strong>Save</strong>.</span></li>
+      <li><span class="sn">7.4.7</span><span class="sc">Click <strong>Submit</strong>, name the version, and click <strong>Publish</strong>.<em>Same as step 6.1. Nothing you built in this chapter is live until you do this.</em></span></li>
+      <li><span class="sn">7.4.8</span><span class="sc">Run one final test on the live URL, confirming in the Tags tab that your conversion tag still fires.</span></li>
+    </ol>
+    <div class="explain">
+      <h4>WHY</h4>
+      <p>The <code>user_data</code> parameter is what carries the hashed email to Google alongside the conversion. Without it, the two variables you built do nothing.</p>
+      <div class="trap"><p><strong>If you are following an older tutorial.</strong> Many describe an "Include user-provided data from your website" checkbox on this tag. That checkbox is no longer available for new setups in Google Tag Manager for individual events; you now add <code>user_data</code> manually to Event Parameters using a custom user data variable. That is what steps 7.4.2 to 7.4.5 do.</p></div>
+      <div class="gate"><p><strong>Gate &mdash; enhanced conversions is complete when:</strong> the variable resolves to a real email in Preview, <code>user_data</code> is on the tag, the container is published, and the tag still fires on the live site.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= APPENDIX A ================= -->
+<section id="ts" style="margin-top:56px;">
+  <h2>Appendix A &mdash; Troubleshooting by symptom</h2>
+  <p class="section-sub">Work down each list in order. Stop at the first thing that is wrong, rather than checking everything at once, or you will not know what fixed it.</p>
+
+  <div class="ts">
+    <h4>"Google Ads shows zero conversions"</h4>
+    <ol>
+      <li><strong>Has enough time passed?</strong> Conversion reporting is not real-time. Allow several hours before treating this as a fault.</li>
+      <li><strong>Did you publish the container?</strong> The most common cause by a wide margin. Check the Versions tab in GTM. See step 6.1.</li>
+      <li><strong>Does the event fire on the live site?</strong> Run Preview against production, complete the action, and look for your event name. If it is absent, the problem is on your website. Return to Chapter 3.</li>
+      <li><strong>Does the tag fire on that event?</strong> Click the event in Tag Assistant, check the Tags tab. If your tag is under "Tags Not Fired," the trigger does not match. Compare the trigger's event name to the actual event name, character for character. See step 5.1.5.</li>
+      <li><strong>Are the ID and Label correct?</strong> Open the tag and compare both against Google Ads. A single transposed character produces exactly this symptom.</li>
+      <li><strong>Is the conversion action still active?</strong> Check it has not been paused or removed.</li>
+      <li><strong>Are you looking at the right column?</strong> A secondary action reports in "All conversions," not "Conversions." If it is set to secondary, the main column will read zero by design. See step 4.4.</li>
+    </ol>
+  </div>
+
+  <div class="ts">
+    <h4>"Conversions are recording, but the number looks too high"</h4>
+    <ol>
+      <li><strong>Is Count set to One?</strong> Set to Every, a single click producing two submissions records two conversions. See step 4.3.</li>
+      <li><strong>Is the event firing on failure paths?</strong> Submit deliberately invalid data and check whether the event appears. This is step 3.2.10, and it is the check most often skipped.</li>
+      <li><strong>Is the tag firing more than once per event?</strong> Check the tag's firing options are set to once per event, and that you have not attached two triggers that both match.</li>
+      <li><strong>Do you have duplicate conversion actions?</strong> A GA4-imported action and a manually created one measuring the same thing will both count.</li>
+      <li><strong>Is spam getting through?</strong> A public form with no protection produces bot submissions that count as conversions. Check whether the leads are real people.</li>
+    </ol>
+  </div>
+
+  <div class="ts">
+    <h4>"Enhanced conversions shows a zero or very low match rate"</h4>
+    <ol>
+      <li><strong>Run step 7.3 first.</strong> If the DOM variable returns undefined in Preview, that is your answer and everything below is downstream of it.</li>
+      <li><strong>Does the hidden element exist before the event fires?</strong> The most common cause. Use the message in step 7.3 to ask.</li>
+      <li><strong>Does the CSS selector match?</strong> Compare the selector in step 7.1.9 against the actual ID on the page, exactly.</li>
+      <li><strong>Is the variable attached to the tag?</strong> Confirm the <code>user_data</code> event parameter is present and points at the User-Provided Data variable. See step 7.4.5.</li>
+      <li><strong>Did you republish after adding it?</strong> Step 7.4.7. Adding the parameter without publishing changes nothing.</li>
+      <li><strong>Is enhanced conversions on at account level, with the method set to Google Tag Manager?</strong> Both must be true. See step 7.1.4.</li>
+      <li><strong>Is the conversion action GA4-imported?</strong> If so, enhanced conversions is unavailable regardless of configuration. Rebuild it manually per Chapter 4.</li>
+    </ol>
+  </div>
+
+  <div class="ts">
+    <h4>"It worked in Preview but not on the live site"</h4>
+    <ol>
+      <li><strong>Publish the container.</strong> This is almost always the answer. Preview runs your workspace; the live site runs the last published version.</li>
+      <li><strong>Did you test on the production hostname?</strong> Staging URLs can be blocked by spam protection and hostname-restricted tags.</li>
+      <li><strong>Is a consent banner holding tags back?</strong> If consent mode is implemented and the visitor declined, tags may be withheld by design. Test as a consenting visitor.</li>
+      <li><strong>Are ad blockers interfering?</strong> Browser extensions can block Google tags. Test in a clean browser profile.</li>
+    </ol>
+  </div>
+
+  <div class="ts">
+    <h4>"Google Ads, GA4, and my CRM all disagree"</h4>
+    <ol>
+      <li><strong>Expect disagreement, and expect the ad platforms to be highest.</strong> Modeled conversions, view-through credit, and fractional attribution all push Google Ads above GA4, and both above a CRM. See step 2.3.</li>
+      <li><strong>Compare like with like.</strong> Check the conversion window and attribution model on both Google sides before concluding anything is broken.</li>
+      <li><strong>Check what your CRM is discarding.</strong> Deduplication against existing contacts, lead-routing rules, and validation on the receiving end all remove records that were genuine conversions.</li>
+      <li><strong>Check whether the integration is dropping records.</strong> A form submission that never reached the CRM is a real gap, not a measurement difference. Compare raw form-notification emails against CRM records for a single day.</li>
+      <li><strong>Check for double counting in one system.</strong> A GA4 key event and a Google Ads conversion measuring the same action are each correct in their own terms.</li>
+      <li><strong>Check the GA4 Measurement ID.</strong> If GA4 is materially lower across the board, verify it against the Data Streams panel. See step 2.3.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= APPENDIX B ================= -->
+<section id="gl">
+  <h2>Appendix B &mdash; Glossary, in chapter order</h2>
+  <p class="section-sub">Terms appear in the order the manual introduces them, so you can read this alongside the chapters rather than hunting alphabetically.</p>
+
+  <p class="gl-head">CHAPTER 1 &mdash; TAG MANAGER'S OWN FURNITURE</p>
+  <dl class="glossary">
+    <div class="term"><dt>Container<span class="where">GTM</span></dt><dd>The box of tracking code installed once on every page of your site. Everything you build lives inside it. ID looks like <code>GTM-XXXXXXX</code>.</dd></div>
+    <div class="term"><dt>Workspace<span class="where">GTM</span></dt><dd>Your editing area inside the container. A draft. Changes here do not affect the live site.</dd></div>
+    <div class="term"><dt>Version<span class="where">GTM</span></dt><dd>A saved, numbered snapshot of the container. Your history, and what you roll back to.</dd></div>
+    <div class="term"><dt>Publishing<span class="where">GTM</span></dt><dd>Making a version live on your website. Until you publish, visitors run whatever was published last.</dd></div>
+  </dl>
+
+  <p class="gl-head">CHAPTER 1 &mdash; THE FIVE MOVING PARTS</p>
+  <dl class="glossary">
+    <div class="term"><dt>Data layer<span class="where">Your website</span></dt><dd>A message board on the page. Your site posts messages to it, GTM reads them. Nothing appears there unless your site puts it there.</dd></div>
+    <div class="term"><dt>Trigger<span class="where">GTM</span></dt><dd>A condition GTM watches for. Answers <em>when</em>. Does nothing on its own.</dd></div>
+    <div class="term"><dt>Variable<span class="where">GTM</span></dt><dd>A named container holding a value GTM looks up when it needs it. Answers <em>what</em>.</dd></div>
+    <div class="term"><dt>Tag<span class="where">GTM</span></dt><dd>The thing that sends data somewhere. Answers <em>send it, and to whom</em>. Needs a trigger or it never runs.</dd></div>
+    <div class="term"><dt>Conversion action<span class="where">Google Ads</span></dt><dd>The record that receives the signal and counts it. Produces the Conversion ID and Label.</dd></div>
+  </dl>
+
+  <p class="gl-head">CHAPTER 2 &mdash; DECIDING AND CHECKING</p>
+  <dl class="glossary">
+    <div class="term"><dt>Cross-domain tracking<span class="where">GA4 / GTM</span></dt><dd>Configuration that keeps a visitor identified as one person when they move between two different domains you own. Not needed between subdomains of the same domain.</dd></div>
+    <div class="term"><dt>Measurement ID<span class="where">GA4</span></dt><dd>The identifier that connects your website to a GA4 data stream. Looks like <code>G-XXXXXXXXXX</code>. A wrong one silently reports nothing.</dd></div>
+    <div class="term"><dt>Modeled conversions<span class="where">Google Ads / GA4</span></dt><dd>Conversions Google estimates rather than directly observes, where consent was declined or cookies blocked. A major reason platform numbers exceed CRM numbers.</dd></div>
+    <div class="term"><dt>Consent mode<span class="where">Your website</span></dt><dd>Passes each visitor's cookie-banner choice to Google so tags adjust accordingly. Required for EEA, UK, and Swiss traffic.</dd></div>
+  </dl>
+
+  <p class="gl-head">CHAPTER 4 &mdash; THE CONVERSION ACTION</p>
+  <dl class="glossary">
+    <div class="term"><dt>Primary action<span class="where">Google Ads</span></dt><dd>A conversion action that steers bidding and reports in the "Conversions" column.</dd></div>
+    <div class="term"><dt>Secondary action<span class="where">Google Ads</span></dt><dd>Measured for observation only, reported in "All conversions," not used for bidding unless placed in a custom goal.</dd></div>
+    <div class="term"><dt>Value-based bidding<span class="where">Google Ads</span></dt><dd>Bidding that optimizes for total conversion value rather than count. Requires differentiated values to be worth using.</dd></div>
+    <div class="term"><dt>Click-through conversion window<span class="where">Google Ads</span></dt><dd>How long after an ad click you are still willing to credit a conversion to it.</dd></div>
+    <div class="term"><dt>Attribution model<span class="where">Google Ads</span></dt><dd>How credit is divided when someone interacts with several ads before converting. Data-driven is the default.</dd></div>
+    <div class="term"><dt>Conversion ID and Label<span class="where">Google Ads</span></dt><dd>The two values that together form the address your tag sends to. Produced when you create a conversion action.</dd></div>
+  </dl>
+
+  <p class="gl-head">CHAPTER 5 &mdash; WIRING IT UP</p>
+  <dl class="glossary">
+    <div class="term"><dt>Custom Event trigger<span class="where">GTM</span></dt><dd>A trigger that watches the data layer for one specific named message. The event name must match character for character.</dd></div>
+    <div class="term"><dt>Conversion Linker<span class="where">GTM</span></dt><dd>A tag that runs on every page and stores which ad click brought a visitor, so a later conversion can be credited to it.</dd></div>
+  </dl>
+
+  <p class="gl-head">CHAPTER 7 &mdash; ENHANCED CONVERSIONS</p>
+  <dl class="glossary">
+    <div class="term"><dt>Enhanced conversions<span class="where">Both</span></dt><dd>Sends a hashed email alongside the conversion so Google can match it more reliably. Improves match rate; does not create conversions.</dd></div>
+    <div class="term"><dt>CSS selector<span class="where">GTM</span></dt><dd>An address for a specific piece of a web page. <code>#conversion-email</code> means "the element with the ID conversion-email."</dd></div>
+    <div class="term"><dt>DOM Element variable<span class="where">GTM</span></dt><dd>A variable that reads a value directly out of the page's HTML using a selector.</dd></div>
+    <div class="term"><dt>User-Provided Data variable<span class="where">GTM</span></dt><dd>A variable that formats and hashes customer data before it is sent, so the raw value never leaves the browser.</dd></div>
+    <div class="term"><dt>Event parameter<span class="where">GTM</span></dt><dd>An extra field attached to a tag. <code>user_data</code> is the one that carries the hashed email.</dd></div>
+  </dl>
+</section>
+
+<!-- ================= APPENDIX C ================= -->
+<section id="src">
+  <h2>Appendix C &mdash; Sources and further reading</h2>
+  <p class="section-sub">Platform behavior changes. Verify anything that does not match your screen. Checked September 2026.</p>
+
+  <h3>Sources for the claims in this manual</h3>
+  <ul class="sources">
+    <li>Primary and secondary conversion actions, including the custom goal exception &mdash; <a href="https://support.google.com/google-ads/answer/11461796?hl=en">Google Ads Help</a> and <a href="https://support.google.com/sa360/answer/13448677?hl=en">Search Ads 360 Help</a></li>
+    <li>Consent requirements for EEA traffic &mdash; <a href="https://support.google.com/google-ads/answer/13695607?hl=en">Google Ads Help: Updates to consent mode for EEA traffic</a></li>
+    <li>Enhanced conversions setup in Google Tag Manager, including the <code>user_data</code> event parameter &mdash; <a href="https://support.google.com/google-ads/answer/13262500?hl=en">Google Ads Help</a> and <a href="https://support.google.com/sa360/answer/12863936?hl=en">Search Ads 360 Help</a></li>
+    <li>GA4-imported conversions are not supported for enhanced conversions &mdash; <a href="https://support.google.com/google-ads/answer/13261987?hl=en">Google Ads Help</a></li>
+    <li>Cross-domain measurement in GA4 &mdash; <a href="https://support.google.com/analytics/answer/10071811?hl=en">Google Analytics Help</a></li>
+  </ul>
+
+  <div class="rec">
+    <h4>If you are enjoying the GTM work</h4>
+    <p>I highly recommend checking out <a href="https://www.analyticsmania.com/">AnalyticsMania.com</a> and/or <a href="https://www.lovesdata.com/">lovesdata.com</a>.</p>
+    <p>Analytics Mania, run by Julius Fedorovicius, is the most thorough free resource on Google Tag Manager specifically, with step-by-step guides that go well past what this manual covers. Loves Data, run by Benjamin Mangold, covers Google Analytics, Tag Manager, and Google Ads together, which is useful once you start caring how the three fit into one measurement picture.</p>
+  </div>
+
+  <p style="font-size:0.9rem; color:var(--ink-3); margin-top:20px;">The time estimates at the top are from a live build, not measured averages. The conversion value example in step 4.5 is illustrative arithmetic, not a benchmark; derive your own ratios from your CRM. The platform-versus-CRM percentage range in step 2.3 is directional guidance from published tracking audits, not a universal figure. The troubleshooting entries are drawn from a live implementation rather than from documentation.</p>
+</section>
+
+<footer>
+  <p>Written from a live implementation on a custom-built B2B site. The specific tools are interchangeable; the order, and the verification gates at the end of each chapter, are not.</p>
+  <p>Platform interfaces change. Where a step does not match what you see on screen, trust the current interface and the logic in section 1.4 over the exact button names.</p>
+</footer>
+
+</div>
+</body>
+</html>
