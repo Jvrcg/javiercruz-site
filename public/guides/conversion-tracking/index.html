@@ -107,12 +107,15 @@
   .ask p:last-child{margin:0;}
   .ask code{background:#E4D9F7; color:#3B0F73;}
 
+  .pre-brief{font-size:0.88rem; color:var(--ink-3); margin:14px 0 0; max-width:68ch;}
   .brief{background:var(--dev-soft); border-left:3px solid var(--dev); padding:18px 20px; margin:14px 0 0;}
   .brief h4{margin:0 0 4px; font-size:0.94rem; font-weight:600; color:#3B0F73; font-family:inherit; letter-spacing:0;}
   .brief .who{font-size:0.78rem; color:#6D4CA8; margin:0 0 12px;}
   .brief ol{margin:0; padding-left:20px; max-width:none;}
   .brief li{font-size:0.92rem; color:#3B0F73; margin-bottom:7px;}
   .brief code{background:#E4D9F7; color:#3B0F73;}
+  .brief p{font-size:0.92rem; color:#3B0F73; margin:0 0 10px; max-width:none;}
+  .brief h5{margin:14px 0 6px; font-size:0.78rem; font-family:"IBM Plex Mono",monospace; color:#6D4CA8; letter-spacing:0.04em; font-weight:600;}
 
   .concept{background:var(--card); border:1px solid var(--rule); padding:18px 22px; margin:0 0 12px;}
   .concept h3{margin:0 0 4px; font-size:1.04rem; font-weight:600;}
@@ -602,34 +605,40 @@
   <div class="step-body">
     <ol class="clicks">
       <li><span class="sn">3.1.1</span><span class="sc">Choose a name for the event, in lowercase with underscores. For example <code>contact_form_submit</code>.<em>Write it down. You will type it again in step 5.1.5, and it must match exactly.</em></span></li>
-      <li><span class="sn">3.1.2</span><span class="sc">Decide whether you are doing Chapter 7. If not, delete points 2, 4, and the second half of point 8 from the brief below.</span></li>
-      <li><span class="sn">3.1.3</span><span class="sc">Copy the brief and replace the example event name with the one you chose.</span></li>
+      <li><span class="sn">3.1.2</span><span class="sc">Decide whether you are doing Chapter 7. If not, delete points 2 and 4, and the two references to the hidden element in WHAT I NEED BACK FROM YOU.</span></li>
+      <li><span class="sn">3.1.3</span><span class="sc">Copy the request and replace the example event name and the landing page name with yours.</span></li>
       <li><span class="sn">3.1.4</span><span class="sc">Send it to your developer, or paste it into your AI coding tool.</span></li>
       <li><span class="sn">3.1.5</span><span class="sc">When the work comes back, collect two things from them: the exact ID used on the hidden element, and their written confirmation on the ordering question.<em>You need the ID in step 7.1.6.</em></span></li>
     </ol>
 
+    <p class="pre-brief">Most developers have wired up a conversion event before and will only need points 2 and 3. The remaining points exist so the three failure modes are written down rather than discovered later.</p>
+
     <div class="brief">
-      <h4>Brief: fire a conversion event on successful form submission</h4>
-      <p class="who">Hand this over as written</p>
+      <h4>Request: fire a conversion event when the form submits successfully</h4>
+      <h5>WHAT WE ARE SOLVING FOR</h5>
+      <p>Right now we cannot see which ads and keywords produce real leads on [landing page], because nothing tells Google Ads when someone actually submits the form. This adds that signal. Nothing changes for the visitor.</p>
+      <h5>THE REQUEST</h5>
+      <p>Fire a conversion event when the form on [landing page] submits successfully, and not at any other point. Adjust anything below that does not match how the form is built.</p>
       <ol>
-        <li>When the form submits <strong>successfully</strong>, and only then, do the following in this exact order.</li>
-        <li><strong>First:</strong> write the submitter's email address into a hidden element on the page with a stable, documented ID. For example <code>&lt;span id="conversion-email" hidden&gt;</code>. Tell me the exact ID you used.</li>
-        <li><strong>Then:</strong> push an event to the data layer:<br><code>dataLayer.push({ event: 'contact_form_submit', form_type: '...' })</code></li>
-        <li>The hidden element must exist in the page <strong>before</strong> the push runs. If the push runs first, the email cannot be read and enhanced conversions will silently capture nothing.</li>
-        <li>Do <strong>not</strong> include the email address or name inside the push itself. It only needs to be in the hidden element.</li>
-        <li>Do <strong>not</strong> fire on validation failure, spam rejection, or a failed send. A lead I never received is not a lead.</li>
-        <li>Keep the event name identical every time, lowercase with underscores.</li>
-        <li>When you are finished, report back with: every file you changed, the exact element ID you used, written confirmation that the element is written before the push rather than after, and anything in this brief you could not implement or were unsure about.</li>
+        <li>I am after one signal: something that fires when the form submits successfully, and not at any other point. The two steps below need to happen in the order listed, for the reason in point 4.</li>
+        <li>Could you write the submitter's email address into a hidden element on the page, using a stable ID you are happy to keep? Something like <code>&lt;span id="conversion-email" hidden&gt;</code> works. Whichever ID you choose, send it to me. I need to reference it later.</li>
+        <li>Then push an event to the data layer:<br><code>dataLayer.push({ event: 'contact_form_submit', form_type: '...' })</code></li>
+        <li>If it works with how the form is built, the hidden element needs to exist before the push runs. If the push goes first, the email cannot be read, and the tracking captures nothing without any error showing up, which is hard to catch later.</li>
+        <li>Could you keep the email address and name out of the push object itself. The hidden element is enough, and anything inside the push is readable by every tag in the container.</li>
+        <li>It would help if the event does not fire on validation failure, spam rejection, or a failed send. Otherwise, the conversion count ends up higher than the number of leads that actually arrived.</li>
+        <li>Once the event name is set, could we keep it identical going forward, lowercase with underscores. My side matches on the exact string, so a change will break it and I won't have visibility into the issue either.</li>
       </ol>
+      <h5>WHAT I NEED BACK FROM YOU</h5>
+      <p>Which files you changed, the exact element ID you used, and whether the element ends up written before the push. Also anything here that did not fit the setup, or that you would do differently.</p>
     </div>
 
     <div class="explain">
       <h4>WHY</h4>
       <p>You are asking for two things to happen the moment a submission genuinely succeeds. Not when the button is clicked. Not when validation fails. Only when the lead actually landed.</p>
-      <p>Every clause exists because of a specific failure. The order requirement prevents a silent enhanced-conversions failure. Excluding the email from the push keeps personal data out of the tag container, where every tag could read it. Not firing on failure paths prevents a conversion count higher than your actual lead count.</p>
+      <p>The reason behind each point sits inside the request itself, so the developer reads it in context rather than taking your word for it. If you trim the request for your own situation, keep the reasons attached to the points you keep. A bare instruction is the one most likely to get implemented in a way that technically complies and silently fails.</p>
 
       <h5>If you are using an AI coding tool, ask it to QA itself</h5>
-      <p>AI coding tools are fast, and they are also confidently wrong more often than you would like. Point 8 asks the tool to report what it could not do, which most will answer honestly when asked directly. Then ask it these three follow-ups, which cost nothing and catch the common errors:</p>
+      <p>AI coding tools are fast, and they are also confidently wrong more often than you would like. The closing section asks the tool to report anything that did not fit, which most will answer honestly when asked directly. Then ask it these three follow-ups, which cost nothing and catch the common errors:</p>
       <ul>
         <li>"Show me the exact lines where the hidden element is written and where the dataLayer push happens, so I can see the order."</li>
         <li>"Confirm the event does not fire on validation failure or a failed send, and tell me which code path prevents it."</li>
