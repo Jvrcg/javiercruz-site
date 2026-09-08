@@ -4,6 +4,51 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Google Ads Conversion Tracking: A Manual for B2B Marketers</title>
+<meta name="description" content="A step-by-step manual for setting up Google Ads conversion tracking through Google Tag Manager, from choosing what counts to verifying the signal arrives.">
+<link rel="canonical" href="https://jjcruzgalera.com/guides/conversion-tracking">
+
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://jjcruzgalera.com/guides/conversion-tracking">
+<meta property="og:title" content="Google Ads Conversion Tracking: A Manual for B2B Marketers">
+<meta property="og:description" content="A step-by-step manual for setting up Google Ads conversion tracking through Google Tag Manager, from choosing what counts to verifying the signal arrives.">
+<meta property="og:image" content="https://jjcruzgalera.com/guides/conversion-tracking-cover.png">
+<meta property="og:site_name" content="Javier Cruz Galera">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Google Ads Conversion Tracking: A Manual for B2B Marketers">
+<meta name="twitter:description" content="A step-by-step manual for setting up Google Ads conversion tracking through Google Tag Manager, from choosing what counts to verifying the signal arrives.">
+<meta name="twitter:image" content="https://jjcruzgalera.com/guides/conversion-tracking-cover.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "Google Ads conversion tracking, start to finish",
+  "description": "A step-by-step manual for setting up Google Ads conversion tracking through Google Tag Manager, from choosing what counts to verifying the signal arrives.",
+  "image": "https://jjcruzgalera.com/guides/conversion-tracking-cover.png",
+  "datePublished": "2026-09-03",
+  "dateModified": "2026-09-08",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://jjcruzgalera.com/guides/conversion-tracking"
+  },
+  "author": {
+    "@type": "Person",
+    "name": "Javier Cruz Galera",
+    "url": "https://jjcruzgalera.com",
+    "jobTitle": "Senior B2B SaaS Performance Marketer",
+    "sameAs": ["https://www.linkedin.com/in/javiercruzgalera/"]
+  },
+  "publisher": {
+    "@type": "Person",
+    "name": "Javier Cruz Galera",
+    "url": "https://jjcruzgalera.com"
+  },
+  "proficiencyLevel": "Beginner",
+  "dependencies": "Google Ads account with admin access, Google Tag Manager account with admin access, GTM container installed on the site"
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -184,7 +229,7 @@
   <h2>HOW LONG THIS TAKES</h2>
 
   <div class="timerow"><span>Chapter 2 &mdash; Decide and check what exists</span><span class="t">20&ndash;30 min</span></div>
-  <div class="timerow"><span>Chapter 3 &mdash; Brief the website change <span class="opt">your part only</span></span><span class="t">15 min</span></div>
+  <div class="timerow"><span>Chapter 3 &mdash; Request the website change <span class="opt">your part only</span></span><span class="t">15 min</span></div>
   <div class="timerow"><span>Chapter 3 &mdash; Waiting on the developer <span class="opt">the real variable</span></span><span class="t">1 hour &ndash; 2 weeks</span></div>
   <div class="timerow"><span>Chapter 4 &mdash; Create the conversion action</span><span class="t">20&ndash;30 min</span></div>
   <div class="timerow"><span>Chapter 5 &mdash; Wire it up in Tag Manager</span><span class="t">20 min</span></div>
@@ -244,12 +289,12 @@
 <h3>0.3 Two paths through this manual</h3>
 <p>Chapters 2 through 6 are the <strong>required path</strong>. Complete them and you have working conversion tracking.</p>
 <p>Chapter 7 adds <strong>enhanced conversions</strong>, which improves how reliably Google matches your conversions but does not create conversions that would not otherwise exist. It is genuinely optional and it adds a website requirement, so it lives in its own chapter rather than being scattered through the others.</p>
-<p>The only place the two paths touch before Chapter 7 is the brief in step 3.1, which contains two extra points you include only if you intend to do Chapter 7. Decide now so you brief the change once.</p>
+<p>The only place the two paths touch before Chapter 7 is the request in step 3.1, which contains two extra points you include only if you intend to do Chapter 7. Decide now so you request the change once.</p>
 
 <h3>0.4 Scope</h3>
 <ul>
   <li><strong>B2B lead generation.</strong> The worked example is a contact form. The same structure applies to demo requests, trials, and gated content.</li>
-  <li><strong>A custom-built website</strong> where you can brief a developer or an AI coding tool. Hosted platforms have their own, usually simpler paths. The concepts still apply; the implementation details do not.</li>
+  <li><strong>A custom-built website</strong> where you can send the change to a developer or an AI coding tool. Hosted platforms have their own, usually simpler paths. The concepts still apply; the implementation details do not.</li>
   <li><strong>Out of scope:</strong> consent mode implementation, attribution modeling, offline conversion import from a CRM. Each is named where it becomes relevant.</li>
 </ul>
 
@@ -597,11 +642,11 @@
   <p class="chapter-kicker">CHAPTER 3 <span class="badge">REQUIRED</span></p>
   <h2>Make your website announce the action</h2>
   <p class="chapter-intro">The only chapter you cannot complete in a settings screen. Your website has to say "this just happened." It is a small job, but it has to be specified precisely, and it is the step most likely to be done subtly wrong.</p>
-  <p class="chapter-loc"><span><strong>Where you work:</strong> A brief to a developer or an AI coding tool</span><span><strong>Your time:</strong> 15 min</span><span><strong>Their turnaround:</strong> hours to weeks</span></p>
+  <p class="chapter-loc"><span><strong>Where you work:</strong> A request to a developer or an AI coding tool</span><span><strong>Your time:</strong> 15 min</span><span><strong>Their turnaround:</strong> hours to weeks</span></p>
 </div>
 
 <div class="step">
-  <div class="step-head"><h3><span class="n">3.1</span> Brief the change</h3></div>
+  <div class="step-head"><h3><span class="n">3.1</span> Request the change</h3></div>
   <div class="step-body">
     <ol class="clicks">
       <li><span class="sn">3.1.1</span><span class="sc">Choose a name for the event, in lowercase with underscores. For example <code>contact_form_submit</code>.<em>Write it down. You will type it again in step 5.1.5, and it must match exactly.</em></span></li>
@@ -651,7 +696,7 @@
 <div class="step">
   <div class="step-head"><h3><span class="n">3.2</span> Verify what you can verify yourself</h3></div>
   <div class="step-body">
-    <p>This step confirms the event exists and is clean. It cannot confirm the ordering requirement from point 4 of the brief. That check comes in step 7.3, and if you are not doing Chapter 7 you do not need it.</p>
+    <p>This step confirms the event exists and is clean. It cannot confirm the ordering requirement from point 4 of the request. That check comes in step 7.3, and if you are not doing Chapter 7 you do not need it.</p>
     <ol class="clicks">
       <li><span class="sn">3.2.1</span><span class="sc">In GTM, click <strong>Preview</strong>.</span></li>
       <li><span class="sn">3.2.2</span><span class="sc">Enter the URL of the page containing your form, and click <strong>Connect</strong>.</span></li>
@@ -670,7 +715,7 @@
       <p>The search for <code>@</code> in 3.2.9 confirms no email address is sitting in the data layer message itself. It should only ever be in the hidden element, where a single variable reads it deliberately, rather than in a message every tag in the container can see.</p>
 
       <h5>The one thing you cannot check yourself, and what to ask for</h5>
-      <p>Point 4 of the brief requires the hidden element to be written <em>before</em> the data layer push. Verifying that means reading the page's source code as it executes, which is a developer task, not a marketing one. This manual is not going to pretend otherwise.</p>
+      <p>Point 4 of the request asks for the hidden element to be written <em>before</em> the data layer push. Verifying that means reading the page's source code as it executes, which is a developer task, not a marketing one. This manual is not going to pretend otherwise.</p>
       <p>You have two ways to close the gap. Do the first now, and the second in Chapter 7 if you are doing it.</p>
 
       <div class="ask">
@@ -1018,7 +1063,7 @@
   <p class="chapter-kicker">CHAPTER 7 <span class="badge opt">OPTIONAL</span></p>
   <h2>Add enhanced conversions</h2>
   <p class="chapter-intro">Improves how reliably Google matches your conversions when cookies fail. It does not create conversions that would not otherwise exist, which is why it is optional. It also contains the strongest check on the ordering requirement from Chapter 3.</p>
-  <p class="chapter-loc"><span><strong>Where you work:</strong> Google Ads, then Tag Manager</span><span><strong>Time:</strong> 25 minutes</span><span><strong>Requires:</strong> points 2 and 4 of the step 3.1 brief</span></p>
+  <p class="chapter-loc"><span><strong>Where you work:</strong> Google Ads, then Tag Manager</span><span><strong>Time:</strong> 25 minutes</span><span><strong>Requires:</strong> points 2 and 4 of the step 3.1 request</span></p>
 </div>
 
 <div class="step">
