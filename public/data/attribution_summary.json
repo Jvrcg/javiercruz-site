@@ -1,0 +1,587 @@
+{
+  "meta": {
+    "fiscal_window": {
+      "start": "2025-02-01",
+      "end": "2026-01-31"
+    },
+    "annual_goals": {
+      "mql": 2350,
+      "pql": 4400,
+      "pipeline": 5040000
+    },
+    "prior_year_growth_assumption": 0.18
+  },
+  "totals": {
+    "leads": 8245,
+    "mqls": 2407,
+    "pqls": 4502,
+    "opportunities": 1745,
+    "closed_won": 266,
+    "pipeline_by_model": {
+      "first_touch": 5172658.0,
+      "last_touch": 5172658.0,
+      "linear": 5172658.0,
+      "u_shaped": 5172658.0
+    },
+    "avg_deal_size": 3057.64,
+    "avg_cycle_days": 110.1,
+    "pipeline_velocity_30d": 221616.41
+  },
+  "channels": {
+    "linkedin": {
+      "leads": 4563,
+      "mqls": 1329,
+      "opportunities": 957,
+      "closed_won": 141,
+      "pipeline_by_model": {
+        "first_touch": 2843285.0,
+        "last_touch": 1666201.0,
+        "linear": 2083223.25,
+        "u_shaped": 2167245.3
+      },
+      "opportunities_touched": 1262,
+      "annual_spend": 574000,
+      "demo_touches": 750,
+      "trial_touches": 1464
+    },
+    "google": {
+      "leads": 3521,
+      "mqls": 1041,
+      "opportunities": 752,
+      "closed_won": 120,
+      "pipeline_by_model": {
+        "first_touch": 2227764.0,
+        "last_touch": 1501805.0,
+        "linear": 1727990.67,
+        "u_shaped": 1799274.9
+      },
+      "opportunities_touched": 1075,
+      "annual_spend": 574000,
+      "demo_touches": 693,
+      "trial_touches": 1294
+    },
+    "g2": {
+      "leads": 126,
+      "mqls": 28,
+      "opportunities": 31,
+      "closed_won": 5,
+      "pipeline_by_model": {
+        "first_touch": 84577.0,
+        "last_touch": 1069741.0,
+        "linear": 621281.58,
+        "u_shaped": 596946.4
+      },
+      "opportunities_touched": 526,
+      "annual_spend": 112000,
+      "demo_touches": 288,
+      "trial_touches": 555
+    },
+    "programmatic": {
+      "leads": 35,
+      "mqls": 9,
+      "opportunities": 5,
+      "closed_won": 0,
+      "pipeline_by_model": {
+        "first_touch": 17032.0,
+        "last_touch": 934911.0,
+        "linear": 740162.5,
+        "u_shaped": 609191.4
+      },
+      "opportunities_touched": 582,
+      "annual_spend": 140000,
+      "demo_touches": 313,
+      "trial_touches": 577
+    }
+  },
+  "campaigns": {
+    "GGL-Competitor-Streamlink-Alt": {
+      "channel": "google",
+      "pipeline_by_model": {
+        "first_touch": 413532.0,
+        "last_touch": 251425.0,
+        "linear": 321211.25,
+        "u_shaped": 327212.0
+      },
+      "opportunities_touched": 243
+    },
+    "G2-Badge-LP-Integration": {
+      "channel": "g2",
+      "pipeline_by_model": {
+        "first_touch": 22957.0,
+        "last_touch": 338420.0,
+        "linear": 194739.08,
+        "u_shaped": 187574.4
+      },
+      "opportunities_touched": 189
+    },
+    "G2-GridReport-ETL-Gated": {
+      "channel": "g2",
+      "pipeline_by_model": {
+        "first_touch": 30545.0,
+        "last_touch": 370762.0,
+        "linear": 211243.0,
+        "u_shaped": 205185.9
+      },
+      "opportunities_touched": 195
+    },
+    "LI-MOFU-Demo-DataEngineers": {
+      "channel": "linkedin",
+      "pipeline_by_model": {
+        "first_touch": 400851.0,
+        "last_touch": 185727.0,
+        "linear": 273607.25,
+        "u_shaped": 284212.5
+      },
+      "opportunities_touched": 210
+    },
+    "LI-Retarget-SiteVisitors-30d": {
+      "channel": "linkedin",
+      "pipeline_by_model": {
+        "first_touch": 368955.0,
+        "last_touch": 429504.0,
+        "linear": 348174.92,
+        "u_shaped": 370534.0
+      },
+      "opportunities_touched": 298
+    },
+    "LI-ENT-Awareness-DataPipeline": {
+      "channel": "linkedin",
+      "pipeline_by_model": {
+        "first_touch": 397220.0,
+        "last_touch": 153901.0,
+        "linear": 256572.5,
+        "u_shaped": 267502.1
+      },
+      "opportunities_touched": 187
+    },
+    "DSP-ABM-AirCover-Strategic": {
+      "channel": "programmatic",
+      "pipeline_by_model": {
+        "first_touch": 2069.0,
+        "last_touch": 301489.0,
+        "linear": 213856.75,
+        "u_shaped": 184116.8
+      },
+      "opportunities_touched": 176
+    },
+    "LI-ENT-Awareness-DataIntegration": {
+      "channel": "linkedin",
+      "pipeline_by_model": {
+        "first_touch": 429777.0,
+        "last_touch": 164232.0,
+        "linear": 279777.42,
+        "u_shaped": 289921.0
+      },
+      "opportunities_touched": 214
+    },
+    "LI-MOFU-Trial-AnalyticsTeams": {
+      "channel": "linkedin",
+      "pipeline_by_model": {
+        "first_touch": 406024.0,
+        "last_touch": 173337.0,
+        "linear": 268461.83,
+        "u_shaped": 281583.8
+      },
+      "opportunities_touched": 213
+    },
+    "GGL-RLSA-HighIntent-Visitors": {
+      "channel": "google",
+      "pipeline_by_model": {
+        "first_touch": 348220.0,
+        "last_touch": 288286.0,
+        "linear": 290770.08,
+        "u_shaped": 306804.1
+      },
+      "opportunities_touched": 236
+    },
+    "LI-Retarget-PricingPage-14d": {
+      "channel": "linkedin",
+      "pipeline_by_model": {
+        "first_touch": 442454.0,
+        "last_touch": 373865.0,
+        "linear": 369536.0,
+        "u_shaped": 382180.1
+      },
+      "opportunities_touched": 320
+    },
+    "GGL-NonBrand-ETL-Tools": {
+      "channel": "google",
+      "pipeline_by_model": {
+        "first_touch": 325297.0,
+        "last_touch": 229725.0,
+        "linear": 261320.25,
+        "u_shaped": 269541.6
+      },
+      "opportunities_touched": 202
+    },
+    "DSP-Awareness-DataEngineers": {
+      "channel": "programmatic",
+      "pipeline_by_model": {
+        "first_touch": 3068.0,
+        "last_touch": 267274.0,
+        "linear": 180770.42,
+        "u_shaped": 157360.3
+      },
+      "opportunities_touched": 159
+    },
+    "GGL-Competitor-Pipeform-Alt": {
+      "channel": "google",
+      "pipeline_by_model": {
+        "first_touch": 361308.0,
+        "last_touch": 164106.0,
+        "linear": 255572.0,
+        "u_shaped": 257740.4
+      },
+      "opportunities_touched": 192
+    },
+    "DSP-Retarget-HighIntent-14d": {
+      "channel": "programmatic",
+      "pipeline_by_model": {
+        "first_touch": 3779.0,
+        "last_touch": 143288.0,
+        "linear": 153150.58,
+        "u_shaped": 112633.4
+      },
+      "opportunities_touched": 139
+    },
+    "G2-Retarget-CategoryBuyers": {
+      "channel": "g2",
+      "pipeline_by_model": {
+        "first_touch": 31075.0,
+        "last_touch": 360559.0,
+        "linear": 215299.5,
+        "u_shaped": 204186.1
+      },
+      "opportunities_touched": 203
+    },
+    "DSP-ABM-AirCover-Commercial": {
+      "channel": "programmatic",
+      "pipeline_by_model": {
+        "first_touch": 8116.0,
+        "last_touch": 222860.0,
+        "linear": 192384.75,
+        "u_shaped": 155080.9
+      },
+      "opportunities_touched": 151
+    },
+    "GGL-NonBrand-DataPipeline": {
+      "channel": "google",
+      "pipeline_by_model": {
+        "first_touch": 378374.0,
+        "last_touch": 212469.0,
+        "linear": 286157.83,
+        "u_shaped": 288738.6
+      },
+      "opportunities_touched": 214
+    },
+    "LI-ABM-Strategic-ENT": {
+      "channel": "linkedin",
+      "pipeline_by_model": {
+        "first_touch": 398004.0,
+        "last_touch": 185635.0,
+        "linear": 287093.33,
+        "u_shaped": 291311.8
+      },
+      "opportunities_touched": 211
+    },
+    "GGL-Brand-Syncflow-Exact": {
+      "channel": "google",
+      "pipeline_by_model": {
+        "first_touch": 401033.0,
+        "last_touch": 355794.0,
+        "linear": 312959.25,
+        "u_shaped": 349238.2
+      },
+      "opportunities_touched": 257
+    }
+  },
+  "monthly": {
+    "months": [
+      "Feb-2025",
+      "Mar-2025",
+      "Apr-2025",
+      "May-2025",
+      "Jun-2025",
+      "Jul-2025",
+      "Aug-2025",
+      "Sep-2025",
+      "Oct-2025",
+      "Nov-2025",
+      "Dec-2025",
+      "Jan-2026"
+    ],
+    "leads_actual": [
+      767,
+      899,
+      917,
+      739,
+      695,
+      549,
+      606,
+      942,
+      942,
+      816,
+      373,
+      0
+    ],
+    "mql_actual": [
+      199,
+      176,
+      241,
+      223,
+      194,
+      157,
+      180,
+      256,
+      286,
+      230,
+      97,
+      168
+    ],
+    "mql_goal": [
+      190.3,
+      225.6,
+      220.9,
+      209.1,
+      183.3,
+      157.5,
+      166.8,
+      244.4,
+      270.2,
+      225.6,
+      94.0,
+      162.2
+    ],
+    "pql_actual": [
+      364,
+      439,
+      414,
+      402,
+      340,
+      310,
+      316,
+      471,
+      537,
+      413,
+      180,
+      316
+    ],
+    "pql_goal": [
+      356.4,
+      422.4,
+      413.6,
+      391.6,
+      343.2,
+      294.8,
+      312.4,
+      457.6,
+      506.0,
+      422.4,
+      176.0,
+      303.6
+    ],
+    "pipeline_actual": [
+      428655,
+      493493,
+      502183,
+      439622,
+      361674,
+      337676,
+      382882,
+      534677,
+      649139,
+      488697,
+      209672,
+      344288
+    ],
+    "pipeline_goal": [
+      408240.0,
+      483840.0,
+      473760.0,
+      448560.0,
+      393120.0,
+      337680.0,
+      357840.0,
+      524160.0,
+      579600.0,
+      483840.0,
+      201600.0,
+      347760.0
+    ],
+    "prior_year_mql": [
+      179.1,
+      196.5,
+      190.5,
+      172.6,
+      152.0,
+      137.7,
+      156.6,
+      202.4,
+      237.9,
+      196.0,
+      89.5,
+      129.1
+    ]
+  },
+  "pacing_projection": {
+    "cutoff_month": "Oct-2025",
+    "actual_feb_to_oct_mql": 1912,
+    "implied_total": 2399.7,
+    "projected": {
+      "Nov-2025": 230.5,
+      "Dec-2025": 105.3,
+      "Jan-2026": 151.9
+    },
+    "validation": {
+      "Nov-2025": {
+        "projected": 230.5,
+        "actual": 230,
+        "variance_pct": 0.2
+      },
+      "Dec-2025": {
+        "projected": 105.3,
+        "actual": 97,
+        "variance_pct": 8.6
+      }
+    }
+  },
+  "demographics": {
+    "lead_type": {
+      "demo": 1899,
+      "trial": 3738,
+      "neither": 2399,
+      "both": 209
+    },
+    "seniority": {
+      "c_suite_vp": {
+        "leads": 969,
+        "mqls": 296,
+        "opportunities": 225,
+        "closed_won": 36,
+        "channel_mix": {
+          "linkedin": 153,
+          "google": 141,
+          "g2": 1,
+          "programmatic": 1
+        },
+        "cost_per_mql": 551.97,
+        "avg_deal_size": 4338.42,
+        "avg_cycle_days": 134.5,
+        "win_rate": 0.16
+      },
+      "director": {
+        "leads": 1869,
+        "mqls": 530,
+        "opportunities": 401,
+        "closed_won": 57,
+        "channel_mix": {
+          "linkedin": 298,
+          "google": 219,
+          "g2": 11,
+          "programmatic": 2
+        },
+        "cost_per_mql": 612.4,
+        "avg_deal_size": 3765.05,
+        "avg_cycle_days": 119.2,
+        "win_rate": 0.1421
+      },
+      "ic_analyst": {
+        "leads": 2473,
+        "mqls": 722,
+        "opportunities": 541,
+        "closed_won": 93,
+        "channel_mix": {
+          "linkedin": 387,
+          "google": 326,
+          "g2": 6,
+          "programmatic": 3
+        },
+        "cost_per_mql": 578.35,
+        "avg_deal_size": 2168.51,
+        "avg_cycle_days": 94.2,
+        "win_rate": 0.1719
+      },
+      "manager": {
+        "leads": 2934,
+        "mqls": 859,
+        "opportunities": 578,
+        "closed_won": 80,
+        "channel_mix": {
+          "linkedin": 491,
+          "google": 355,
+          "g2": 10,
+          "programmatic": 3
+        },
+        "cost_per_mql": 575.64,
+        "avg_deal_size": 3010.88,
+        "avg_cycle_days": 109.2,
+        "win_rate": 0.1384
+      }
+    },
+    "job_function": {
+      "Analytics and BI": {
+        "leads": 4148,
+        "mqls": 1222,
+        "opportunities": 901,
+        "closed_won": 141,
+        "channel_mix": {
+          "linkedin": 645,
+          "google": 562,
+          "g2": 12,
+          "programmatic": 3
+        },
+        "cost_per_mql": 559.02,
+        "avg_deal_size": 2938.58,
+        "avg_cycle_days": 108.7,
+        "win_rate": 0.1565
+      },
+      "Data Engineering": {
+        "leads": 2419,
+        "mqls": 713,
+        "opportunities": 498,
+        "closed_won": 75,
+        "channel_mix": {
+          "linkedin": 413,
+          "google": 290,
+          "g2": 7,
+          "programmatic": 3
+        },
+        "cost_per_mql": 579.17,
+        "avg_deal_size": 2875.43,
+        "avg_cycle_days": 106.7,
+        "win_rate": 0.1506
+      },
+      "Data Platform and Governance": {
+        "leads": 1678,
+        "mqls": 472,
+        "opportunities": 346,
+        "closed_won": 50,
+        "channel_mix": {
+          "linkedin": 271,
+          "google": 189,
+          "g2": 9,
+          "programmatic": 3
+        },
+        "cost_per_mql": 643.91,
+        "avg_deal_size": 3666.7,
+        "avg_cycle_days": 118.6,
+        "win_rate": 0.1445
+      }
+    },
+    "buying_committee": {
+      "avg_distinct_prospects_per_company": 274.83,
+      "distribution": {
+        "1": 0,
+        "2": 0,
+        "3": 0,
+        "4+": 30
+      }
+    },
+    "pipeline_by_lead_type": {
+      "demo": 2292441.0,
+      "trial": 1901963.0,
+      "both": 416895.0,
+      "neither": 561359.0
+    }
+  }
+}
