@@ -626,6 +626,7 @@ export default function AttributionTool() {
   const [model, setModel] = useState("u_shaped");
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
+  const [navHeight, setNavHeight] = useState(0);
 
   useEffect(() => {
     fetch('/data/attribution_summary.json')
@@ -637,27 +638,48 @@ export default function AttributionTool() {
       .catch(err => setError(err.message));
   }, []);
 
+  // The site header (Nav.astro) is itself `sticky top-0`. Measuring its
+  // real height (rather than hardcoding a guess) keeps this bar pinned
+  // directly below it instead of colliding/overlapping if the header's
+  // height ever changes.
+  useEffect(() => {
+    const header = document.querySelector('header');
+    if (!header) return;
+    const update = () => setNavHeight(header.getBoundingClientRect().height);
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
+
   if (error) return <div style={{ padding: "2rem", color: "#991b1b", fontSize: 13 }}>Could not load dataset: {error}</div>;
   if (!data) return <div style={{ padding: "2rem", color: "#6b6a68", fontSize: 13 }}>Loading dataset…</div>;
 
   return <div style={{ fontFamily: "inherit", maxWidth: "100%" }}>
-    <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "1rem", flexWrap: "wrap", gap: 6 }}>
-      <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
-        {TABS.map((t, i) => <button key={t} onClick={() => setTab(i)} style={{
-          padding: "5px 10px", fontSize: 11, borderRadius: 6, border: tab === i ? "0.5px solid #d1d1d0" : "0.5px solid transparent",
-          cursor: "pointer", background: tab === i ? "#fff" : "transparent",
-          color: tab === i ? "#1a1a19" : "#6b6a68", whiteSpace: "nowrap"
-        }}>{t}</button>)}
-      </div>
-      <div style={{ display: "flex", flexDirection: "column", gap: 3, marginLeft: "auto" }}>
-        <p style={{ fontSize: 11, color: "#6b6a68", margin: "0 0 2px", textAlign: "right" }}>Attribution model</p>
-        <div style={{ display: "flex", gap: 3, flexWrap: "wrap", justifyContent: "flex-end" }}>
-          {Object.entries(MODEL_LABELS).map(([k, v]) => <button key={k} onClick={() => setModel(k)} style={{
-            padding: "4px 9px", fontSize: 11, borderRadius: 6,
-            border: model === k ? "0.5px solid #2563EB" : "0.5px solid #d1d1d0",
-            cursor: "pointer", background: model === k ? "#eff6ff" : "transparent",
-            color: model === k ? "#1d4ed8" : "#6b6a68"
-          }}>{v}</button>)}
+    <div style={{
+      position: "sticky", top: navHeight, zIndex: 20,
+      background: "#fff",
+      borderBottom: "1px solid #e5e5e3",
+      boxShadow: "0 2px 4px rgba(0,0,0,0.03)",
+      paddingTop: 10, paddingBottom: 10, marginBottom: "1rem",
+    }}>
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", flexWrap: "wrap", gap: 6 }}>
+        <div style={{ display: "flex", gap: 3, flexWrap: "wrap" }}>
+          {TABS.map((t, i) => <button key={t} onClick={() => setTab(i)} style={{
+            padding: "5px 10px", fontSize: 11, borderRadius: 6, border: tab === i ? "0.5px solid #d1d1d0" : "0.5px solid transparent",
+            cursor: "pointer", background: tab === i ? "#fff" : "transparent",
+            color: tab === i ? "#1a1a19" : "#6b6a68", whiteSpace: "nowrap"
+          }}>{t}</button>)}
+        </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 3, marginLeft: "auto" }}>
+          <p style={{ fontSize: 11, color: "#6b6a68", margin: "0 0 2px", textAlign: "right" }}>Attribution model</p>
+          <div style={{ display: "flex", gap: 3, flexWrap: "wrap", justifyContent: "flex-end" }}>
+            {Object.entries(MODEL_LABELS).map(([k, v]) => <button key={k} onClick={() => setModel(k)} style={{
+              padding: "4px 9px", fontSize: 11, borderRadius: 6,
+              border: model === k ? "0.5px solid #2563EB" : "0.5px solid #d1d1d0",
+              cursor: "pointer", background: model === k ? "#eff6ff" : "transparent",
+              color: model === k ? "#1d4ed8" : "#6b6a68"
+            }}>{v}</button>)}
+          </div>
         </div>
       </div>
     </div>
