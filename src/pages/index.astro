@@ -16,69 +16,60 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <h2 class="text-xl font-normal text-gray-700 leading-snug mb-8">
         Performance marketing, in the open.
       </h2>
-      <p class="text-lg text-gray-600 mb-10 leading-relaxed">
-        Most of what I know about performance marketing I did not figure out alone (aside from
-        countless hours of research, and online courses). I had managers and senior operators who
-        were generous with their time and ruthless with their feedback. They taught me that the
-        work is only as good as the decision it changes, and that a test you cannot defend is not
-        really a test. This site is me writing those lessons down and passing them forward.
+      <p class="text-lg text-gray-600 mb-0 leading-relaxed">
+        I didn't figure out most of what I know about performance marketing alone.
+        Research and courses filled in gaps, but the teaching came from managers and
+        senior operators who were generous with their time and feedback. They taught me
+        that the work is only as good as the decision it changes, and that a test you
+        cannot defend is not really a test. The rest I learned by digging into the data
+        and building the programs. I created this site to share what I learned and to
+        test new tools and playbooks.
       </p>
-      <div class="flex flex-wrap gap-4">
-        <a
-          href="/playbooks"
-          class="bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
-        >
-          Read the Playbooks
-        </a>
-        <a
-          href="/lab-notes"
-          class="border border-gray-200 text-gray-700 px-6 py-3 rounded-lg font-medium hover:border-gray-400 hover:text-gray-900 transition-colors"
-        >
-          See the Lab Notes
-        </a>
-      </div>
     </div>
   </section>
 
-  <!-- What this site is -->
-  <section class="border-y border-gray-100 bg-gray-50 py-16" aria-labelledby="about-site-heading">
-    <div class="max-w-4xl mx-auto px-6">
-      <h2 id="about-site-heading" class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-10">
-        What this site is
-      </h2>
-      <div class="grid sm:grid-cols-2 gap-10">
-
-        <article>
-          <h3 class="font-semibold text-gray-900 mb-3">The craft</h3>
-          <p class="text-gray-600 leading-relaxed">
-            Dashboards and reporting that drive decisions, not just describe what happened.
-            A/B testing done in a way you can actually defend. The operational workflows behind
-            the numbers. These are the parts of performance marketing nobody writes about honestly.
-          </p>
-          <a
-            href="/playbooks"
-            class="inline-block mt-4 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            Read the playbooks →
-          </a>
-        </article>
-
-        <article>
-          <h3 class="font-semibold text-gray-900 mb-3">The lab</h3>
-          <p class="text-gray-600 leading-relaxed">
-            This site is the experiment. Every post is optimized with a real hypothesis.
-            Rankings, traffic, and AI-engine visibility are tracked. Results are posted openly
-            in Lab Notes, including the things that don't work.
-          </p>
-          <a
-            href="/lab-notes"
-            class="inline-block mt-4 text-sm font-medium text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            See the lab notes →
-          </a>
-        </article>
-
-      </div>
+  <section class="max-w-4xl mx-auto px-6 pb-20">
+    <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-widest mb-10">Take a tour</h2>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <a href="/playbooks" class="group block rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
+        <img
+          src="/images/home/home-playbooks-hn-audience-map.png"
+          alt="Network map of Hacker News commenter overlap across AI infrastructure companies"
+          width="1600"
+          height="900"
+          loading="lazy"
+          decoding="async"
+          class="aspect-video w-full rounded-lg object-cover border border-gray-200"
+        />
+        <h3 class="font-semibold text-gray-900 mt-4 mb-2 group-hover:text-blue-600 transition-colors">Playbooks</h3>
+        <p class="text-gray-600 leading-relaxed">Playbooks on performance marketing reporting, testing, and the operational work.</p>
+      </a>
+      <a href="/lab-notes" class="group block rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
+        <img
+          src="/images/home/home-lab-notes-conversion-flow.png"
+          alt="Flow diagram of a form submission moving from a website through Google Tag Manager into Google Ads"
+          width="757"
+          height="426"
+          loading="lazy"
+          decoding="async"
+          class="aspect-video w-full rounded-lg object-cover border border-gray-200"
+        />
+        <h3 class="font-semibold text-gray-900 mt-4 mb-2 group-hover:text-blue-600 transition-colors">Lab Notes</h3>
+        <p class="text-gray-600 leading-relaxed">Strategies and workflows being tested, what's changed, and what the data shows, including the things that don't work.</p>
+      </a>
+      <a href="/tools" class="group block rounded-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4">
+        <img
+          src="/images/home/home-tools-attribution-dashboard.png"
+          alt="Marketing dashboard showing funnel conversion rates and channel performance against benchmarks"
+          width="872"
+          height="490"
+          loading="lazy"
+          decoding="async"
+          class="aspect-video w-full rounded-lg object-cover border border-gray-200"
+        />
+        <h3 class="font-semibold text-gray-900 mt-4 mb-2 group-hover:text-blue-600 transition-colors">Tools</h3>
+        <p class="text-gray-600 leading-relaxed">Tools are built on the same frameworks and benchmark data I use in practice, Including experimental tools.</p>
+      </a>
     </div>
   </section>
 
