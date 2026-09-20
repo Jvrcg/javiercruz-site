@@ -37,6 +37,11 @@ export default function CreativeResizer() {
   }, []);
 
   const handleFileSelected = useCallback(async file => {
+    // A file can be picked from the rail, the page-level drop target, or
+    // the Upload section's own dropzone, but load feedback (the preview,
+    // the dimensions, any error) only renders in the Upload section.
+    // Jump there so the result of every load attempt is always visible.
+    dispatch({ type: 'nav/setSection', section: 'upload' });
     dispatch({ type: 'upload/start' });
     try {
       const { bitmap, width, height } = await loadImageSource(file);
@@ -61,6 +66,29 @@ export default function CreativeResizer() {
     }
   }, []);
 
+  // Page-level drop target: the rail's dropzone was providing "drop a file
+  // from anywhere in the tool" behavior. Now that the rail has no dropzone
+  // of its own, this replaces that. Bound to window so it covers the
+  // whole page, not just the tool's own DOM subtree. UploadDropzone's own
+  // onDrop calls stopPropagation, so a drop that lands on the Upload
+  // section's dropzone is handled there only, not here as well.
+  useEffect(() => {
+    function handleWindowDragOver(event) {
+      event.preventDefault();
+    }
+    function handleWindowDrop(event) {
+      event.preventDefault();
+      const file = event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files[0];
+      if (file) handleFileSelected(file);
+    }
+    window.addEventListener('dragover', handleWindowDragOver);
+    window.addEventListener('drop', handleWindowDrop);
+    return () => {
+      window.removeEventListener('dragover', handleWindowDragOver);
+      window.removeEventListener('drop', handleWindowDrop);
+    };
+  }, [handleFileSelected]);
+
   const activeSource = state.sourceFiles.find(s => s.id === state.activeSourceId) || null;
   const ActiveSection = SECTION_COMPONENTS[state.activeSection] || UploadSection;
 
@@ -70,23 +98,21 @@ export default function CreativeResizer() {
         activeSection={state.activeSection}
         onSelectSection={section => dispatch({ type: 'nav/setSection', section })}
         status={state.status}
-        hasImage={Boolean(activeSource)}
+        fileName={activeSource ? activeSource.name : null}
         onFileSelected={handleFileSelected}
       />
       <div className="flex-1 min-w-0 px-4 py-6 md:px-8 md:py-8">
-        <div className="max-w-3xl">
-          {state.exifOrientationSupported === false && (
-            <div className="mb-6 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              This browser does not appear to apply photo rotation metadata automatically. Images taken on a phone in portrait orientation may appear sideways after upload.
-            </div>
-          )}
-          <ActiveSection
-            status={state.status}
-            error={state.error}
-            source={activeSource}
-            onFileSelected={handleFileSelected}
-          />
-        </div>
+        {state.exifOrientationSupported === false && (
+          <div className="mb-6 max-w-3xl rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            This browser does not appear to apply photo rotation metadata automatically. Images taken on a phone in portrait orientation may appear sideways after upload.
+          </div>
+        )}
+        <ActiveSection
+          status={state.status}
+          error={state.error}
+          source={activeSource}
+          onFileSelected={handleFileSelected}
+        />
       </div>
     </div>
   );

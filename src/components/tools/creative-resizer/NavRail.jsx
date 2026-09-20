@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { NAV_SECTIONS } from './config.js';
-import UploadDropzone from './UploadDropzone.jsx';
+import RailFileControl from './RailFileControl.jsx';
 
 function NavList({ activeSection, onSelectSection }) {
   return (
@@ -23,7 +23,7 @@ function NavList({ activeSection, onSelectSection }) {
   );
 }
 
-export default function NavRail({ activeSection, onSelectSection, status, hasImage, onFileSelected }) {
+export default function NavRail({ activeSection, onSelectSection, status, fileName, onFileSelected }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   function selectSection(key) {
@@ -45,9 +45,12 @@ export default function NavRail({ activeSection, onSelectSection, status, hasIma
         </button>
       </div>
 
-      {/* Drawer, visible below the md breakpoint */}
+      {/* Drawer, visible below the md breakpoint. z-[60] because the
+          sitewide header (Nav.astro) is sticky at z-50: the drawer must
+          sit above it, or the header intercepts clicks meant for the
+          drawer's own Close button near the top of the screen. */}
       {drawerOpen && (
-        <div className="md:hidden fixed inset-0 z-30 flex">
+        <div className="md:hidden fixed inset-0 z-[60] flex">
           <div className="absolute inset-0 bg-black/30" onClick={() => setDrawerOpen(false)} />
           <div className="relative w-72 max-w-[85vw] h-full bg-white overflow-y-auto p-4 flex flex-col gap-4">
             <div className="flex items-center justify-between">
@@ -56,7 +59,7 @@ export default function NavRail({ activeSection, onSelectSection, status, hasIma
                 Close
               </button>
             </div>
-            <UploadDropzone compact status={status} hasImage={hasImage} onFileSelected={onFileSelected} />
+            <RailFileControl fileName={fileName} status={status} onFileSelected={onFileSelected} />
             <NavList activeSection={activeSection} onSelectSection={selectSection} />
           </div>
         </div>
@@ -65,7 +68,7 @@ export default function NavRail({ activeSection, onSelectSection, status, hasIma
       {/* Persistent rail, visible at and above the md breakpoint */}
       <div className="hidden md:flex md:flex-col md:w-64 md:shrink-0 md:h-screen md:sticky md:top-0 md:overflow-y-auto md:border-r md:border-gray-200 md:p-4 md:gap-4 bg-white">
         <p className="text-sm font-semibold text-gray-900">Creative Resizer</p>
-        <UploadDropzone compact status={status} hasImage={hasImage} onFileSelected={onFileSelected} />
+        <RailFileControl fileName={fileName} status={status} onFileSelected={onFileSelected} />
         <NavList activeSection={activeSection} onSelectSection={onSelectSection} />
       </div>
     </>

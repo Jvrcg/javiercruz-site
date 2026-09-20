@@ -26,15 +26,17 @@ const softwareSchema = {
   <Fragment slot="head">
     <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
   </Fragment>
-  <div class="max-w-6xl mx-auto px-6 pt-12 pb-6">
-    <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-3">Tools</p>
-    <h1 class="text-4xl font-bold text-gray-900 leading-tight mb-4">Creative Resizer</h1>
-    <h2 class="text-xl font-normal text-gray-700 leading-snug mb-4">
-      Resize, crop, and export paid media creative across multiple aspect ratios at once, entirely in your browser.
-    </h2>
-    <p class="text-gray-600 leading-relaxed">
-      Upload an image, generate the output sizes you need, and export. Nothing leaves your browser: there is no upload, no server processing, and no API call.
-    </p>
+  <div class="max-w-[1600px] mx-auto px-6">
+    <header class="pt-12 pb-6">
+      <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-3">Tools</p>
+      <h1 class="text-4xl font-bold text-gray-900 leading-tight mb-4">Creative Resizer</h1>
+      <h2 class="max-w-2xl text-xl font-normal text-gray-700 leading-snug mb-4">
+        Resize, crop, and export paid media creative across multiple aspect ratios at once, entirely in your browser.
+      </h2>
+      <p class="max-w-2xl text-gray-600 leading-relaxed">
+        Upload an image, generate the output sizes you need, and export. Nothing leaves your browser: there is no upload, no server processing, and no API call.
+      </p>
+    </header>
+    <CreativeResizer client:load />
   </div>
-  <CreativeResizer client:load />
 </BaseLayout>

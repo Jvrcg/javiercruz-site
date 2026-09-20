@@ -23,7 +23,7 @@ export default function UploadSection({ status, error, source, onFileSelected })
   }, [source]);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 max-w-3xl">
       <div>
         <h2 className="text-lg font-semibold text-gray-900 mb-1">Upload</h2>
         <p className="text-sm text-gray-500">
