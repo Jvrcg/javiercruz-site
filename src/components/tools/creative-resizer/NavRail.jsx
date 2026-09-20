@@ -65,7 +65,7 @@ export default function NavRail({ activeSection, onSelectSection, status, hasIma
       {/* Persistent rail, visible at and above the md breakpoint */}
       <div className="hidden md:flex md:flex-col md:w-64 md:shrink-0 md:h-screen md:sticky md:top-0 md:overflow-y-auto md:border-r md:border-gray-200 md:p-4 md:gap-4 bg-white">
         <p className="text-sm font-semibold text-gray-900">Creative Resizer</p>
-        <UploadDropzone status={status} hasImage={hasImage} onFileSelected={onFileSelected} />
+        <UploadDropzone compact status={status} hasImage={hasImage} onFileSelected={onFileSelected} />
         <NavList activeSection={activeSection} onSelectSection={onSelectSection} />
       </div>
     </>

@@ -31,8 +31,8 @@ export const PRESETS = [
 // passes instead of a single drawImage call.
 export const STEPWISE_RESAMPLE_THRESHOLD = 0.5;
 
-// --- Phase 3 (export). Recorded now per approved Phase 0 amendments.
-// Not wired up until Phase 3. ---
+// Phase 3 (export). Recorded now per approved Phase 0 amendments.
+// Not wired up until Phase 3.
 
 // Quality slider range. Disabled entirely when the selected format is PNG,
 // since the quality argument only applies to lossy formats.

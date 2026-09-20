@@ -1,7 +1,7 @@
-import { useCallback, useReducer } from 'react';
+import { useCallback, useEffect, useReducer } from 'react';
 import { reducer, initialState } from './state.js';
 import { useSourceDisposal } from './hooks/useSourceDisposal.js';
-import { loadImageSource, ImageLoadError } from './lib/canvas.js';
+import { loadImageSource, detectExifOrientationSupport, ImageLoadError } from './lib/canvas.js';
 import NavRail from './NavRail.jsx';
 import UploadSection from './sections/UploadSection.jsx';
 import ResizeSection from './sections/ResizeSection.jsx';
@@ -25,6 +25,16 @@ export default function CreativeResizer() {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useSourceDisposal(state.sourceFiles);
+
+  useEffect(() => {
+    let cancelled = false;
+    detectExifOrientationSupport().then(supported => {
+      if (!cancelled) dispatch({ type: 'diagnostics/setExifOrientationSupport', supported });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleFileSelected = useCallback(async file => {
     dispatch({ type: 'upload/start' });
@@ -63,8 +73,13 @@ export default function CreativeResizer() {
         hasImage={Boolean(activeSource)}
         onFileSelected={handleFileSelected}
       />
-      <main className="flex-1 min-w-0 px-4 py-6 md:px-8 md:py-8">
+      <div className="flex-1 min-w-0 px-4 py-6 md:px-8 md:py-8">
         <div className="max-w-3xl">
+          {state.exifOrientationSupported === false && (
+            <div className="mb-6 rounded-md border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              This browser does not appear to apply photo rotation metadata automatically. Images taken on a phone in portrait orientation may appear sideways after upload.
+            </div>
+          )}
           <ActiveSection
             status={state.status}
             error={state.error}
@@ -72,7 +87,7 @@ export default function CreativeResizer() {
             onFileSelected={handleFileSelected}
           />
         </div>
-      </main>
+      </div>
     </div>
   );
 }

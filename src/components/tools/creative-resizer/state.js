@@ -17,6 +17,10 @@ export const initialState = {
   error: null,
   activeSection: 'upload',
 
+  // null until the startup probe resolves, then true or false. See
+  // detectExifOrientationSupport in lib/canvas.js.
+  exifOrientationSupported: null,
+
   // Phase 2
   selectedPresetIds: [],
   customOutputs: [],
@@ -50,6 +54,9 @@ export function reducer(state, action) {
   switch (action.type) {
     case 'nav/setSection':
       return { ...state, activeSection: action.section };
+
+    case 'diagnostics/setExifOrientationSupport':
+      return { ...state, exifOrientationSupported: action.supported };
 
     case 'upload/start':
       return { ...state, status: 'loading', error: null };
