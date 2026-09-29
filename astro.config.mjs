@@ -12,7 +12,14 @@ export default defineConfig({
   redirects: {
     '/writing': '/playbooks',
   },
-  integrations: [sitemap(), react()],
+  integrations: [
+    sitemap({
+      // Static HTML in public/ is not built by Astro, so the sitemap
+      // integration cannot see it. List those pages here.
+      customPages: ['https://jjcruzgalera.com/guides/conversion-tracking'],
+    }),
+    react(),
+  ],
   // No `output` set: Astro defaults to 'static', so every page is prerendered
   // at build time. The adapter only enables on-demand rendering for routes
   // that explicitly opt out with `export const prerender = false`
