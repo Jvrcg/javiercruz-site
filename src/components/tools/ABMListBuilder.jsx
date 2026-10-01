@@ -897,6 +897,16 @@ export default function ABMListBuilder() {
             {tiered.lost.filter(r => r.inWindow).length} closed-lost accounts fall inside the window and will be excluded; {tiered.lost.filter(r => !r.inWindow).length} older ones can be targeted again.
           </p>
 
+          {/* Lookalike counts */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
+            <span style={{ fontSize: 13, color: '#1a1a19' }}>Lookalikes to find:</span>
+            <input type="number" min={1} max={500} value={strategicCount} onChange={e => setStrategicCount(Math.max(1, Math.min(500, Number(e.target.value) || 1)))} aria-label={tiered.hypothesis ? 'Best customer lookalikes' : 'Strategic lookalikes'} style={{ ...S.input, width: 70 }} />
+            <span style={{ fontSize: 13, color: '#1a1a19' }}>{tiered.hypothesis ? 'best customer' : 'Strategic'}</span>
+            <input type="number" min={1} max={500} value={coreCount} onChange={e => setCoreCount(Math.max(1, Math.min(500, Number(e.target.value) || 1)))} aria-label="Core ICP lookalikes" style={{ ...S.input, width: 70 }} />
+            <span style={{ fontSize: 13, color: '#1a1a19' }}>Core ICP</span>
+          </div>
+          <p style={{ ...S.gray, marginBottom: 14 }}>These counts go into the prompt in Step 4.</p>
+
           {/* Table */}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
             {['All', ...(tiered.hypothesis ? ['Hand-picked', 'Not picked'] : ['Strategic', 'Core ICP', 'Heavy Lift']), 'Churned', 'Closed-lost'].map(t => (
@@ -989,14 +999,6 @@ export default function ABMListBuilder() {
             <label style={{ fontSize: 12, color: '#6b6a68' }}>
               What you sell
               <input type="text" value={whatYouSell} placeholder="e.g. Acme: a data integration platform" onChange={e => setWhatYouSell(e.target.value)} style={{ ...S.input, marginTop: 4 }} />
-            </label>
-            <label style={{ fontSize: 12, color: '#6b6a68' }}>
-              Strategic lookalikes
-              <input type="number" min={1} max={500} value={strategicCount} onChange={e => setStrategicCount(Math.max(1, Number(e.target.value) || 1))} style={{ ...S.input, marginTop: 4 }} />
-            </label>
-            <label style={{ fontSize: 12, color: '#6b6a68' }}>
-              Core ICP lookalikes
-              <input type="number" min={1} max={500} value={coreCount} onChange={e => setCoreCount(Math.max(1, Number(e.target.value) || 1))} style={{ ...S.input, marginTop: 4 }} />
             </label>
           </div>
           <label style={{ fontSize: 12, color: '#6b6a68', display: 'block', marginBottom: 12 }}>
