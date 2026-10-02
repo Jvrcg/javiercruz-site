@@ -76,6 +76,8 @@ function parseCSV(text) {
   let row = [];
   let field = '';
   let inQuotes = false;
+  let rowNum = 0; // spreadsheet row number, counting blank rows
+  const keep = r => { rowNum++; if (r.some(v => v.trim() !== '')) { r.rowNum = rowNum; rows.push(r); } };
   const t = text.replace(/^\uFEFF/, '');
   for (let i = 0; i < t.length; i++) {
     const c = t[i];
@@ -89,12 +91,12 @@ function parseCSV(text) {
     else if (c === '\n' || c === '\r') {
       if (c === '\r' && t[i + 1] === '\n') i++;
       row.push(field); field = '';
-      if (row.some(v => v.trim() !== '')) rows.push(row);
+      keep(row);
       row = [];
     } else field += c;
   }
   row.push(field);
-  if (row.some(v => v.trim() !== '')) rows.push(row);
+  keep(row);
   return rows;
 }
 
@@ -369,7 +371,8 @@ export default function ABMListBuilder() {
     setIsSample(sample);
     setError('');
     resetDownstream();
-    if (sample) setWhatYouSell('Syncflow: a data integration platform');
+    setWhatYouSell('');
+    setJobTitles('');
   }
 
   function handleUpload() {
@@ -444,21 +447,31 @@ export default function ABMListBuilder() {
         status,
         lostDate: null,
         valid: true,
+        rowNum: row.rowNum,
+        badNote: '',
       };
       if (!r.account_name && !r.domain) return;
       if (status === 'Closed-lost') {
         r.lostDate = parseDate(get(row, 'closed_lost_date'));
-        if (!r.lostDate) { bad['Closed-lost date'] = (bad['Closed-lost date'] || 0) + 1; }
+        if (!r.lostDate) (bad['Closed-lost date'] = bad['Closed-lost date'] || []).push({ name: r.account_name || r.domain, rowNum: r.rowNum, value: get(row, 'closed_lost_date') });
       } else {
         const checks = [
-          ['ARR (USD)', !Number.isNaN(r.arr)],
-          ['Sales cycle (days)', !Number.isNaN(r.cycle)],
-          ['Expansion (Yes/No)', r.expansion !== ''],
-          ['Churn risk (Low/Med/High)', r.churn_risk !== ''],
-          ['Support tickets per quarter', !Number.isNaN(r.tickets)],
-          ['Product-market fit (High/Med/Low)', r.pmf !== ''],
+          ['ARR (USD)', !Number.isNaN(r.arr), 'arr_usd'],
+          ['Sales cycle (days)', !Number.isNaN(r.cycle), 'sales_cycle_days'],
+          ['Expansion (Yes/No)', r.expansion !== '', 'expansion'],
+          ['Churn risk (Low/Med/High)', r.churn_risk !== '', 'churn_risk'],
+          ['Support tickets per quarter', !Number.isNaN(r.tickets), 'support_tickets_qtr'],
+          ['Product-market fit (High/Med/Low)', r.pmf !== '', 'pmf_fit'],
         ];
-        checks.forEach(([label, ok]) => { if (!ok) { bad[label] = (bad[label] || 0) + 1; r.valid = false; } });
+        const notes = [];
+        checks.forEach(([label, ok, key]) => {
+          if (ok) return;
+          const value = get(row, key);
+          (bad[label] = bad[label] || []).push({ name: r.account_name || r.domain, rowNum: r.rowNum, value });
+          notes.push(`${label} ${value === '' ? 'is blank' : `"${value}" could not be read`}`);
+          r.valid = false;
+        });
+        r.badNote = notes.join('; ');
       }
       out.push(r);
     });
@@ -500,7 +513,7 @@ export default function ABMListBuilder() {
         reason = 'Churned within first year';
       } else if (!r.valid) {
         tier = null;
-        reason = 'Left out: unreadable values';
+        reason = `Left out: ${r.badNote} (row ${r.rowNum})`;
       } else if (hypothesis) {
         tier = picked[r.id] ? 'Hand-picked' : 'Not picked';
         reason = picked[r.id] ? 'Marked as a best customer by hand' : 'Not marked';
@@ -549,7 +562,7 @@ export default function ABMListBuilder() {
     lines.push('You have my permission to search the web and open public web pages for this whole task. Do not stop to ask before each search or page. Only ask if a page needs a login or a payment.');
     lines.push('');
     lines.push('CONTEXT');
-    lines.push(`We sell ${whatYouSell.trim() ? whatYouSell.trim() : '[describe what you sell]'}. Below are the traits that set our best customers apart, measured against our full customer base.`);
+    lines.push(`We sell ${whatYouSell.trim() ? whatYouSell.trim() : (isSample ? 'Syncflow: a data integration platform' : '[describe what you sell]')}. Below are the traits that set our best customers apart, measured against our full customer base.`);
     lines.push('');
     const sLabel = hypothesis ? 'BEST CUSTOMERS (HAND-PICKED)' : 'STRATEGIC CUSTOMERS';
     lines.push(`${sLabel} (${strategic.length} accounts, median ARR ${fmtMoney(median(strategic.map(r => r.arr)))})`);
@@ -616,7 +629,7 @@ export default function ABMListBuilder() {
     if (coreFallback) cols.push('Exception reason');
     lines.push(`A table with these columns: ${cols.join(' | ')}`);
     return lines.join('\n');
-  }, [tiered, exclusion, whatYouSell, strategicCount, coreCount, jobTitles, windowMonths]);
+  }, [tiered, exclusion, isSample, whatYouSell, strategicCount, coreCount, jobTitles, windowMonths]);
 
   // ---------- Step 4.1 cleaner ----------
   function cleanOutput() {
@@ -713,7 +726,7 @@ export default function ABMListBuilder() {
   };
 
   const tableRows = tiered
-    ? tiered.result.filter(r => tierFilter === 'All' || r.tier === tierFilter)
+    ? tiered.result.filter(r => tierFilter === 'All' || (tierFilter === 'Left out' ? r.tier === null : r.tier === tierFilter))
     : [];
 
   return (
@@ -832,11 +845,20 @@ export default function ABMListBuilder() {
 
           {Object.keys(records.bad).length > 0 && (
             <div style={{ marginBottom: 12 }}>
-              {Object.entries(records.bad).map(([field, n]) => (
-                <p key={field} style={{ color: '#ca8a04', fontSize: 12, background: '#fefce8', border: '1px solid #fef08a', borderRadius: 6, padding: '6px 10px', marginBottom: 6 }}>
-                  {n} rows have values we couldn't read in {field}. They were left out of the tiers.
-                </p>
-              ))}
+              {Object.entries(records.bad).map(([field, items]) => {
+                const n = items.length;
+                const shown = items.slice(0, 3).map(it => `${it.name} (row ${it.rowNum}, ${it.value === '' ? 'blank' : `"${it.value}"`})`).join(', ');
+                const more = n > 3 ? ` and ${n - 3} more` : '';
+                const lost = field === 'Closed-lost date';
+                const ending = lost
+                  ? (n === 1 ? 'It stays excluded from the LLM list to be safe.' : 'They stay excluded from the LLM list to be safe.')
+                  : (n === 1 ? 'It was left out of the tiers.' : 'They were left out of the tiers.');
+                return (
+                  <p key={field} style={{ color: '#ca8a04', fontSize: 12, background: '#fefce8', border: '1px solid #fef08a', borderRadius: 6, padding: '6px 10px', marginBottom: 6 }}>
+                    {n === 1 ? '1 row has a value' : `${n} rows have values`} we couldn't read in {field}: {shown}{more}. {ending}
+                  </p>
+                );
+              })}
             </div>
           )}
 
@@ -922,9 +944,9 @@ export default function ABMListBuilder() {
 
           {/* Table */}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
-            {['All', ...(tiered.hypothesis ? ['Hand-picked', 'Not picked'] : ['Strategic', 'Core ICP', 'Heavy Lift']), 'Churned', 'Closed-lost'].map(t => (
+            {['All', ...(tiered.hypothesis ? ['Hand-picked', 'Not picked'] : ['Strategic', 'Core ICP', 'Heavy Lift']), 'Churned', 'Closed-lost', ...(tiered.result.some(r => r.tier === null) ? ['Left out'] : [])].map(t => (
               <button key={t} onClick={() => setTierFilter(t)} style={{ padding: '4px 10px', borderRadius: 6, fontSize: 12, cursor: 'pointer', border: tierFilter === t ? '1px solid #2563EB' : '1px solid #e5e7eb', background: tierFilter === t ? '#eff6ff' : '#fff', color: tierFilter === t ? '#2563EB' : '#6b6a68' }}>
-                {t === 'All' ? 'All' : TIER_LABEL[t]}
+                {t === 'All' || t === 'Left out' ? t : TIER_LABEL[t]}
               </button>
             ))}
           </div>
@@ -1013,13 +1035,16 @@ export default function ABMListBuilder() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10, marginBottom: 12 }}>
             <label style={{ fontSize: 12, color: '#6b6a68' }}>
               What you sell
-              <input type="text" value={whatYouSell} placeholder="e.g. Acme: a data integration platform" onChange={e => setWhatYouSell(e.target.value)} style={{ ...S.input, marginTop: 4 }} />
+              <input type="text" value={whatYouSell} placeholder="e.g. Syncflow: a data integration platform" onChange={e => setWhatYouSell(e.target.value)} style={{ ...S.input, marginTop: 4 }} />
             </label>
           </div>
-          <label style={{ fontSize: 12, color: '#6b6a68', display: 'block', marginBottom: 12 }}>
+          <label style={{ fontSize: 12, color: '#6b6a68', display: 'block', marginBottom: 4 }}>
             Target job titles (optional, comma separated). Adds the hiring signal section to the prompt.
             <input type="text" value={jobTitles} placeholder="e.g. Director of Data Engineering, Analytics Engineer" onChange={e => setJobTitles(e.target.value)} style={{ ...S.input, marginTop: 4 }} />
           </label>
+          <p style={{ ...S.gray, fontStyle: 'italic', marginBottom: 12 }}>
+            Many LLM chats can't read career pages or job boards. The hiring signal works best in a web-enabled tool like Claygent or Perplexity. See Limitations & Solutions at the bottom of this page.
+          </p>
           <textarea readOnly value={promptText} style={{ width: '100%', minHeight: 320, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 12, lineHeight: 1.5, border: '1px solid #e5e7eb', borderRadius: 6, padding: 12, color: '#1a1a19', background: '#f9fafb' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
             <button style={S.btn} onClick={() => copyText(promptText, true)}>{copied ? 'Copied' : 'Copy prompt'}</button>
@@ -1041,7 +1066,7 @@ export default function ABMListBuilder() {
           <div style={{ marginTop: 22, borderTop: '1px solid #f3f4f6', paddingTop: 16 }}>
             <p style={S.stepEyebrow}>Step 4.1 (Recommended)</p>
             <h4 style={{ ...S.stepTitle, fontSize: 16 }}>Clean Your Output</h4>
-            <p style={S.intro}>Paste your LLM's results here. We'll remove any company you already sell to or recently lost, right in your browser.</p>
+            <p style={S.intro}>Paste your LLM's results here. This step will remove any company you already sell to or recently lost, right in your browser.</p>
             <textarea value={pasted} onChange={e => setPasted(e.target.value)} placeholder="Paste the table or list your LLM returned" style={{ width: '100%', minHeight: 140, fontSize: 12, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', border: '1px solid #e5e7eb', borderRadius: 6, padding: 10, color: '#1a1a19' }} />
             <button style={{ ...S.btn, marginTop: 10, opacity: pasted.trim() ? 1 : 0.5 }} disabled={!pasted.trim()} onClick={cleanOutput}>Clean my list</button>
             <p style={{ ...S.gray, marginTop: 8 }}>Matching is by domain. Subdomains count as a match (eu.acme.com matches acme.com).</p>
