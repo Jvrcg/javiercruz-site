@@ -813,12 +813,13 @@ export default function ABMListBuilder() {
 
         <Accordion isOpen={!!open.a1} onToggle={() => toggle('a1')} title="Picking the right customers to upload">
           <ul style={ul}>
-            <li>Use closed-won deals from the last 12 to 24 months, keep the ones that are still customers, and ideally ones that expanded. (<L href="https://6sense.com/guides/ideal-customer-profile/">6sense ICP guide</L>)</li>
-            <li>Count new business wins, not renewals. (<L href="https://support.6sense.com/docs/relevant-opportunity-definition-for-predictive">6sense support</L>)</li>
-            <li>Include customers who churned in their first year; their patterns tell you who to avoid. (<L href="https://6sense.com/guides/ideal-customer-profile/">6sense ICP guide</L>)</li>
-            <li>Aim for 50 to 100 closed-won deals. (<L href="https://salesmotion.io/blog/ideal-customer-profile-template">Salesmotion</L>) Under 10 to 20 customers, treat your ICP as a hypothesis. (<L href="https://www.stackmatix.com/blog/ideal-customer-profile-for-startups">Stackmatix</L>)</li>
+            <li>Use closed-won deals from the last 12 to 24 months, keep the ones that are still customers, and ideally ones that expanded.</li>
+            <li>Count new business wins, not renewals.</li>
+            <li>Include customers who churned in their first year; their patterns tell you who to avoid.</li>
+            <li>Aim for 50 to 100 closed-won deals. Under 10 to 20 customers, treat your ICP as a hypothesis.</li>
             <li>Columns don't need to match the template names. The mapping step lets you point each field at your own column.</li>
           </ul>
+          <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: <L href="https://6sense.com/guides/ideal-customer-profile/">6sense: Ideal Customer Profile guide</L>, <L href="https://support.6sense.com/docs/relevant-opportunity-definition-for-predictive">6sense: Relevant Opportunity Definition</L>, <L href="https://salesmotion.io/blog/ideal-customer-profile-template">Salesmotion: ICP Scoring Rubric</L>, <L href="https://www.stackmatix.com/blog/ideal-customer-profile-for-startups">Stackmatix: ICP for Startups</L></p>
         </Accordion>
       </section>
 
@@ -960,11 +961,12 @@ export default function ABMListBuilder() {
 
           <Accordion isOpen={!!open.a2} onToggle={() => toggle('a2')} title="How the tiers are calculated">
             <ul style={ul}>
-              <li>Tiers use several signals, not one, and weigh customer value against cost to serve. (<L href="https://www.velaris.io/articles/customer-tiers-for-customer-success">Velaris</L>)</li>
+              <li>Tiers use several signals, not one, and weigh customer value against cost to serve.</li>
               <li>ARR is the gate for Strategic, so a strong revenue account is not downgraded for one weak operational metric.</li>
-              <li>Rules, not lead scoring: lead scoring rates people, and these tiers rate accounts. (<L href="https://www.factors.ai/blog/account-scoring-guide">Factors.ai</L>) Predictive scoring needs more data than most startups have; Microsoft Dynamics 365, for example, needs 40 qualified and 40 disqualified leads to train. (<L href="https://learn.microsoft.com/en-us/dynamics365/sales/configure-predictive-lead-scoring">Microsoft Learn</L>)</li>
+              <li>Rules, not lead scoring: lead scoring rates people, and these tiers rate accounts. Predictive scoring needs more data than most startups have; Microsoft Dynamics 365, for example, needs 40 qualified and 40 disqualified leads to train.</li>
               <li>Every cutoff (top 20%, bottom 25%, median, 2 of 3) is a judgment call, not a benchmark. Edit them to fit your business.</li>
             </ul>
+            <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: <L href="https://www.velaris.io/articles/customer-tiers-for-customer-success">Velaris: Customer Tiers in SaaS</L>, <L href="https://www.factors.ai/blog/account-scoring-guide">Factors.ai: B2B Account Scoring Guide</L>, <L href="https://learn.microsoft.com/en-us/dynamics365/sales/configure-predictive-lead-scoring">Microsoft Learn: Configure predictive lead scoring</L></p>
           </Accordion>
         </section>
       )}
@@ -992,11 +994,12 @@ export default function ABMListBuilder() {
 
           <Accordion isOpen={!!open.a3} onToggle={() => toggle('a3')} title="Keeping the list useful">
             <ul style={ul}>
-              <li>"20,000 companies is not a target list. That is a marketing audience." (<L href="https://zenabm.com/blog/choose-target-accounts-for-abm">ZenABM</L>)</li>
-              <li>Review your ICP quarterly against new closed-won data and do a full refresh annually. (<L href="https://6sense.com/guides/ideal-customer-profile/">6sense ICP guide</L>)</li>
-              <li>Treat the list as living: add new fits and remove accounts with no engagement after 90 days. (<L href="https://zenabm.com/blog/choose-target-accounts-for-abm">ZenABM</L>)</li>
-              <li>Self-serve accounts can still become targets once they show buying signals. (<L href="https://www.plg.news/p/how-to-use-product-qualified-accounts">PLG News</L>)</li>
+              <li>"20,000 companies is not a target list. That is a marketing audience."</li>
+              <li>Review your ICP quarterly against new closed-won data and do a full refresh annually.</li>
+              <li>Treat the list as living: add new fits and remove accounts with no engagement after 90 days.</li>
+              <li>Self-serve accounts can still become targets once they show buying signals.</li>
             </ul>
+            <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: <L href="https://zenabm.com/blog/choose-target-accounts-for-abm">ZenABM: How to Choose Target Accounts for ABM</L>, <L href="https://6sense.com/guides/ideal-customer-profile/">6sense: Ideal Customer Profile guide</L>, <L href="https://www.plg.news/p/how-to-use-product-qualified-accounts">PLG News: Product Qualified Accounts</L></p>
           </Accordion>
         </section>
       )}
@@ -1026,11 +1029,12 @@ export default function ABMListBuilder() {
           <Accordion isOpen={!!open.a4} onToggle={() => toggle('a4')} title="Before you trust the LLM's list">
             <ul style={ul}>
               <li>LLMs can return made-up companies or old details. Keep the source URL and date-checked columns, and spot-check them.</li>
-              <li>Check that every domain is live before you enrich the list. (<L href="https://www.hubspot.com/startups/tech-stacks/sales-csx/how-to-build-lookalike-prospecting-engine">HubSpot for Startups</L>)</li>
-              <li>Company data decays, so re-verify on a schedule. (<L href="https://www.clay.com/guides/how-to-build-a-targeted-prospect-list">Clay</L>)</li>
-              <li>A low-fit account with loud intent still stays off the list. (<L href="https://digital-astronauts.com/blog/abm-target-account-list-intent-data/">Digital Astronauts</L>)</li>
-              <li>Next step outside this tool: layer intent. 6sense, for example, sorts accounts into buying stages from Target to Purchase. (<L href="https://support.6sense.com/docs/predictive-buying-stages">6sense support</L>)</li>
+              <li>Check that every domain is live before you enrich the list.</li>
+              <li>Company data decays, so re-verify on a schedule.</li>
+              <li>A low-fit account with loud intent still stays off the list.</li>
+              <li>Next step outside this tool: layer intent. 6sense, for example, sorts accounts into buying stages from Target to Purchase.</li>
             </ul>
+            <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: <L href="https://www.hubspot.com/startups/tech-stacks/sales-csx/how-to-build-lookalike-prospecting-engine">HubSpot for Startups: Lookalike Prospecting Engine in Clay</L>, <L href="https://www.clay.com/guides/how-to-build-a-targeted-prospect-list">Clay: How to Build a Targeted Prospect List</L>, <L href="https://digital-astronauts.com/blog/abm-target-account-list-intent-data/">Digital Astronauts: ABM Target Account List with Intent Data</L>, <L href="https://support.6sense.com/docs/predictive-buying-stages">6sense: Predictive Buying Stages</L></p>
           </Accordion>
 
           {/* Step 4.1 */}
@@ -1070,10 +1074,11 @@ export default function ABMListBuilder() {
       <Accordion isOpen={!!open.limits} onToggle={() => toggle('limits')} title="Limitations & Solutions">
         <p style={{ marginBottom: 10 }}>That’s why the prompt doesn't just ask for the data blindly. It acts as an agentic workflow blueprint. It instructs web-enabled AI tools like Claygent or Perplexity on the exact Google search operators to use against Greenhouse, Lever and Ashby to validate live hiring signals on their side.</p>
         <ul style={ul}>
-          <li><strong>LLM amnesia.</strong> In long chats, LLMs lose track of instructions, so later batches can repeat companies or skip the EXCLUDE list. Research on long inputs found models use information best at the start or end of a prompt and worst in the middle (<L href="https://arxiv.org/abs/2307.03172">Liu et al., Lost in the Middle</L>). Solution: the prompt puts the rules and the EXCLUDE list at the end, works in batches of 25, and Step 4.1 removes anything that slips through. If results drift, paste the RULES section again.</li>
+          <li><strong>LLM amnesia.</strong> In long chats, LLMs lose track of instructions, so later batches can repeat companies or skip the EXCLUDE list. Research on long inputs found models use information best at the start or end of a prompt and worst in the middle. Solution: the prompt puts the rules and the EXCLUDE list at the end, works in batches of 25, and Step 4.1 removes anything that slips through. If results drift, paste the RULES section again.</li>
           <li><strong>Scraping barriers.</strong> Career pages and job boards can block automated browsing or load their listings in ways an AI tool can't read. "No live posting found" means the tool couldn't confirm one, not that the company isn't hiring. Solution: use a web-enabled agent like Claygent, and spot-check important accounts by hand.</li>
           <li><strong>Strict rule exceptions.</strong> The tiers follow fixed rules, so some accounts land in a tier a human might not choose. For example, a top-revenue account with churn risk High goes to Heavy Lift, and a small file can push percentile cutoffs to odd values. Solution: every row shows its tier_reason, the cutoffs are editable, and you can adjust tiers in the downloaded CSV.</li>
         </ul>
+        <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: <L href="https://arxiv.org/abs/2307.03172">Liu et al.: Lost in the Middle</L></p>
       </Accordion>
     </div>
   );
