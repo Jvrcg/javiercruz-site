@@ -545,6 +545,9 @@ export default function ABMListBuilder() {
     const lines = [];
     lines.push('You are a B2B research analyst building a target account list.');
     lines.push('');
+    lines.push('PERMISSION');
+    lines.push('You have my permission to search the web and open public web pages for this whole task. Do not stop to ask before each search or page. Only ask if a page needs a login or a payment.');
+    lines.push('');
     lines.push('CONTEXT');
     lines.push(`We sell ${whatYouSell.trim() ? whatYouSell.trim() : '[describe what you sell]'}. Below are the traits that set our best customers apart, measured against our full customer base.`);
     lines.push('');
@@ -556,6 +559,7 @@ export default function ABMListBuilder() {
     lines.push('');
     lines.push(`CORE ICP CUSTOMERS (${core.length} accounts, median ARR ${fmtMoney(median(core.map(r => r.arr)))})`);
     const cTraits = traitLines(overIndexedTraits(core, current));
+    const coreFallback = cTraits.length === 0;
     if (cTraits.length) {
       lines.push(...cTraits);
     } else {
@@ -595,13 +599,21 @@ export default function ABMListBuilder() {
     lines.push("- Confirm the company's website is live.");
     lines.push('- Return results in batches of 25. Wait for me to say "continue" before the next batch.');
     lines.push('- Before returning a batch, check every domain against the EXCLUDE list and remove matches.');
+    lines.push("- If your evidence for a company comes from a competitor's case study or customer page, keep the company and write that competitor's name in the Competitor customer column. Otherwise write \"none found\".");
+    if (coreFallback) {
+      const reasons = ['Adjacent industry', 'Tech stack match', 'Problem match'];
+      if (titles.length) reasons.push('Hiring signal');
+      lines.push(`- Core ICP 70/30 rule: at least 70% of the Core ICP companies must be in the listed industries and employee band. Up to 30% may fall outside them, but only if the company matches at least one ${hypothesis ? 'best customer' : 'Strategic'} trait with a source. For each of those, fill the Exception reason column with exactly one of: ${reasons.join(' | ')}. For the rest, write "n/a".`);
+      lines.push('- Do not pad the list. If you cannot find enough qualified companies, return fewer and say how many are missing.');
+    }
     lines.push('');
     lines.push(`EXCLUDE (current customers, churned customers, and accounts lost in the last ${windowMonths} months; never return these)`);
     lines.push(exclusion.list.map(e => e.domain || e.name).join(', '));
     lines.push('');
     lines.push('OUTPUT');
-    const cols = ['Tier', 'Company', 'Domain', 'Industry', 'Employees', 'Tech stack evidence', 'Problem evidence', 'Source URLs', 'Date checked', 'Match reason (one line)'];
-    if (titles.length) cols.splice(8, 0, 'Hiring signal link');
+    const cols = ['Tier', 'Company', 'Domain', 'Industry', 'Employees', 'Tech stack evidence', 'Problem evidence', 'Competitor customer', 'Source URLs', 'Date checked', 'Match reason (one line)'];
+    if (titles.length) cols.splice(9, 0, 'Hiring signal link');
+    if (coreFallback) cols.push('Exception reason');
     lines.push(`A table with these columns: ${cols.join(' | ')}`);
     return lines.join('\n');
   }, [tiered, exclusion, whatYouSell, strategicCount, coreCount, jobTitles, windowMonths]);
