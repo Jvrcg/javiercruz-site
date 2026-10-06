@@ -331,7 +331,6 @@ export default function ABMListBuilder() {
   const [heavyTicketsTopPct, setHeavyTicketsTopPct] = useState(25);
   const [traitsNeeded, setTraitsNeeded] = useState(2);
   const [windowMonths, setWindowMonths] = useState(10);
-  const [showCutoffs, setShowCutoffs] = useState(false);
 
   // Hypothesis mode picks
   const [picked, setPicked] = useState({});
@@ -713,6 +712,11 @@ export default function ABMListBuilder() {
 
   const ul = { paddingLeft: 18, display: 'flex', flexDirection: 'column', gap: 6, listStyle: 'disc' };
 
+  // Small number box that sits inside a tiering rule sentence
+  const cutInput = (label, val, set, min, max) => (
+    <input type="number" aria-label={label} min={min} max={max} value={val} onChange={e => set(Math.max(min, Math.min(max, Number(e.target.value) || 0)))} style={{ ...S.input, width: 58, padding: '2px 6px', margin: '0 2px' }} />
+  );
+
   // ---------- Render ----------
   const stats = t => {
     const rows = tiered.by(t);
@@ -898,29 +902,38 @@ export default function ABMListBuilder() {
                 })}
               </div>
 
-              <p style={{ ...S.gray, marginBottom: 8 }}>
-                Strategic = top {strategicTopPct}% ARR ({fmtMoney(tiered.cut.arrTop)} and up) plus any {traitsNeeded} of 3: sales cycle under the median ({Math.round(tiered.cut.cycleMedian)} days), expansion Yes, product-market fit High. Heavy Lift = churn risk High, or bottom {heavyArrBottomPct}% ARR ({fmtMoney(tiered.cut.arrBottom)} or less) with top {heavyTicketsTopPct}% support tickets ({tiered.cut.ticketsTop} or more per quarter). Everything else = Core ICP. All cutoffs are judgment calls you can edit.
-              </p>
-              <button style={{ ...S.btnGhost, fontSize: 12, padding: '5px 12px', marginBottom: 10 }} onClick={() => setShowCutoffs(v => !v)}>
-                {showCutoffs ? 'Hide cutoffs' : 'Edit cutoffs'}
-              </button>
-              {showCutoffs && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 10, marginBottom: 12, background: '#f8f8f7', padding: 12, borderRadius: 6 }}>
-                  {[
-                    ['Strategic: top % of ARR', strategicTopPct, setStrategicTopPct, 1, 99],
-                    ['Strategic: traits needed (of 3)', traitsNeeded, setTraitsNeeded, 0, 3],
-                    ['Heavy Lift: bottom % of ARR', heavyArrBottomPct, setHeavyArrBottomPct, 1, 99],
-                    ['Heavy Lift: top % of tickets', heavyTicketsTopPct, setHeavyTicketsTopPct, 1, 99],
-                  ].map(([label, val, set, min, max]) => (
-                    <label key={label} style={{ fontSize: 12, color: '#6b6a68' }}>
-                      {label}
-                      <input type="number" min={min} max={max} value={val} onChange={e => { const v = Math.max(min, Math.min(max, Number(e.target.value) || 0)); set(v); }} style={{ ...S.input, marginTop: 4 }} />
-                    </label>
-                  ))}
-                </div>
-              )}
+              <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a19', marginBottom: 6 }}>How accounts are tiered</p>
+              <div style={{ overflowX: 'auto', marginBottom: 6 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead><tr><th style={S.th}>Tier</th><th style={S.th}>Rule</th><th style={S.th}>On your file</th></tr></thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ ...S.td, paddingTop: 12 }}><Pill tier="Strategic" /></td>
+                      <td style={{ ...S.td, lineHeight: 2.4, minWidth: 300 }}>
+                        Top {cutInput('Strategic: top % of ARR', strategicTopPct, setStrategicTopPct, 1, 99)}% of ARR, plus any {cutInput('Strategic: traits needed (of 3)', traitsNeeded, setTraitsNeeded, 0, 3)} of 3: sales cycle under the median, expansion Yes, product-market fit High
+                      </td>
+                      <td style={{ ...S.td, whiteSpace: 'nowrap', lineHeight: 1.7 }}>{fmtMoney(tiered.cut.arrTop)} and up<br />Median sales cycle: {Math.round(tiered.cut.cycleMedian)} days</td>
+                    </tr>
+                    <tr>
+                      <td style={{ ...S.td, paddingTop: 12 }}><Pill tier="Heavy Lift" /></td>
+                      <td style={{ ...S.td, lineHeight: 2.4, minWidth: 300 }}>
+                        Churn risk High, or bottom {cutInput('Heavy Lift: bottom % of ARR', heavyArrBottomPct, setHeavyArrBottomPct, 1, 99)}% of ARR with top {cutInput('Heavy Lift: top % of tickets', heavyTicketsTopPct, setHeavyTicketsTopPct, 1, 99)}% of support tickets
+                      </td>
+                      <td style={{ ...S.td, whiteSpace: 'nowrap', lineHeight: 1.7 }}>{fmtMoney(tiered.cut.arrBottom)} or less<br />{tiered.cut.ticketsTop} or more tickets per quarter</td>
+                    </tr>
+                    <tr>
+                      <td style={S.td}><Pill tier="Core ICP" /></td>
+                      <td style={S.td}>Everything else</td>
+                      <td style={S.td}></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p style={{ ...S.gray, marginBottom: 14 }}>All cutoffs are judgment calls you can edit.</p>
             </>
           )}
+
+          <p style={{ fontSize: 13, fontWeight: 600, color: '#1a1a19', marginBottom: 8 }}>Prompt settings</p>
 
           {/* Closed-lost window */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
@@ -935,12 +948,19 @@ export default function ABMListBuilder() {
           {/* Lookalike counts */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 6 }}>
             <span style={{ fontSize: 13, color: '#1a1a19' }}>Lookalikes to find:</span>
-            <input type="number" min={1} max={500} value={strategicCount} onChange={e => setStrategicCount(Math.max(1, Math.min(500, Number(e.target.value) || 1)))} aria-label={tiered.hypothesis ? 'Best customer lookalikes' : 'Strategic lookalikes'} style={{ ...S.input, width: 70 }} />
-            <span style={{ fontSize: 13, color: '#1a1a19' }}>{tiered.hypothesis ? 'best customer' : 'Strategic'}</span>
-            <input type="number" min={1} max={500} value={coreCount} onChange={e => setCoreCount(Math.max(1, Math.min(500, Number(e.target.value) || 1)))} aria-label="Core ICP lookalikes" style={{ ...S.input, width: 70 }} />
-            <span style={{ fontSize: 13, color: '#1a1a19' }}>Core ICP</span>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#1a1a19' }}>
+              {tiered.hypothesis ? 'Best customer' : 'Strategic'}
+              <input type="number" min={1} max={500} value={strategicCount} onChange={e => setStrategicCount(Math.max(1, Math.min(500, Number(e.target.value) || 1)))} style={{ ...S.input, width: 70 }} />
+            </label>
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#1a1a19', marginLeft: 8 }}>
+              Core ICP
+              <input type="number" min={1} max={500} value={coreCount} onChange={e => setCoreCount(Math.max(1, Math.min(500, Number(e.target.value) || 1)))} style={{ ...S.input, width: 70 }} />
+            </label>
           </div>
-          <p style={{ ...S.gray, marginBottom: 14 }}>These counts go into the prompt in Step 4.</p>
+          <p style={{ ...S.gray, marginBottom: tiered.hypothesis ? 14 : 4 }}>These counts go into the prompt in Step 4. Total: {Number(strategicCount) + Number(coreCount)} accounts.</p>
+          {!tiered.hypothesis && (
+            <p style={{ ...S.gray, marginBottom: 14 }}>Keep Strategic to what your team can personalize for. 6sense puts one-to-one at 10-50 accounts. (<L href="https://6sense.com/guides/abm-strategy/">6sense ABM guide</L>)</p>
+          )}
 
           {/* Table */}
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
