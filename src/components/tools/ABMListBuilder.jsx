@@ -277,18 +277,6 @@ function overIndexedTraits(group, base) {
   return out;
 }
 
-function traitLines(traits, problemLabel) {
-  return traits.map(t => {
-    const parts = t.items.map((it, i) => {
-      const pct = Math.round(it.baseShare * 100);
-      const vs = i === 0 && t === traits[0] ? `vs ${pct}% of all customers` : `vs ${pct}%`;
-      return `${it.value} (${it.n} of ${it.total}, ${vs})`;
-    });
-    const label = problemLabel && t.label === 'Problem we solved' ? problemLabel : t.label;
-    return `- ${label}: ${parts.join(', ')}`;
-  });
-}
-
 // Trait lines without counts or shares (used in the prompt and the export add-ons)
 function plainTraitLines(traits) {
   return traits.map(t => {
@@ -350,6 +338,7 @@ export default function ABMListBuilder() {
   const [strategicCount, setStrategicCount] = useState(15);
   const [coreCount, setCoreCount] = useState(20);
   const [copied, setCopied] = useState(false);
+  const [copiedKey, setCopiedKey] = useState('');
 
   // Step 4.1
   const [pasted, setPasted] = useState('');
@@ -564,7 +553,7 @@ export default function ABMListBuilder() {
   }, [tiered]);
 
   // ---------- Prompt ----------
-  // Shared profile used by the prompt (Step 4)
+  // Shared profile used by the prompt (Step 4) and the export add-ons (Step 5)
   const profile = useMemo(() => {
     if (!tiered) return null;
     const { current, churned, hypothesis, by } = tiered;
@@ -662,6 +651,100 @@ export default function ABMListBuilder() {
     lines.push('4. Check that at least 7 of every 10 Core ICP rows have Exception Reason "N/A".');
     return lines.join('\n');
   }, [tiered, profile, exclusion, sellText, strategicCount, coreCount, windowMonths]);
+
+  // ---------- Step 5: export add-ons ----------
+  const claygentText = useMemo(() => {
+    if (!profile) return '';
+    const { sName, sLines, coreLines, aLines, hasChurned } = profile;
+    const lines = [];
+    lines.push('Research the company {{Company}} ({{Domain}}) and check how well it fits our target profile.');
+    lines.push(`We sell ${sellText}.`);
+    lines.push('');
+    lines.push(`${sName === 'Strategic' ? 'Strategic' : 'Best customer'} profile:`);
+    lines.push(...(sLines.length ? sLines : ['- No single trait stands out for this group.']));
+    lines.push('');
+    lines.push('Core ICP profile:');
+    lines.push(...(coreLines.length ? coreLines : ['- No single trait stands out for this group.']));
+    if (hasChurned && aLines.length) {
+      lines.push('');
+      lines.push('Avoid patterns (customers who churned in year one):');
+      lines.push(...aLines);
+    }
+    lines.push('');
+    lines.push('Using only public pages you open:');
+    lines.push(`1. Fit tier: exactly one of "${sName === 'Strategic' ? 'Strategic' : 'Best customer'}", "Core ICP", "Avoid", "No fit".`);
+    lines.push('2. Tech stack evidence: tools from our profiles that this company uses, or "unverified".');
+    lines.push('3. Problem evidence: signs it has the problem we solve, or "unverified".');
+    lines.push('4. Source URL: the page you used. Never build a URL from a pattern.');
+    lines.push('5. Reason: one line.');
+    lines.push('Do not guess. If you cannot verify something, write "unverified".');
+    return lines.join('\n');
+  }, [profile, sellText]);
+
+  const apolloText = useMemo(() => {
+    if (!profile) return '';
+    const pick = (traits, label) => {
+      const t = traits.find(x => x.label === label);
+      return t ? t.items.map(it => it.value) : [];
+    };
+    const block = (title, traits, fallbackLines) => {
+      const out = [title];
+      const ind = pick(traits, 'Industry');
+      const emp = pick(traits, 'Employees');
+      const tech = pick(traits, 'Tech stack');
+      const loc = pick(traits, 'Region');
+      if (ind.length) out.push(`Industry & keywords: ${ind.join('; ')}`);
+      if (emp.length) out.push(`# of employees: ${emp.join(', ')}`);
+      if (tech.length) out.push(`Technologies: ${tech.join(', ')}`);
+      if (loc.length) out.push(`Location: ${loc.join(', ')}`);
+      if (out.length === 1 && fallbackLines) {
+        fallbackLines.forEach(l => {
+          if (l.startsWith('- Industry: ')) out.push(`Industry & keywords: ${l.slice(12)}`);
+          if (l.startsWith('- Employees: ')) out.push(`# of employees: ${l.slice(13)}`);
+        });
+      }
+      if (out.length === 1) out.push('No single trait stands out for this group.');
+      return out;
+    };
+    const lines = [];
+    lines.push(...block(`${profile.sName === 'Strategic' ? 'STRATEGIC' : 'BEST CUSTOMER'} SEARCH`, profile.sTraits));
+    lines.push('');
+    lines.push(...block('CORE ICP SEARCH', profile.cTraits, profile.coreLines));
+    if (profile.hasChurned && profile.aTraits.length) {
+      lines.push('');
+      lines.push(...block('AVOID (exclude where your filters allow)', profile.aTraits));
+    }
+    return lines.join('\n');
+  }, [profile]);
+
+  const exclusionText = useMemo(() => exclusion.list.map(e => e.domain || e.name).join('\n'), [exclusion]);
+
+  function downloadClayCSV() {
+    if (!cleanResult || !cleanResult.clean.length) return;
+    const header = cleanResult.header ? splitCells(cleanResult.header) : ['Row'];
+    const domainIdx = header.findIndex(h => /^domain$/i.test(h.trim()));
+    const rows = cleanResult.clean.map(c => {
+      const cells = cleanResult.header ? splitCells(c.line) : [c.line];
+      const rest = cells.filter((_, i) => i !== domainIdx);
+      return [c.domain, ...rest];
+    });
+    const restHeader = header.filter((_, i) => i !== domainIdx);
+    downloadCSV('abm_lookalikes_for_clay.csv', ['Domain', ...restHeader], rows);
+  }
+
+  function downloadExclusion() {
+    downloadCSV('abm_exclusion_list.csv', ['domain', 'company', 'reason'], exclusion.list.map(e => [e.domain || '', e.name || '', e.reason]));
+  }
+
+  async function copyKey(text, key) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(''), 2000);
+    } catch {
+      /* clipboard blocked: user can select the text manually */
+    }
+  }
 
   // ---------- Step 4.1 cleaner ----------
   function cleanOutput(text = pasted) {
@@ -1197,6 +1280,38 @@ export default function ABMListBuilder() {
               </div>
             )}
           </div>
+        </section>
+      )}
+
+      {/* Step 5 */}
+      {tiered && (
+        <section style={S.card}>
+          <p style={S.stepEyebrow}>Step 5 (Optional)</p>
+          <h3 style={S.stepTitle}>Take it to your tools</h3>
+          <p style={S.intro}>Built from the same profile as your prompt. Everything below is generated in your browser.</p>
+
+          <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a19', marginBottom: 4 }}>Clay</p>
+          <p style={{ ...S.gray, marginBottom: 8 }}>Download your cleaned list from Step 4.1 with the domain in the first column, then import it into a Clay table as a CSV.</p>
+          <button style={{ ...S.btnGhost, opacity: cleanResult && cleanResult.clean.length ? 1 : 0.5, cursor: cleanResult && cleanResult.clean.length ? 'pointer' : 'not-allowed' }} disabled={!(cleanResult && cleanResult.clean.length)} onClick={downloadClayCSV}>Download Clay-ready CSV</button>
+          {!(cleanResult && cleanResult.clean.length) && <p style={{ ...S.gray, marginTop: 6 }}>Clean a list in Step 4.1 first.</p>}
+
+          <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a19', marginTop: 18, marginBottom: 4 }}>Claygent prompt (runs on each row)</p>
+          <p style={{ ...S.gray, marginBottom: 8 }}>Paste into a Claygent column. Replace {'{{Company}}'} and {'{{Domain}}'} with the matching columns in your table.</p>
+          <textarea readOnly value={claygentText} style={{ width: '100%', minHeight: 200, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 12, lineHeight: 1.5, border: '1px solid #e5e7eb', borderRadius: 6, padding: 12, color: '#1a1a19', background: '#f9fafb' }} />
+          <button style={{ ...S.btnGhost, marginTop: 8 }} onClick={() => copyKey(claygentText, 'claygent')}>{copiedKey === 'claygent' ? 'Copied' : 'Copy Claygent prompt'}</button>
+
+          <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a19', marginTop: 18, marginBottom: 4 }}>Apollo filters</p>
+          <p style={{ ...S.gray, marginBottom: 8 }}>Values to enter in Apollo's company search filters. Pick the closest options Apollo offers.</p>
+          <textarea readOnly value={apolloText} style={{ width: '100%', minHeight: 160, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 12, lineHeight: 1.5, border: '1px solid #e5e7eb', borderRadius: 6, padding: 12, color: '#1a1a19', background: '#f9fafb' }} />
+          <button style={{ ...S.btnGhost, marginTop: 8 }} onClick={() => copyKey(apolloText, 'apollo')}>{copiedKey === 'apollo' ? 'Copied' : 'Copy Apollo filters'}</button>
+
+          <p style={{ fontSize: 14, fontWeight: 600, color: '#1a1a19', marginTop: 18, marginBottom: 4 }}>Exclusion list ({exclusion.list.length} accounts)</p>
+          <p style={{ ...S.gray, marginBottom: 8 }}>Your current customers, churned customers and accounts lost in the last {windowMonths} months, one domain per line. Use it to exclude companies in Apollo, or download it as a CSV for a saved list.</p>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button style={S.btnGhost} onClick={() => copyKey(exclusionText, 'exclude')}>{copiedKey === 'exclude' ? 'Copied' : 'Copy exclusion list'}</button>
+            <button style={S.btnGhost} onClick={downloadExclusion}>Download exclusion CSV</button>
+          </div>
+          <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: <L href="https://university.clay.com/docs/csv-import-overview">Clay Docs: How to import your CSV into Clay</L>, <L href="https://www.clay.com/guides/how-to-use-claygent-for-prospect-research">Clay: How to Use Claygent for Prospect Research</L>, <L href="https://knowledge.apollo.io/hc/en-us/articles/4412665755661-Search-Filters-Overview">Apollo: Search Filters Overview</L></p>
         </section>
       )}
 
