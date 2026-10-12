@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 
 // ABM List Builder
 // Privacy rules (keep the Privacy-First copy true):
-// 1. Uploaded files are read with FileReader only. Nothing the user uploads or pastes is sent anywhere.
+// 1. Uploaded files are read in the browser only (FileReader, or read-excel-file for .xlsx in Step 4.1). Nothing the user uploads or pastes is sent anywhere.
 // 2. Data lives in React state only. No localStorage, sessionStorage or IndexedDB.
 // 3. Nothing from the file is pushed to the dataLayer.
 // 4. Downloads are built client-side with Blob URLs.
@@ -339,12 +339,16 @@ export default function ABMListBuilder() {
   const [whatYouSell, setWhatYouSell] = useState('');
   const [strategicCount, setStrategicCount] = useState(25);
   const [coreCount, setCoreCount] = useState(50);
-  const [jobTitles, setJobTitles] = useState('');
   const [copied, setCopied] = useState(false);
 
   // Step 4.1
   const [pasted, setPasted] = useState('');
   const [cleanResult, setCleanResult] = useState(null);
+  const [cleanMode, setCleanMode] = useState(null); // 'paste' | null
+  const [showCleanUpload, setShowCleanUpload] = useState(false);
+  const [cleanFile, setCleanFile] = useState(null);
+  const [cleanFileName, setCleanFileName] = useState('');
+  const [cleanError, setCleanError] = useState('');
 
   const [tierFilter, setTierFilter] = useState('All');
   const [open, setOpen] = useState({});
@@ -355,6 +359,8 @@ export default function ABMListBuilder() {
     setPicked({});
     setCleanResult(null);
     setPasted('');
+    setCleanFileName('');
+    setCleanError('');
     setTierFilter('All');
   }
 
@@ -371,7 +377,6 @@ export default function ABMListBuilder() {
     setError('');
     resetDownstream();
     setWhatYouSell('');
-    setJobTitles('');
   }
 
   function handleUpload() {
@@ -595,14 +600,6 @@ export default function ABMListBuilder() {
     lines.push(`1. List ${strategicCount} companies that match the ${hypothesis ? 'best customer' : 'Strategic'} profile.`);
     lines.push(`2. List ${coreCount} companies that match the Core ICP profile.`);
     if (churned.length) lines.push('3. Skip any company that matches the Avoid profile.');
-    const titles = jobTitles.split(',').map(s => s.trim()).filter(Boolean);
-    if (titles.length) {
-      lines.push('');
-      lines.push('Hiring Signal Objective:');
-      const titleQuery = titles.length === 1 ? `"${titles[0]}"` : '(' + titles.map(t => `"${t}"`).join(' OR ') + ')';
-      lines.push(`For each lookalike account generated, use your web-browsing capability to search major ATS platforms using this query format: \`site:greenhouse.io OR site:lever.co OR site:ashbyhq.com "[Company Name]" ${titleQuery}\`.`);
-      lines.push("Validation Rule: Only count a hiring signal if the job posting link is live when you open it. Include that link in your response. If you cannot open a live posting, write 'no live posting found'.");
-    }
     lines.push('');
     lines.push('RULES');
     lines.push('- Only include real companies you can verify on the public web.');
@@ -614,7 +611,6 @@ export default function ABMListBuilder() {
     lines.push("- If your evidence for a company comes from a competitor's case study or customer page, keep the company and write that competitor's name in the Competitor customer column. Otherwise write \"none found\".");
     if (coreFallback) {
       const reasons = ['Adjacent industry', 'Tech stack match', 'Problem match'];
-      if (titles.length) reasons.push('Hiring signal');
       lines.push(`- Core ICP 70/30 rule: at least 70% of the Core ICP companies must be in the listed industries and employee band. Up to 30% may fall outside them, but only if the company matches at least one ${hypothesis ? 'best customer' : 'Strategic'} trait with a source. For each of those, fill the Exception reason column with exactly one of: ${reasons.join(' | ')}. For the rest, write "n/a".`);
       lines.push('- Do not pad the list. If you cannot find enough qualified companies, return fewer and say how many are missing.');
     }
@@ -624,14 +620,15 @@ export default function ABMListBuilder() {
     lines.push('');
     lines.push('OUTPUT');
     const cols = ['Tier', 'Company', 'Domain', 'Industry', 'Employees', 'Tech stack evidence', 'Problem evidence', 'Competitor customer', 'Source URLs', 'Date checked', 'Match reason (one line)'];
-    if (titles.length) cols.splice(9, 0, 'Hiring signal link');
     if (coreFallback) cols.push('Exception reason');
-    lines.push(`A table with these columns: ${cols.join(' | ')}`);
+    lines.push(`Return each batch as CSV inside a code block, with a header row and these columns: ${cols.join(', ')}`);
+    lines.push('Put every value in double quotes so commas inside a value do not break the columns.');
+    lines.push('If you can create files, also attach the full list as an .xlsx file.');
     return lines.join('\n');
-  }, [tiered, exclusion, isSample, whatYouSell, strategicCount, coreCount, jobTitles, windowMonths]);
+  }, [tiered, exclusion, isSample, whatYouSell, strategicCount, coreCount, windowMonths]);
 
   // ---------- Step 4.1 cleaner ----------
-  function cleanOutput() {
+  function cleanOutput(text = pasted) {
     const domainRe = /(?:https?:\/\/)?(?:[a-z0-9-]+\.)+[a-z]{2,}(?:\/[^\s|,)]*)?/gi;
     const exDomains = exclusion.list.filter(e => e.domain);
     const exNames = exclusion.list.filter(e => normName(e.name).length > 2);
@@ -640,7 +637,7 @@ export default function ABMListBuilder() {
     const check = [];
     const seen = new Set();
     let header = null;
-    pasted.split(/\r?\n/).forEach(raw => {
+    String(text || '').split(/\r?\n/).forEach(raw => {
       const line = raw.trim();
       if (!line) return;
       if (/^\|?\s*:?-{3,}/.test(line)) return; // markdown separator row
@@ -659,6 +656,43 @@ export default function ABMListBuilder() {
       clean.push({ line, domain: primary });
     });
     setCleanResult({ clean, removed, check, header });
+  }
+
+  // Step 4.1 upload: .csv is read as text, .xlsx is turned into CSV lines, then both go through cleanOutput
+  async function handleCleanUpload() {
+    if (!cleanFile) return;
+    const file = cleanFile;
+    const csvCell = v => {
+      const t = v === null || v === undefined ? '' : (v instanceof Date ? v.toISOString().slice(0, 10) : String(v));
+      return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t;
+    };
+    try {
+      let text;
+      if (/\.csv$/i.test(file.name)) {
+        text = await file.text();
+      } else if (/\.xlsx$/i.test(file.name)) {
+        const { readSheet } = await import('read-excel-file/browser'); // loaded only when an .xlsx is uploaded
+        const rows = await readSheet(file);
+        text = rows.map(r => r.map(csvCell).join(',')).join('\n');
+      } else {
+        setCleanError("That file isn't a .csv or .xlsx. Save your LLM's results in one of those formats and try again.");
+        setCleanResult(null);
+        setCleanFileName('');
+        setShowCleanUpload(false);
+        setCleanFile(null);
+        return;
+      }
+      setCleanError('');
+      setCleanFileName(file.name);
+      setCleanMode(null);
+      cleanOutput(text);
+    } catch {
+      setCleanError("We couldn't read that file. Try saving it again as .csv or .xlsx.");
+      setCleanResult(null);
+      setCleanFileName('');
+    }
+    setShowCleanUpload(false);
+    setCleanFile(null);
   }
 
   function splitCells(line) {
@@ -743,7 +777,7 @@ export default function ABMListBuilder() {
           <ul style={ul}>
             <li><strong>No upload to a server.</strong> The CSV is opened on your computer and is not sent to jjcruzgalera.com or any third party.</li>
             <li><strong>Nothing is saved.</strong> No database, no cookies or browser storage for your data. Refresh or close the page and it is gone.</li>
-            <li><strong>You control the export.</strong> The tiered CSV downloads straight to your device. The prompt only goes to an LLM if you copy and paste it there yourself, and that provider's data policy then applies. The prompt includes the domains of your customers and recently lost accounts so the LLM can skip them, but no revenue, names of people or other fields. Results you paste back in Step 4.1 are cleaned in your browser too.</li>
+            <li><strong>You control the export.</strong> The tiered CSV downloads straight to your device. The prompt only goes to an LLM if you copy and paste it there yourself, and that provider's data policy then applies. The prompt includes the domains of your customers and recently lost accounts so the LLM can skip them, but no revenue, names of people or other fields. Results you paste or upload in Step 4.1 are cleaned in your browser too.</li>
             <li><strong>Page analytics are separate.</strong> This site uses Google Tag Manager to count page visits. It does not receive the contents of your file.</li>
             <li><strong>Tip:</strong> if your list is sensitive, remove contact names and emails first. The tool only needs account-level fields.</li>
           </ul>
@@ -1058,13 +1092,6 @@ export default function ABMListBuilder() {
               <input type="text" value={whatYouSell} placeholder="e.g. Syncflow: a data integration platform" onChange={e => setWhatYouSell(e.target.value)} style={{ ...S.input, marginTop: 4 }} />
             </label>
           </div>
-          <label style={{ fontSize: 12, color: '#6b6a68', display: 'block', marginBottom: 4 }}>
-            Target job titles (optional, comma separated). Adds the hiring signal section to the prompt.
-            <input type="text" value={jobTitles} placeholder="e.g. Director of Data Engineering, Analytics Engineer" onChange={e => setJobTitles(e.target.value)} style={{ ...S.input, marginTop: 4 }} />
-          </label>
-          <p style={{ ...S.gray, fontStyle: 'italic', marginBottom: 12 }}>
-            Many LLM chats can't read career pages or job boards. The hiring signal works best in a web-enabled tool like Claygent or Perplexity. See Limitations & Solutions at the bottom of this page.
-          </p>
           <textarea readOnly value={promptText} style={{ width: '100%', minHeight: 320, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 12, lineHeight: 1.5, border: '1px solid #e5e7eb', borderRadius: 6, padding: 12, color: '#1a1a19', background: '#f9fafb' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 10 }}>
             <button style={S.btn} onClick={() => copyText(promptText, true)}>{copied ? 'Copied' : 'Copy prompt'}</button>
@@ -1076,19 +1103,39 @@ export default function ABMListBuilder() {
               <li>LLMs can return made-up companies or old details. Keep the source URL and date-checked columns, and spot-check them.</li>
               <li>Check that every domain is live before you enrich the list.</li>
               <li>Company data decays, so re-verify on a schedule.</li>
-              <li>A low-fit account with loud intent still stays off the list.</li>
-              <li>Next step outside this tool: layer intent. 6sense, for example, sorts accounts into buying stages from Target to Purchase.</li>
             </ul>
-            <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: <L href="https://www.hubspot.com/startups/tech-stacks/sales-csx/how-to-build-lookalike-prospecting-engine">HubSpot for Startups: Lookalike Prospecting Engine in Clay</L>, <L href="https://www.clay.com/guides/how-to-build-a-targeted-prospect-list">Clay: How to Build a Targeted Prospect List</L>, <L href="https://digital-astronauts.com/blog/abm-target-account-list-intent-data/">Digital Astronauts: ABM Target Account List with Intent Data</L>, <L href="https://support.6sense.com/docs/predictive-buying-stages">6sense: Predictive Buying Stages</L></p>
+            <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: <L href="https://www.hubspot.com/startups/tech-stacks/sales-csx/how-to-build-lookalike-prospecting-engine">HubSpot for Startups: Lookalike Prospecting Engine in Clay</L>, <L href="https://www.clay.com/guides/how-to-build-a-targeted-prospect-list">Clay: How to Build a Targeted Prospect List</L></p>
           </Accordion>
 
           {/* Step 4.1 */}
           <div style={{ marginTop: 22, borderTop: '1px solid #f3f4f6', paddingTop: 16 }}>
             <p style={S.stepEyebrow}>Step 4.1 (Recommended)</p>
             <h4 style={{ ...S.stepTitle, fontSize: 16 }}>Clean Your Output</h4>
-            <p style={S.intro}>Paste your LLM's results here. This step will remove any company you already sell to or recently lost, right in your browser.</p>
-            <textarea value={pasted} onChange={e => setPasted(e.target.value)} placeholder="Paste the table or list your LLM returned" style={{ width: '100%', minHeight: 140, fontSize: 12, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', border: '1px solid #e5e7eb', borderRadius: 6, padding: 10, color: '#1a1a19' }} />
-            <button style={{ ...S.btn, marginTop: 10, opacity: pasted.trim() ? 1 : 0.5 }} disabled={!pasted.trim()} onClick={cleanOutput}>Clean my list</button>
+            <p style={S.intro}>Paste or upload your LLM's results. This step will remove any company you already sell to or recently lost, right in your browser.</p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button style={cleanMode === 'paste' ? S.btn : S.btnGhost} onClick={() => { setCleanMode(m => (m === 'paste' ? null : 'paste')); setCleanError(''); }}>Paste results</button>
+              <button style={S.btnGhost} onClick={() => { setShowCleanUpload(true); setCleanError(''); }}>Upload file (.csv or .xlsx)</button>
+            </div>
+            {cleanMode === 'paste' && (
+              <div style={{ marginTop: 10 }}>
+                <textarea value={pasted} onChange={e => setPasted(e.target.value)} placeholder="Paste the CSV or table your LLM returned" style={{ width: '100%', minHeight: 140, fontSize: 12, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', border: '1px solid #e5e7eb', borderRadius: 6, padding: 10, color: '#1a1a19' }} />
+                <button style={{ ...S.btn, marginTop: 10, opacity: pasted.trim() ? 1 : 0.5 }} disabled={!pasted.trim()} onClick={() => { setCleanFileName(''); cleanOutput(pasted); }}>Clean my list</button>
+              </div>
+            )}
+            {showCleanUpload && (
+              <div role="dialog" aria-modal="true" style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 16 }}>
+                <div style={{ background: '#fff', borderRadius: 8, padding: 20, width: '100%', maxWidth: 420, boxShadow: '0 10px 30px rgba(0,0,0,0.15)' }}>
+                  <p style={{ fontSize: 15, fontWeight: 600, color: '#1a1a19', marginBottom: 12 }}>Choose your LLM's results file (.csv or .xlsx)</p>
+                  <input type="file" accept=".csv,.xlsx,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" onChange={e => setCleanFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)} style={{ fontSize: 13, marginBottom: 16, width: '100%' }} />
+                  <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                    <button style={S.btnGhost} onClick={() => { setShowCleanUpload(false); setCleanFile(null); }}>Cancel</button>
+                    <button style={{ ...S.btn, opacity: cleanFile ? 1 : 0.5, cursor: cleanFile ? 'pointer' : 'not-allowed' }} disabled={!cleanFile} onClick={handleCleanUpload}>Upload and clean</button>
+                  </div>
+                </div>
+              </div>
+            )}
+            {cleanFileName && <p style={{ ...S.gray, marginTop: 8 }}>Cleaned: <strong>{cleanFileName}</strong></p>}
+            {cleanError && <p style={{ color: '#dc2626', fontSize: 12, marginTop: 8 }}>{cleanError}</p>}
             <p style={{ ...S.gray, marginTop: 8 }}>Matching is by domain. Subdomains count as a match (eu.acme.com matches acme.com).</p>
 
             {cleanResult && (
@@ -1117,13 +1164,16 @@ export default function ABMListBuilder() {
 
       {/* Limitations & Solutions */}
       <Accordion isOpen={!!open.limits} onToggle={() => toggle('limits')} title="Limitations & Solutions">
-        <p style={{ marginBottom: 10 }}>That’s why the prompt doesn't just ask for the data blindly. It acts as an agentic workflow blueprint. It instructs web-enabled AI tools like Claygent or Perplexity on the exact Google search operators to use against Greenhouse, Lever and Ashby to validate live hiring signals on their side.</p>
         <ul style={ul}>
           <li><strong>LLM amnesia.</strong> In long chats, LLMs lose track of instructions, so later batches can repeat companies or skip the EXCLUDE list. Research on long inputs found models use information best at the start or end of a prompt and worst in the middle. Solution: the prompt puts the rules and the EXCLUDE list at the end, works in batches of 25, and Step 4.1 removes anything that slips through. If results drift, paste the RULES section again.</li>
-          <li><strong>Scraping barriers.</strong> Career pages and job boards can block automated browsing or load their listings in ways an AI tool can't read. "No live posting found" means the tool couldn't confirm one, not that the company isn't hiring. Solution: use a web-enabled agent like Claygent, and spot-check important accounts by hand.</li>
           <li><strong>Strict rule exceptions.</strong> The tiers follow fixed rules, so some accounts land in a tier a human might not choose. For example, a top-revenue account with churn risk High goes to Heavy Lift, and a small file can push percentile cutoffs to odd values. Solution: every row shows its tier_reason, the cutoffs are editable, and you can adjust tiers in the downloaded CSV.</li>
         </ul>
         <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: <L href="https://arxiv.org/abs/2307.03172">Liu et al.: Lost in the Middle</L></p>
+      </Accordion>
+
+      {/* Additional insights */}
+      <Accordion isOpen={!!open.insights} onToggle={() => toggle('insights')} title="Additional ABM List Building & LLM insights">
+        <p>This free tool does not include an intent and intelligence layer (latest hiring efforts, company updates etc.) given that many LLM chats can't read career pages or job boards.</p>
       </Accordion>
     </div>
   );
