@@ -289,6 +289,16 @@ function traitLines(traits, problemLabel) {
   });
 }
 
+// Trait lines without counts or shares (used in the prompt and the export add-ons)
+function plainTraitLines(traits) {
+  return traits.map(t => {
+    const vals = t.items.map(it => it.value);
+    const sep = vals.some(v => v.includes(',')) ? '; ' : ', ';
+    const label = t.label === 'Problem we solved' ? 'Problem' : t.label;
+    return `- ${label}: ${vals.join(sep)}`;
+  });
+}
+
 function Pill({ tier }) {
   if (!tier) return <span style={{ fontSize: 11, color: '#9ca3af' }}>Left out</span>;
   const st = TIER_STYLE[tier];
@@ -337,8 +347,8 @@ export default function ABMListBuilder() {
 
   // Step 4 inputs
   const [whatYouSell, setWhatYouSell] = useState('');
-  const [strategicCount, setStrategicCount] = useState(25);
-  const [coreCount, setCoreCount] = useState(50);
+  const [strategicCount, setStrategicCount] = useState(15);
+  const [coreCount, setCoreCount] = useState(20);
   const [copied, setCopied] = useState(false);
 
   // Step 4.1
@@ -554,78 +564,104 @@ export default function ABMListBuilder() {
   }, [tiered]);
 
   // ---------- Prompt ----------
-  const promptText = useMemo(() => {
-    if (!tiered) return '';
+  // Shared profile used by the prompt (Step 4)
+  const profile = useMemo(() => {
+    if (!tiered) return null;
     const { current, churned, hypothesis, by } = tiered;
     const strategic = hypothesis ? by('Hand-picked') : by('Strategic');
     const core = hypothesis ? by('Not picked') : by('Core ICP');
-    const lines = [];
-    lines.push('You are a B2B research analyst building a target account list.');
-    lines.push('');
-    lines.push('PERMISSION');
-    lines.push('You have my permission to search the web and open public web pages for this whole task. Do not stop to ask before each search or page. Only ask if a page needs a login or a payment.');
-    lines.push('');
-    lines.push('CONTEXT');
-    lines.push(`We sell ${whatYouSell.trim() ? whatYouSell.trim() : (isSample ? 'Syncflow: a data integration platform' : '[describe what you sell]')}. Below are the traits that set our best customers apart, measured against our full customer base.`);
-    lines.push('');
-    const sLabel = hypothesis ? 'BEST CUSTOMERS (HAND-PICKED)' : 'STRATEGIC CUSTOMERS';
-    lines.push(`${sLabel} (${strategic.length} accounts, median ARR ${fmtMoney(median(strategic.map(r => r.arr)))})`);
-    const sTraits = traitLines(overIndexedTraits(strategic, current));
-    if (sTraits.length) lines.push(...sTraits);
-    else lines.push('- No single trait stands out for this group.');
-    lines.push('');
-    lines.push(`CORE ICP CUSTOMERS (${core.length} accounts, median ARR ${fmtMoney(median(core.map(r => r.arr)))})`);
-    const cTraits = traitLines(overIndexedTraits(core, current));
-    const coreFallback = cTraits.length === 0;
-    if (cTraits.length) {
-      lines.push(...cTraits);
-    } else {
+    const sTraits = overIndexedTraits(strategic, current);
+    const cTraits = overIndexedTraits(core, current);
+    const aTraits = churned.length ? overIndexedTraits(churned, current) : [];
+    let coreLines = plainTraitLines(cTraits);
+    if (!coreLines.length) {
       const healthy = [...strategic, ...core];
       const counts = {};
       healthy.forEach(r => { if (r.industry) counts[r.industry] = (counts[r.industry] || 0) + 1; });
       const top3 = Object.entries(counts).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 3).map(e => e[0]);
       const bandIdx = healthy.map(r => EMPLOYEE_BANDS.indexOf(r.employee_band)).filter(i => i >= 0).sort((a, b) => a - b);
-      const medBand = bandIdx.length ? EMPLOYEE_BANDS[bandIdx[Math.floor((bandIdx.length - 1) / 2)]] : '[median employee band]';
-      lines.push(`For the Core ICP tier, look for accounts that broadly mirror our general customer profile: primarily distributed across our top three indexed industries (${top3.length ? top3.join('; ') : '[top 3 industries]'}) and fitting within our mid-tier employee bands (${medBand}).${churned.length ? ' Avoid the negative churned indicators listed below.' : ''}`);
+      const medBand = bandIdx.length ? EMPLOYEE_BANDS[bandIdx[Math.floor((bandIdx.length - 1) / 2)]] : '';
+      coreLines = [];
+      if (top3.length) coreLines.push(`- Industry: ${top3.join('; ')}`);
+      if (medBand) coreLines.push(`- Employees: ${medBand}`);
     }
-    const aTraits = traitLines(overIndexedTraits(churned, current), 'Problem');
-    if (churned.length) {
+    return {
+      hypothesis,
+      sName: hypothesis ? 'best customer' : 'Strategic',
+      sTitle: hypothesis ? 'BEST CUSTOMER TARGETS (hand-picked)' : 'STRATEGIC TARGETS (highest ARR, strongest fit)',
+      sTraits, cTraits, aTraits,
+      sLines: plainTraitLines(sTraits),
+      coreLines,
+      aLines: plainTraitLines(aTraits),
+      hasChurned: churned.length > 0,
+    };
+  }, [tiered]);
+
+  const sellText = whatYouSell.trim() ? whatYouSell.trim() : (isSample ? 'Syncflow: a data integration platform' : '[describe what you sell]');
+
+  const promptText = useMemo(() => {
+    if (!tiered || !profile) return '';
+    const { sName, sTitle, sLines, coreLines, aLines, hasChurned } = profile;
+    const total = Number(strategicCount) + Number(coreCount);
+    const todayIso = `${TODAY.getFullYear()}-${String(TODAY.getMonth() + 1).padStart(2, '0')}-${String(TODAY.getDate()).padStart(2, '0')}`;
+    const cols = ['Tier', 'Company', 'Domain', 'Industry', 'Employees', 'Tech Stack Evidence', 'Problem Evidence', 'Competitor Customer', 'Source URL', 'Date Checked', 'Match Reason', 'Exception Reason'];
+    const lines = [];
+    lines.push('You are a B2B research analyst building a target account list.');
+    lines.push('');
+    lines.push('PERMISSION & ACCESS');
+    lines.push('- Search the web and open public web pages freely without asking for confirmation.');
+    lines.push('- Only stop if a site requires a login or a paid subscription.');
+    lines.push('');
+    lines.push('CONTEXT & ICP DEFINITION');
+    lines.push(`We sell ${sellText}. Find lookalike companies based on our best customers below, and avoid the patterns of customers who churned.`);
+    lines.push('');
+    lines.push(`1. ${sTitle}`);
+    lines.push(...(sLines.length ? sLines : ['- No single trait stands out for this group.']));
+    lines.push('');
+    lines.push('2. CORE ICP TARGETS');
+    lines.push(...(coreLines.length ? coreLines : ['- No single trait stands out for this group.']));
+    lines.push(`- Exceptions: up to 3 in every 10 may fall outside this profile, only if they match a ${sName} tech stack or problem you can source.`);
+    if (hasChurned) {
       lines.push('');
-      lines.push(`AVOID: CUSTOMERS WHO CHURNED IN YEAR ONE (${churned.length} accounts)`);
-      if (aTraits.length) lines.push(...aTraits);
-      else lines.push('- No single trait stands out for this group.');
+      lines.push('3. AVOID (patterns of customers who churned in year one)');
+      lines.push(...(aLines.length ? aLines : ['- No single trait stands out for this group.']));
     }
     lines.push('');
     lines.push('TASK');
-    lines.push(`1. List ${strategicCount} companies that match the ${hypothesis ? 'best customer' : 'Strategic'} profile.`);
-    lines.push(`2. List ${coreCount} companies that match the Core ICP profile.`);
-    if (churned.length) lines.push('3. Skip any company that matches the Avoid profile.');
+    lines.push(`1. List ${strategicCount} ${sName} target companies.`);
+    lines.push(`2. List ${coreCount} Core ICP target companies.`);
+    if (hasChurned) lines.push('3. Skip any company that matches the Avoid patterns.');
+    if (total > 35) lines.push(`${hasChurned ? '4' : '3'}. Return results in batches of 15. Repeat the header row and follow every rule below in each batch.`);
+    else lines.push(`${hasChurned ? '4' : '3'}. Return everything in one response.`);
     lines.push('');
     lines.push('RULES');
-    lines.push('- Only include real companies you can verify on the public web.');
-    lines.push('- For every field, give the source URL and the date you checked it.');
-    lines.push('- If you cannot verify a field, write "unverified". Never guess.');
-    lines.push("- Confirm the company's website is live.");
-    lines.push('- Return results in batches of 25. Wait for me to say "continue" before the next batch.');
-    lines.push('- Before returning a batch, check every domain against the EXCLUDE list and remove matches.');
-    lines.push("- If your evidence for a company comes from a competitor's case study or customer page, keep the company and write that competitor's name in the Competitor customer column. Otherwise write \"none found\".");
-    if (coreFallback) {
-      const reasons = ['Adjacent industry', 'Tech stack match', 'Problem match'];
-      lines.push(`- Core ICP 70/30 rule: at least 70% of the Core ICP companies must be in the listed industries and employee band. Up to 30% may fall outside them, but only if the company matches at least one ${hypothesis ? 'best customer' : 'Strategic'} trait with a source. For each of those, fill the Exception reason column with exactly one of: ${reasons.join(' | ')}. For the rest, write "n/a".`);
-      lines.push('- Do not pad the list. If you cannot find enough qualified companies, return fewer and say how many are missing.');
-    }
+    lines.push('1. Only include real companies you can verify on the public web.');
+    lines.push('2. Only cite pages you opened during this task. Never build a URL from a pattern. If you cannot verify a field, write "unverified".');
+    lines.push("3. Confirm each company's website is live.");
+    lines.push(`4. For every 10 Core ICP companies, at least 7 must match the Core ICP profile strictly. Up to 3 may be adjacent, but only if they share a ${sName} tech stack or problem you can source. Fill Exception Reason for those, and write "N/A" for the rest.`);
+    lines.push(`5. Write "N/A" in Exception Reason for every ${sName} company.`);
+    lines.push("6. If your evidence for a company comes from a competitor's case study or customer page, keep the company and put that competitor's name in Competitor Customer. Otherwise write \"None\".");
+    lines.push('7. Do not pad the list. If you cannot find enough qualified companies, return fewer and say how many are missing.');
     lines.push('');
-    lines.push(`EXCLUDE (current customers, churned customers, and accounts lost in the last ${windowMonths} months; never return these)`);
+    lines.push('OUTPUT FORMAT');
+    lines.push('- One CSV inside a single ```csv code block, with a header row.');
+    lines.push('- Put every value in double quotes. If a value contains a double quote, double it ("").');
+    lines.push(`- Columns, in this order: ${cols.map(c => `"${c}"`).join(',')}`);
+    lines.push('- Exception Reason must be exactly one of: "Adjacent industry", "Tech stack match", "Problem match", "N/A".');
+    lines.push('- Format example only. Do not include this row in your results:');
+    lines.push(`"Core ICP","Example Co","example.com","Manufacturing","501-1000","Uses Snowflake (careers page)","unverified","None","https://example.com/careers","${todayIso}","Matches Core ICP industry and size","N/A"`);
+    lines.push('- If you can create files, also attach the full list as an .xlsx file.');
+    lines.push('');
+    lines.push(`EXCLUDE (best-effort filter: current customers, churned customers, and accounts lost in the last ${windowMonths} months; never return these)`);
     lines.push(exclusion.list.map(e => e.domain || e.name).join(', '));
     lines.push('');
-    lines.push('OUTPUT');
-    const cols = ['Tier', 'Company', 'Domain', 'Industry', 'Employees', 'Tech stack evidence', 'Problem evidence', 'Competitor customer', 'Source URLs', 'Date checked', 'Match reason (one line)'];
-    if (coreFallback) cols.push('Exception reason');
-    lines.push(`Return each batch as CSV inside a code block, with a header row and these columns: ${cols.join(', ')}`);
-    lines.push('Put every value in double quotes so commas inside a value do not break the columns.');
-    lines.push('If you can create files, also attach the full list as an .xlsx file.');
+    lines.push('SELF-AUDIT (do this before you answer)');
+    lines.push('1. Remove any company whose domain is on the EXCLUDE list.');
+    lines.push('2. Check that every Source URL is a page you opened. If not, replace it with "unverified".');
+    lines.push(`3. Check that every row has all ${cols.length} columns and every value is in double quotes.`);
+    lines.push('4. Check that at least 7 of every 10 Core ICP rows have Exception Reason "N/A".');
     return lines.join('\n');
-  }, [tiered, exclusion, isSample, whatYouSell, strategicCount, coreCount, windowMonths]);
+  }, [tiered, profile, exclusion, sellText, strategicCount, coreCount, windowMonths]);
 
   // ---------- Step 4.1 cleaner ----------
   function cleanOutput(text = pasted) {
@@ -651,6 +687,7 @@ export default function ABMListBuilder() {
       const nameHit = exNames.find(e => lineName.includes(' ' + normName(e.name) + ' '));
       if (nameHit) { check.push({ line, reason: `Name matches ${nameHit.name}, check by hand` }); return; }
       const primary = tokens[0];
+      if (primary === 'example.com') { removed.push({ line, reason: 'Format example row' }); return; }
       if (seen.has(primary)) { check.push({ line, reason: 'Duplicate' }); return; }
       seen.add(primary);
       clean.push({ line, domain: primary });
@@ -1097,6 +1134,7 @@ export default function ABMListBuilder() {
             <button style={S.btn} onClick={() => copyText(promptText, true)}>{copied ? 'Copied' : 'Copy prompt'}</button>
           </div>
           <p style={{ ...S.gray, marginTop: 8 }}>Paste into Claude, ChatGPT or Claygent. Once pasted, that provider's data policy applies.</p>
+          <p style={{ ...S.gray, marginTop: 4 }}>The EXCLUDE list in the prompt is a best-effort filter. Step 4.1 is the guaranteed check: it removes every customer and recent loss in your browser.</p>
 
           <Accordion isOpen={!!open.a4} onToggle={() => toggle('a4')} title="Before you trust the LLM's list">
             <ul style={ul}>
@@ -1165,7 +1203,7 @@ export default function ABMListBuilder() {
       {/* Limitations & Solutions */}
       <Accordion isOpen={!!open.limits} onToggle={() => toggle('limits')} title="Limitations & Solutions">
         <ul style={ul}>
-          <li><strong>LLM amnesia.</strong> In long chats, LLMs lose track of instructions, so later batches can repeat companies or skip the EXCLUDE list. Research on long inputs found models use information best at the start or end of a prompt and worst in the middle. Solution: the prompt puts the rules and the EXCLUDE list at the end, works in batches of 25, and Step 4.1 removes anything that slips through. If results drift, paste the RULES section again.</li>
+          <li><strong>LLM amnesia.</strong> In long chats, LLMs lose track of instructions, so later batches can repeat companies or skip the EXCLUDE list. Research on long inputs found models use information best at the start or end of a prompt and worst in the middle. Solution: the prompt asks for 35 accounts in one response by default, puts the EXCLUDE list and a self-audit at the end, and Step 4.1 removes anything that slips through. If results drift, paste the RULES section again.</li>
           <li><strong>Strict rule exceptions.</strong> The tiers follow fixed rules, so some accounts land in a tier a human might not choose. For example, a top-revenue account with churn risk High goes to Heavy Lift, and a small file can push percentile cutoffs to odd values. Solution: every row shows its tier_reason, the cutoffs are editable, and you can adjust tiers in the downloaded CSV.</li>
         </ul>
         <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: <L href="https://arxiv.org/abs/2307.03172">Liu et al.: Lost in the Middle</L></p>
