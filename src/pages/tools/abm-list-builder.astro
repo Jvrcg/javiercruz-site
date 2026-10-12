@@ -1,12 +1,37 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ABMListBuilder from '../../components/tools/ABMListBuilder.jsx';
+
+const description = 'Upload your customer list to tier accounts with clear reasoning and get a ready-to-run LLM prompt for lookalike accounts. Then clean the results and export them to Clay or Apollo, entirely in your browser.';
+
+const softwareSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'ABM List Builder',
+  description,
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  url: 'https://jjcruzgalera.com/tools/abm-list-builder',
+  author: {
+    '@type': 'Person',
+    name: 'Javier Cruz Galera',
+    url: 'https://jjcruzgalera.com',
+  },
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+};
 ---
 
 <BaseLayout
-  title="ABM List Builder"
-  description="Upload your customer list to instantly tier accounts with clear reasoning. Then, copy your custom LLM prompt to generate lookalikes safely, entirely in your browser."
+  title="ABM List Builder: Tier Customers and Generate Lookalike Account Prompts"
+  description={description}
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+  </Fragment>
   <article class="max-w-4xl mx-auto px-6 py-20">
     <header class="mb-10">
       <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-3">Tools</p>
@@ -17,7 +42,7 @@ import ABMListBuilder from '../../components/tools/ABMListBuilder.jsx';
         Turn your best customers into a lookalike target list.
       </h2>
       <p class="text-gray-600 leading-relaxed">
-        Upload your customer list to instantly tier accounts with clear reasoning. Then, copy your custom LLM prompt to generate lookalikes safely, entirely in your browser.
+        {description}
       </p>
     </header>
 
