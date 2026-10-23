@@ -44,4 +44,15 @@ export const tools = [
     secondaryHref: null,
     secondaryText: null,
   },
+  {
+    label: 'Analytics',
+    title: 'Noise vs Signal Calculator',
+    description:
+      '[Card description goes here]',
+    href: '/tools/noise-vs-signal',
+    addedDate: '2026-10-23',
+    linkText: 'Open the tool',
+    secondaryHref: null,
+    secondaryText: null,
+  },
 ];
