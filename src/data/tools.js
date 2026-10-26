@@ -48,7 +48,7 @@ export const tools = [
     label: 'Analytics',
     title: 'Noise vs Signal Calculator',
     description:
-      '[Card description goes here]',
+      'Prevent overreacting to normal performance fluctuations.',
     href: '/tools/noise-vs-signal',
     addedDate: '2026-10-23',
     linkText: 'Open the tool',
