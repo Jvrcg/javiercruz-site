@@ -96,7 +96,7 @@ function XChart({ data, A, B0, B1, trend, unit, hover, setHover }) {
   const lo = Math.min(...all) - 4, hi = Math.max(...all) + 4;
   const sx = i => X0 + (n === 1 ? 0 : (i * (X1 - X0)) / (n - 1));
   const sy = v => Y1 - ((v - lo) / (hi - lo)) * (Y1 - Y0);
-  const shown = labelIdx(n);
+  const shown = labelIdx(n, labels);
   const gridStep = Math.max(1, Math.pow(10, Math.floor(Math.log10((hi - lo) / 4))));
   const grid = [];
   for (let g = Math.ceil(lo / gridStep) * gridStep; g < hi; g += gridStep) grid.push(g);
@@ -119,12 +119,12 @@ function XChart({ data, A, B0, B1, trend, unit, hover, setHover }) {
         {[w / 2, -w / 2].map(off => <polyline key={`h${off}`} points={line(off)} fill="none" stroke="#B4B2A9" strokeWidth="1" strokeDasharray="2,3" />)}
         {[[c[e] + w, 'Upper limit'], [c[e], trend ? 'Trend line' : 'Average'], [c[e] - w, 'Lower limit']].map(([v, t]) => (
           <g key={t}>
-            <text x={X1 + 6} y={sy(v) - 2} style={{ fill: '#374151', fontSize: 11 }}>{t}</text>
-            <text x={X1 + 6} y={sy(v) + 11} style={{ fill: '#111827', fontSize: 11 }}>{fd(v)}</text>
+            <text x={X1 + 6} y={Math.min(sy(v), Y1 - 8) - 2} style={{ fill: '#374151', fontSize: 11 }}>{t}</text>
+            <text x={X1 + 6} y={Math.min(sy(v), Y1 - 8) + 11} style={{ fill: '#111827', fontSize: 11 }}>{fd(v)}</text>
           </g>
         ))}
         {grid.map(g => <text key={g} x={X0 - 8} y={sy(g) + 4} textAnchor="end" style={tx}>{g}</text>)}
-        {V.map((_, i) => (shown.has(i) ? <text key={i} x={sx(i)} y={Y1 + 20} textAnchor={i === n - 1 ? 'end' : 'middle'} style={tx}>{labels[i]}</text> : null))}
+        {V.map((_, i) => (shown.has(i) ? <text key={i} x={sx(i)} y={Y1 + 20} textAnchor="middle" style={tx}>{labels[i]}</text> : null))}
         {LY && <polyline points={LY.map((v, i) => `${sx(i)},${sy(v)}`).join(' ')} fill="none" stroke={LY_COLOR} strokeWidth="1.5" strokeDasharray="3,4" opacity="0.7" />}
         <polyline points={V.map((v, i) => `${sx(i)},${sy(v)}`).join(' ')} fill="none" stroke="#B4B2A9" strokeWidth="1.5" strokeLinejoin="round" />
         {V.map((v, i) => (
@@ -194,15 +194,18 @@ function markOf(A, i) {
   return t;
 }
 
-// Axis labels: every step-th point, plus the latest point. The label just before the latest is dropped if it would crowd it.
-function labelIdx(n) {
+// Axis labels: every step-th point, plus the latest point. Labels are centered on their point, like the first one.
+// The label just before the latest is dropped only if the two would touch. 556 is the plotted width (X1 - X0),
+// and 6 units per character is a safe width estimate for 11px text.
+function labelIdx(n, labels) {
   const step = Math.max(1, Math.ceil(n / 7));
   const out = [];
   for (let i = 0; i < n; i += step) out.push(i);
   if (out[out.length - 1] !== n - 1) {
-    // 556 is the plotted width (X1 - X0). Drop the previous label if it sits closer than 80 units to the latest one,
-    // which leaves room for labels as wide as "Jan 2026".
-    if (((n - 1 - out[out.length - 1]) * 556) / (n - 1) < 80) out.pop();
+    const prev = out[out.length - 1];
+    const gap = ((n - 1 - prev) * 556) / (n - 1);
+    const room = ((labels[prev].length + labels[n - 1].length) * 6) / 2 + 6;
+    if (gap < room) out.pop();
     out.push(n - 1);
   }
   return new Set(out);
