@@ -82,6 +82,7 @@ const S = {
   nudge: { background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a', borderRadius: 8, padding: '10px 14px', fontSize: 13, margin: '0 0 12px' },
   th: { padding: '7px 10px', fontWeight: 600, width: '34%', verticalAlign: 'top', color: '#111827' },
   td: { padding: '7px 10px' },
+  sep: { border: 0, borderTop: '1px solid #e5e7eb', margin: '16px 0' },
   sec: { fontSize: 12, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '14px 0 4px' },
 };
 
@@ -114,6 +115,7 @@ function XChart({ data, A, B0, B1, trend, unit, hover, setHover }) {
         <rect x={sx(B0)} y={Y0} width={Math.max(0, sx(B1 - 1) - sx(B0))} height={Y1 - Y0} fill="#378ADD" opacity="0.04" />
         <text x={sx(B0) + 6} y={Y0 + 12} style={tx}>Baseline (limits locked)</text>
         {[w, 0, -w].map(off => <polyline key={off} points={line(off)} fill="none" stroke="#888780" strokeWidth="1" />)}
+        {[w / 2, -w / 2].map(off => <polyline key={`h${off}`} points={line(off)} fill="none" stroke="#B4B2A9" strokeWidth="1" strokeDasharray="2,3" />)}
         {[[c[e] + w, 'Upper limit'], [c[e], trend ? 'Trend line' : 'Average'], [c[e] - w, 'Lower limit']].map(([v, t]) => (
           <g key={t}>
             <text x={X1 + 6} y={sy(v) - 2} style={{ fill: '#374151', fontSize: 11 }}>{t}</text>
@@ -322,7 +324,9 @@ export default function NoiseSignal() {
     const nudge = shouldNudge(A, V, B1, useTrend);
 
     results = (
-      <div style={{ marginTop: 20 }}>
+      <div style={{ marginTop: 22 }}>
+        <p style={S.eyebrow}>Step 4</p>
+        <h3 style={S.title}>Read the verdict</h3>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, margin: '0 0 12px', color: trendAllowed ? '#111827' : '#9ca3af' }}>
           <input type="checkbox" checked={useTrend} disabled={!trendAllowed} onChange={e => { setTrend(e.target.checked); setDownNote(false); }} />
           Account for growth (fit a trend line)
@@ -340,6 +344,9 @@ export default function NoiseSignal() {
               <svg width="14" height="14" viewBox="-7 -7 14 14"><Mark x={0} y={0} t={t} /></svg>{t ? `Rule ${t}: ` : ''}{NAME[t]}
             </span>
           ))}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <svg width="22" height="10"><line x1="1" y1="5" x2="21" y2="5" stroke="#B4B2A9" strokeWidth="1" strokeDasharray="2,3" /></svg>Halfway line (Rule 2)
+          </span>
           {data.lastYear && (
             <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
               <svg width="22" height="10"><line x1="1" y1="5" x2="21" y2="5" stroke={LY_COLOR} strokeWidth="1.5" strokeDasharray="3,4" /></svg>Last year
@@ -389,21 +396,39 @@ export default function NoiseSignal() {
     <div>
       <Accordion title="How to use this tool, step by step" isOpen={!!open.guide} onToggle={() => toggle('guide')}>
         <ol style={{ margin: 0, paddingLeft: 20 }}>
-          <li>Pick one metric to check, like weekly demo requests or weekly MQLs. The tool looks at one metric at a time.</li>
-          <li>Export it from your reporting tool or spreadsheet as a CSV with two columns: the date (YYYY-MM-DD) and the value.</li>
-          <li>Optional: add a third column with last year's value for the same week. It shows up as a light dotted line for context.</li>
-          <li>For low-volume metrics, use weekly totals, not daily numbers or rolling averages.</li>
-          <li>Include at least 6 rows. 20 or more gives you limits you can trust.</li>
-          <li>Choose your CSV, then press Submit. Or press Load sample to see how it works with Syncflow Noise vs. Signal.</li>
-          <li>After your data loads, choose the dates to lock the limits on. Aim for 15 to 20 points from a recent stretch with no known changes, like a launch or a budget shift.</li>
-          <li>If your numbers are growing on purpose, turn on "Account for growth." The tool will suggest it when your data is trending up.</li>
-          <li>Read the verdict first. It tells you whether your latest data point is within the noise or needs a closer look. The findings list shows every signal and when it happened.</li>
+          <li style={{ marginBottom: 6 }}>Pick one metric to check, such as weekly demo requests or weekly MQLs (The tool looks at one metric at a time). Export it from your reporting tool or spreadsheet as a CSV with two columns: the date (YYYY-MM-DD) and the value.
+            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20 }}>
+              <li>Recommended: add a third column with last year's value for the same week. It shows up as a light dotted line.</li>
+              <li>For low-volume metrics, use weekly totals, not daily numbers or rolling averages.</li>
+              <li>Include at least 6 rows. 20 or more gives you limits you can trust.</li>
+            </ol>
+          </li>
+          <li style={{ marginBottom: 6 }}>Choose your CSV, then press Submit. Or press Load sample to see how it works with Syncflow Noise vs. Signal.</li>
+          <li>After your data loads, choose the dates to lock the limits on.
+            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20 }}>
+              <li>Aim for 15 to 20 points from a recent stretch with no known changes, like a launch or a budget shift.</li>
+            </ol>
+          </li>
+        </ol>
+        <p style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e', borderRadius: 8, padding: '8px 12px', margin: '10px 0' }}><b>IMPORTANT:</b> If your numbers are growing on purpose (think of YoY growth), turn on "Account for growth." The tool will suggest it when your data is trending up.</p>
+        <ol start={4} style={{ margin: 0, paddingLeft: 20 }}>
+          <li>Read the verdict. It tells you whether your latest data point is within the noise or needs a closer look. The findings list shows every signal and when it happened.
+            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20 }}>
+              <li>Recommendation: Take maturity windows into account. If you are digging into MQLs or metrics that relate to attribution, check how long they take to fully land. If it takes about 4 weeks and each point is a week, treat your latest 4 points as still filling in/maturing.</li>
+              <li>Once you take the above (data maturity or lag) into account, wait for 6 to 8 mature points after a change before deciding it’s real. I recommend 8.</li>
+            </ol>
+          </li>
         </ol>
       </Accordion>
 
       <section style={S.card}>
         <p style={S.eyebrow}>Step 1</p>
-        <h3 style={S.title}>Add your data</h3>
+        <h3 style={S.title}>Prepare your CSV</h3>
+        <p style={S.hint}>Columns: date (YYYY-MM-DD), value, last year (recommended)</p>
+        <p style={{ margin: '6px 0 0' }}><button style={S.link} onClick={downloadTemplate}>Download template</button></p>
+        <hr style={S.sep} />
+        <p style={S.eyebrow}>Step 2</p>
+        <h3 style={S.title}>Upload and submit</h3>
         <div
           onDragEnter={e => { e.preventDefault(); setDragOver(true); }}
           onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -413,11 +438,23 @@ export default function NoiseSignal() {
         >
           <p style={{ fontSize: 15, fontWeight: 600, margin: '0 0 6px', color: '#111827' }}>Drag your CSV here</p>
           <p style={{ ...S.muted, margin: '0 0 6px' }}>or <label style={S.link}>choose a file<input type="file" accept=".csv" style={{ display: 'none' }} onChange={e => { pick(e.target.files[0]); e.target.value = ''; }} /></label></p>
-          <p style={S.hint}>Columns: date (YYYY-MM-DD), value, last year (optional)</p>
-          <p style={{ margin: '8px 0 0' }}><button style={S.link} onClick={downloadTemplate}>Download template</button></p>
           {pending && <p style={{ ...S.muted, margin: '8px 0 0' }}>Selected: {pending.name}</p>}
         </div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 12, marginTop: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>
+          <button style={S.primary} onClick={submit}>Submit</button>
+        </div>
+        {error && <p style={{ color: '#b91c1c', fontSize: 13, margin: '8px 0 0' }}>{error}</p>}
+        <p style={{ ...S.muted, margin: '10px 0 0' }}>No data yet? <button style={S.link} onClick={loadSample}>Load the sample (Syncflow Noise vs. Signal)</button></p>
+        {data && (
+          <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>
+            Loaded: {data.name} ({data.values.length} points{data.lastYear ? ', with last year' : ''}). Limits locked from {data.longLabels[B0]} to {data.longLabels[B1 - 1]}.
+            {!trendAllowed && ` Lock ${MIN_TREND_POINTS} or more points to use "Account for growth."`}
+          </p>
+        )}
+        <hr style={S.sep} />
+        <p style={S.eyebrow}>Step 3</p>
+        <h3 style={S.title}>Lock your limits</h3>
+        <div>
           {data ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, fontSize: 13 }}>
               <label htmlFor="ns-b0">Lock limits from</label>
@@ -429,17 +466,8 @@ export default function NoiseSignal() {
           ) : (
             <p style={S.hint}>Limits lock on your first 20 data points by default. You can change the dates once your data loads.</p>
           )}
-          <button style={S.primary} onClick={submit}>Submit</button>
         </div>
         <p style={{ ...S.hint, margin: '6px 0 0' }}>Aim for 15 to 20 points from a recent stretch with no known changes, like a launch, a budget shift, or a tracking fix. Limits get reliable between 12 and 20 points, and more than 20 adds little.</p>
-        {error && <p style={{ color: '#b91c1c', fontSize: 13, margin: '8px 0 0' }}>{error}</p>}
-        <p style={{ ...S.muted, margin: '10px 0 0' }}>No data yet? <button style={S.link} onClick={loadSample}>Load the sample (Syncflow Noise vs. Signal)</button></p>
-        {data && (
-          <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>
-            Loaded: {data.name} ({data.values.length} points{data.lastYear ? ', with last year' : ''}). Limits locked from {data.longLabels[B0]} to {data.longLabels[B1 - 1]}.
-            {!trendAllowed && ` Lock ${MIN_TREND_POINTS} or more points to use "Account for growth."`}
-          </p>
-        )}
         <Sources>
           <L href="https://xmrit.com/manual/">Xmrit: User Manual</L>, <L href="https://xmrit.com/articles/why-you-need-to-lock-limits/">Xmrit: Why Locking Limits is Essential</L>, <L href="https://www.spcforexcel.com/knowledge/control-chart-basics/when-calculate-lock-and-recalculate-control-limits">SPC for Excel: When to Calculate, Lock, and Recalculate Control Limits</L>, <L href="https://www.wsh.nhs.uk/asset-library/making-data-count-the-essentials.pdf">NHS England: Making Data Count, The Essentials</L>
         </Sources>
@@ -462,32 +490,54 @@ export default function NoiseSignal() {
 
       <Accordion title="How to read the signals & terminology" isOpen={!!open.signals} onToggle={() => toggle('signals')}>
         <p style={{ ...S.sec, marginTop: 0 }}>How to read the signals</p>
-        <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 8px' }}>Each flagged point on the chart uses one of these markers.</p>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 10, margin: '0 0 6px' }}>
+        <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 8px' }}>Each flagged point on the chart uses one of these markers. The strength tells you how sure you can be that something changed, not how big the change is. When a point trips more than one rule, it shows the strongest one.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: '0 0 6px' }}>
           {[
-            [1, 'Strong', 'A point outside the noise band, or a point-to-point change above the upper range limit.'],
-            [2, 'Moderate', '3 of 4 points in a row closer to the same limit than to the average.'],
-            [3, 'Weak', '8 or more points in a row on the same side of the average.'],
-          ].map(([k, lvl, txt]) => (
+            [1, 'Strong', 'An outlier',
+              'One point landed outside the normal range, or the jump between two points was bigger than normal.',
+              'Red triangles. On the main chart, a triangle outside the shaded band. On the moving range chart below it, a triangle above the upper range limit line.',
+              'The week of Jun 29 hit 108, well above the upper limit.',
+              'Find the cause. It is often a one-time event, so look into it before reacting.'],
+            [2, 'Moderate', 'A short run',
+              'Several points in a short stretch are hugging one edge of the normal range. No single point broke a limit, but together they are leaning one way.',
+              'Orange diamonds. Look at the dotted halfway lines between the average and each limit. When 3 of any 4 points in a row land past the same halfway line, they get flagged.',
+              'From Sep 7 to Oct 5, 5 weeks sat past the lower halfway line.',
+              'Treat it as an early warning. Find what changed at the start of the stretch.'],
+            [3, 'Weak', 'A long run',
+              'The metric stayed on one side of the average for 8 or more points in a row. Each point looks normal on its own, but the streak means the level moved.',
+              'Yellow squares. A streak of them above or below the center line.',
+              'From Aug 17 to Oct 5, 8 weeks in a row sat below the trend line.',
+              'Performance has likely shifted up or down. Find what changed when the streak began.'],
+          ].map(([k, lvl, aka, plain, where, sample, todo]) => (
             <div key={k} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 12px' }}>
               <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
                 <svg width="14" height="14" viewBox="-7 -7 14 14"><Mark x={0} y={0} t={k} ring="none" /></svg>
                 <b style={{ color: '#111827' }}>Rule {k}: {NAME[k]}</b>
                 <span style={{ fontSize: 11, fontWeight: 600, borderRadius: 999, padding: '1px 8px', background: BADGE[k][0], color: BADGE[k][1] }}>{lvl} signal</span>
+                <span style={{ fontSize: 12, color: '#6b7280', fontStyle: 'italic' }}>{aka}</span>
               </div>
-              <p style={{ margin: '6px 0 0', lineHeight: 1.5 }}>{txt}</p>
+              <dl style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: '4px 12px', margin: '8px 0 0', lineHeight: 1.5 }}>
+                {[['In plain terms', plain], ['Where to find it', where], ['In the sample', sample], ['What to do', todo]].map(([dt, dd]) => (
+                  <div key={dt} style={{ display: 'contents' }}>
+                    <dt style={{ fontWeight: 600, color: '#374151' }}>{dt}</dt>
+                    <dd style={{ margin: 0 }}>{dd}</dd>
+                  </div>
+                ))}
+              </dl>
             </div>
           ))}
         </div>
+        <p style={{ fontSize: 12, color: '#6b7280', margin: '6px 0 0' }}>Examples use the Syncflow Noise vs. Signal sample with "Account for growth" on.</p>
         <p style={{ ...S.sec, paddingTop: 12, borderTop: '1px solid #e5e7eb' }}>Terminology</p>
         <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
           <tbody>
             {[
-              ['Noise', 'The normal ups and downs a metric shows when nothing has changed. Also called common cause variation. Xmrit calls it routine variation.'],
-              ['Signal', "A change that noise doesn't explain, so something likely happened. Also called special cause variation. Xmrit calls it exceptional variation."],
+              ['Noise', 'Typical ups and downs a metric shows when nothing has changed. Also called common cause variation. Think of weekend site traffic to a B2B page, versus Tuesday 10:00 am traffic.'],
+              ['Signal', "A change that noise doesn't explain, so something likely happened. Also called special cause variation. note worthy change and should be investigated. Site traffic dropped by a large volume on a Tuesday 10:00 am"],
               ['Noise band', 'The shaded area between the lower and upper limits. Points inside it are noise.'],
               ['Baseline', "The points the limits are locked on. New points can't move the limits."],
-              ['Upper and lower limits', 'The edges of the noise band. Xmrit calls them the natural process limits.'],
+              ['Locking limits', 'Freezing the average and the noise band at the values from your baseline. New points get judged against those fixed lines instead of moving them. Without locking, every new point shifts the limits, so a slow change can get absorbed into what looks normal.'],
+              ['Upper and lower limits', 'The edges of the noise band. The area you would consider “normal”'],
               ['Average', 'The center line: the mean of the baseline points.'],
               ['Trend line', 'Replaces the average when "Account for growth" is on. A straight line fit to the baseline.'],
               ['Moving range', 'How much the metric changed from one point to the next.'],
@@ -497,7 +547,7 @@ export default function NoiseSignal() {
           </tbody>
         </table>
         <Sources>
-          <L href="https://xmrit.com/manual/">Xmrit: User Manual</L>, <L href="https://xmrit.com/articles/why-you-need-to-lock-limits/">Xmrit: Why Locking Limits is Essential</L>, <L href="https://asq.org/quality-resources/variation">ASQ: What is the Law of Variation?</L>
+          <L href="https://xmrit.com/manual/">Xmrit: User Manual</L>, <L href="https://xmrit.com/articles/why-you-need-to-lock-limits/">Xmrit: Why Locking Limits is Essential</L>, <L href="https://asq.org/quality-resources/variation">ASQ: What is the Law of Variation?</L>, <L href="https://staceybarr.com/?p=2746">Stacey Barr: 3 Essential Signals to Look for in Your KPIs</L>
         </Sources>
       </Accordion>
 
