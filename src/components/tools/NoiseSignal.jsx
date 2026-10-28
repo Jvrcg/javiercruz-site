@@ -200,7 +200,9 @@ function labelIdx(n) {
   const out = [];
   for (let i = 0; i < n; i += step) out.push(i);
   if (out[out.length - 1] !== n - 1) {
-    if (n - 1 - out[out.length - 1] < step / 2) out.pop();
+    // 556 is the plotted width (X1 - X0). Drop the previous label if it sits closer than 80 units to the latest one,
+    // which leaves room for labels as wide as "Jan 2026".
+    if (((n - 1 - out[out.length - 1]) * 556) / (n - 1) < 80) out.pop();
     out.push(n - 1);
   }
   return new Set(out);
