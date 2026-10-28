@@ -395,9 +395,9 @@ export default function NoiseSignal() {
   return (
     <div>
       <Accordion title="How to use this tool, step by step" isOpen={!!open.guide} onToggle={() => toggle('guide')}>
-        <ol style={{ margin: 0, paddingLeft: 20 }}>
+        <ol style={{ margin: 0, paddingLeft: 20, listStyleType: 'decimal' }}>
           <li style={{ marginBottom: 6 }}>Pick one metric to check, such as weekly demo requests or weekly MQLs (The tool looks at one metric at a time). Export it from your reporting tool or spreadsheet as a CSV with two columns: the date (YYYY-MM-DD) and the value.
-            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20 }}>
+            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20, listStyleType: 'lower-alpha' }}>
               <li>Recommended: add a third column with last year's value for the same week. It shows up as a light dotted line.</li>
               <li>For low-volume metrics, use weekly totals, not daily numbers or rolling averages.</li>
               <li>Include at least 6 rows. 20 or more gives you limits you can trust.</li>
@@ -405,15 +405,15 @@ export default function NoiseSignal() {
           </li>
           <li style={{ marginBottom: 6 }}>Choose your CSV, then press Submit. Or press Load sample to see how it works with Syncflow Noise vs. Signal.</li>
           <li>After your data loads, choose the dates to lock the limits on.
-            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20 }}>
+            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20, listStyleType: 'lower-alpha' }}>
               <li>Aim for 15 to 20 points from a recent stretch with no known changes, like a launch or a budget shift.</li>
             </ol>
           </li>
         </ol>
         <p style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e', borderRadius: 8, padding: '8px 12px', margin: '10px 0' }}><b>IMPORTANT:</b> If your numbers are growing on purpose (think of YoY growth), turn on "Account for growth." The tool will suggest it when your data is trending up.</p>
-        <ol start={4} style={{ margin: 0, paddingLeft: 20 }}>
+        <ol start={4} style={{ margin: 0, paddingLeft: 20, listStyleType: 'decimal' }}>
           <li>Read the verdict. It tells you whether your latest data point is within the noise or needs a closer look. The findings list shows every signal and when it happened.
-            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20 }}>
+            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20, listStyleType: 'lower-alpha' }}>
               <li>Recommendation: Take maturity windows into account. If you are digging into MQLs or metrics that relate to attribution, check how long they take to fully land. If it takes about 4 weeks and each point is a week, treat your latest 4 points as still filling in/maturing.</li>
               <li>Once you take the above (data maturity or lag) into account, wait for 6 to 8 mature points after a change before deciding it’s real. I recommend 8.</li>
             </ol>
