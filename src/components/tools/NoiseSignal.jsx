@@ -58,9 +58,10 @@ function Sources({ children }) {
   return <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: {children}</p>;
 }
 
-// Marker shapes: circle = noise, triangle = Rule 1, diamond = Rule 2, square = Rule 3
+// Marker shapes: circle = noise, triangle = Rule 1, hollow triangle = big jump (Rule 1 on the moving range), diamond = Rule 2, square = Rule 3
 function Mark({ x, y, t, ring = '#fff' }) {
   const c = C[t];
+  if (t === 'j') return <path d={`M${x},${y - 6} L${x + 6},${y + 5} L${x - 6},${y + 5} Z`} fill="#fff" stroke={C[1]} strokeWidth="1.75" />;
   if (t === 1) return <path d={`M${x},${y - 6} L${x + 6},${y + 5} L${x - 6},${y + 5} Z`} fill={c} stroke={ring} strokeWidth="1.5" />;
   if (t === 2) return <path d={`M${x},${y - 6} L${x + 6},${y} L${x},${y + 6} L${x - 6},${y} Z`} fill={c} stroke={ring} strokeWidth="1.5" />;
   if (t === 3) return <rect x={x - 4.5} y={y - 4.5} width="9" height="9" rx="1" fill={c} stroke={ring} strokeWidth="1.5" />;
@@ -95,7 +96,7 @@ function XChart({ data, A, B0, B1, trend, unit, hover, setHover }) {
   const lo = Math.min(...all) - 4, hi = Math.max(...all) + 4;
   const sx = i => X0 + (n === 1 ? 0 : (i * (X1 - X0)) / (n - 1));
   const sy = v => Y1 - ((v - lo) / (hi - lo)) * (Y1 - Y0);
-  const step = Math.max(1, Math.ceil(n / 7));
+  const shown = labelIdx(n);
   const gridStep = Math.max(1, Math.pow(10, Math.floor(Math.log10((hi - lo) / 4))));
   const grid = [];
   for (let g = Math.ceil(lo / gridStep) * gridStep; g < hi; g += gridStep) grid.push(g);
@@ -123,12 +124,12 @@ function XChart({ data, A, B0, B1, trend, unit, hover, setHover }) {
           </g>
         ))}
         {grid.map(g => <text key={g} x={X0 - 8} y={sy(g) + 4} textAnchor="end" style={tx}>{g}</text>)}
-        {V.map((_, i) => (i % step === 0 ? <text key={i} x={sx(i)} y={Y1 + 20} textAnchor="middle" style={tx}>{labels[i]}</text> : null))}
+        {V.map((_, i) => (shown.has(i) ? <text key={i} x={sx(i)} y={Y1 + 20} textAnchor={i === n - 1 ? 'end' : 'middle'} style={tx}>{labels[i]}</text> : null))}
         {LY && <polyline points={LY.map((v, i) => `${sx(i)},${sy(v)}`).join(' ')} fill="none" stroke={LY_COLOR} strokeWidth="1.5" strokeDasharray="3,4" opacity="0.7" />}
         <polyline points={V.map((v, i) => `${sx(i)},${sy(v)}`).join(' ')} fill="none" stroke="#B4B2A9" strokeWidth="1.5" strokeLinejoin="round" />
         {V.map((v, i) => (
           <g key={i} style={{ cursor: 'pointer' }} onMouseEnter={() => setHover(i)} onClick={() => setHover(i)}>
-            <Mark x={sx(i)} y={sy(v)} t={topRule(R[i])} />
+            <Mark x={sx(i)} y={sy(v)} t={markOf(A, i)} />
             <rect x={sx(i) - 6} y={Y0} width="12" height={Y1 - Y0} fill="transparent" />
           </g>
         ))}
@@ -136,37 +137,12 @@ function XChart({ data, A, B0, B1, trend, unit, hover, setHover }) {
       {tip !== null && (
         <div style={{ position: 'absolute', pointerEvents: 'none', left: `${(tipX / W) * 100}%`, top: `${(sy(V[tip]) / 340) * 100}%`, background: '#fff', border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 10px', fontSize: 12, maxWidth: 240, lineHeight: 1.5, color: '#111827' }}>
           <b>{tipLabel(tip)}: {V[tip]}</b>
-          {R[tip].length
-            ? <>{R[tip].map(k => <div key={k}>Rule {k}: {NAME[k]}</div>)}<div>Investigate.</div></>
+          {R[tip].length || A.mrHigh[tip]
+            ? <>{R[tip].map(k => <div key={k}>Rule {k}: {NAME[k]}</div>)}{A.mrHigh[tip] && <div>Rule 1: big jump from the {unit === 'point' ? 'point' : unit} before</div>}<div>Investigate.</div></>
             : <div>Within the noise. No action.</div>}
         </div>
       )}
     </div>
-  );
-}
-
-function MRChart({ data, A }) {
-  const { labels } = data;
-  const { mr, mrHigh, url, mrb } = A;
-  const n = mr.length;
-  const X0 = 44, X1 = 600, M0 = 15, M1 = 115;
-  const sx = i => X0 + (n === 1 ? 0 : (i * (X1 - X0)) / (n - 1));
-  const mhi = Math.max(url, ...mr.slice(1)) + 2;
-  const my = v => M1 - (v / mhi) * (M1 - M0);
-  const fd = x => x.toFixed(data.dec);
-  const step = Math.max(1, Math.ceil(n / 7));
-  const tx = { fill: '#6b7280', fontSize: 11 };
-  return (
-    <svg viewBox="0 0 700 150" width="100%" role="img" aria-label="Moving range chart with the upper range limit">
-      <line x1={X0} x2={X1} y1={my(url)} y2={my(url)} stroke="#888780" />
-      <text x={X1 + 6} y={my(url) - 2} style={{ fill: '#374151', fontSize: 11 }}>Upper range limit</text>
-      <text x={X1 + 6} y={my(url) + 11} style={{ fill: '#111827', fontSize: 11 }}>{fd(url)}</text>
-      <line x1={X0} x2={X1} y1={my(mrb)} y2={my(mrb)} stroke="#888780" />
-      <text x={X1 + 6} y={my(mrb) + 4} style={{ fill: '#374151', fontSize: 11 }}>Avg {fd(mrb)}</text>
-      <polyline points={mr.slice(1).map((v, j) => `${sx(j + 1)},${my(v)}`).join(' ')} fill="none" stroke="#B4B2A9" strokeWidth="1.5" />
-      {mr.map((v, i) => (i ? <Mark key={i} x={sx(i)} y={my(v)} t={mrHigh[i] ? 1 : 0} /> : null))}
-      {mr.map((_, i) => (i % step === 0 ? <text key={`l${i}`} x={sx(i)} y={M1 + 22} textAnchor="middle" style={tx}>{labels[i]}</text> : null))}
-    </svg>
   );
 }
 
@@ -210,6 +186,26 @@ function buildFindings(data, A, trend, unit) {
   return rows;
 }
 
+// What the main chart shows for a point: a solid Rule 1 triangle wins, then a hollow triangle for a big jump, then Rule 2, then Rule 3.
+function markOf(A, i) {
+  const t = topRule(A.R[i]);
+  if (t === 1) return 1;
+  if (A.mrHigh[i]) return 'j';
+  return t;
+}
+
+// Axis labels: every step-th point, plus the latest point. The label just before the latest is dropped if it would crowd it.
+function labelIdx(n) {
+  const step = Math.max(1, Math.ceil(n / 7));
+  const out = [];
+  for (let i = 0; i < n; i += step) out.push(i);
+  if (out[out.length - 1] !== n - 1) {
+    if (n - 1 - out[out.length - 1] < step / 2) out.pop();
+    out.push(n - 1);
+  }
+  return new Set(out);
+}
+
 export default function NoiseSignal() {
   const [data, setData] = useState(null); // { name, dates, values, lastYear, labels, longLabels, dec, unit }
   const [base, setBase] = useState({ f: 0, t: DEFAULT_BASE - 1 });
@@ -230,12 +226,17 @@ export default function NoiseSignal() {
     const n = values.length;
     const f = 0, t = Math.min(DEFAULT_BASE, n) - 1;
     const next = { name, dates, values, lastYear, unit, dec: decimalsOf(values), labels: dates.map(d => fmtShort(d, unit)), longLabels: dates.map(fmtLong) };
-    // Growth defaults to on, unless the baseline trends down (a steady decline should be flagged, not treated as normal).
+    // Growth defaults to on only when the baseline clearly trends up. It stays off for a flat baseline, and for a
+    // baseline that clearly trends down (a steady decline should be flagged, not treated as normal), which also shows a note.
     let tr = false, down = false;
     if (t - f + 1 >= MIN_TREND_POINTS) {
       const slope = analyze(values, f, t + 1, true).slope;
-      tr = slope >= 0;
-      down = slope < 0;
+      const halfBand = analyze(values, f, t + 1, false).w;
+      // Flat: across the baseline, the trend line moves less than half the noise band's full width
+      // (that is, less than the distance from the average to one limit). This cutoff is a judgment call, not a sourced number.
+      const flat = Math.abs(slope) * (t - f) < halfBand;
+      tr = !flat && slope > 0;
+      down = !flat && slope < 0;
     }
     setData(next);
     setPending(null);
@@ -307,7 +308,8 @@ export default function NoiseSignal() {
   if (data && A) {
     const V = data.values, n = V.length, li = n - 1, lab = data.labels;
     const { c, w, R, mrHigh, slope } = A;
-    const lt = topRule(R[li]);
+    const jumpOnly = mrHigh[li] && topRule(R[li]) !== 1;
+    const lt = mrHigh[li] ? 1 : topRule(R[li]);
     const fd = x => x.toFixed(data.dec);
     const tie = [c[li] - w, c[li] + w].some(x => fd(x) === fd(V[li]));
     const bf = tie ? f2 : fd;
@@ -318,7 +320,7 @@ export default function NoiseSignal() {
     const dir = V[li] > c[li] ? 'above' : 'below';
     const stat = { 0: ['Noise', '#4b5563'], 1: ['Rule 1', '#b91c1c'], 2: ['Rule 2', '#c2410c'], 3: ['Rule 3', '#b45309'] };
     let verdict;
-    if (lt === 1) verdict = { bg: '#fef2f2', b: '#fecaca', t: '#991b1b', h: 'Signal: investigate', p: `The ${latestLabel} came in at ${V[li]}, ${dir} the noise band of ${f2(c[li] - w)} to ${f2(c[li] + w)}${useTrend ? ' around your trend line' : ''}. This is not routine variation.`, r: 'Check what changed before reacting: tracking, budget, launches, platform changes, or outside factors like industry events or other campaigns.' };
+    if (lt === 1) verdict = { bg: '#fef2f2', b: '#fecaca', t: '#991b1b', h: 'Signal: investigate', p: jumpOnly ? `The ${latestLabel} came in at ${V[li]}, a jump of ${Number.isInteger(A.mr[li]) ? A.mr[li] : f2(A.mr[li])} from the ${unitWord} before (${V[li - 1]}). That is above the upper range limit of ${f2(A.url)}, so it is not routine variation, even though the value is inside the noise band.` : `The ${latestLabel} came in at ${V[li]}, ${dir} the noise band of ${f2(c[li] - w)} to ${f2(c[li] + w)}${useTrend ? ' around your trend line' : ''}. This is not routine variation.`, r: 'Check what changed before reacting: tracking, budget, launches, platform changes, or outside factors like industry events or other campaigns.' };
     else if (lt) verdict = { bg: '#fffbeb', b: '#fde68a', t: '#92400e', h: 'Possible shift: confirm what changed', p: `The ${latestLabel} came in at ${V[li]}, inside the noise band, but it is part of a pattern ${dir} ${ref}.`, r: 'Confirm what changed at the start of the pattern.' };
     else verdict = { bg: '#f0fdf4', b: '#bbf7d0', t: '#166534', h: 'Within the noise', p: `The ${latestLabel} came in at ${V[li]}, inside the noise band, with no pattern rules triggered.`, r: 'Keep monitoring' };
     const nudge = shouldNudge(A, V, B1, useTrend);
@@ -345,6 +347,9 @@ export default function NoiseSignal() {
             </span>
           ))}
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <svg width="14" height="14" viewBox="-7 -7 14 14"><Mark x={0} y={0} t="j" /></svg>Big jump (Rule 1)
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <svg width="22" height="10"><line x1="1" y1="5" x2="21" y2="5" stroke="#B4B2A9" strokeWidth="1" strokeDasharray="2,3" /></svg>Halfway line (Rule 2)
           </span>
           {data.lastYear && (
@@ -354,8 +359,6 @@ export default function NoiseSignal() {
           )}
         </div>
         <XChart data={data} A={A} B0={B0} B1={B1} trend={useTrend} unit={data.unit} hover={hover} setHover={setHover} />
-        <p style={{ fontSize: 13, color: '#374151', margin: '16px 0 4px' }}>{unitWord.charAt(0).toUpperCase() + unitWord.slice(1)}-to-{unitWord} change (moving range)</p>
-        <MRChart data={data} A={A} />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, margin: '28px 0 20px' }}>
           {useTrend
@@ -495,7 +498,7 @@ export default function NoiseSignal() {
           {[
             [1, 'Strong', 'An outlier',
               'One point landed outside the normal range, or the jump between two points was bigger than normal.',
-              'Red triangles. On the main chart, a triangle outside the shaded band. On the moving range chart below it, a triangle above the upper range limit line.',
+              'Red triangles. A solid triangle sits outside the shaded band. A hollow triangle marks a week that jumped unusually far from the week before, even if it is inside the band.',
               'The week of Jun 29 hit 108, well above the upper limit.',
               'Find the cause. It is often a one-time event, so look into it before reacting.'],
             [2, 'Moderate', 'A short run',
