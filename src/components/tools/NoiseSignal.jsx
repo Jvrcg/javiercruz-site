@@ -489,7 +489,7 @@ export default function NoiseSignal() {
           2. Limits are locked on the points you choose (the baseline, the first 20 by default), so new points can't drag them around.<br />
           3. Average: the mean of the baseline points. With "Account for growth" on, a straight trend line fit to the baseline replaces the average. Baseline points outside the untrended limits are left out of the fit.<br />
           4. Noise band: the average (or trend line) plus or minus 2.66 times the average moving range.<br />
-          5. Upper range limit: 3.268 times the average moving range.
+          5. Upper range limit: 3.268 times the average moving range. A jump above it is flagged, except when a point is only falling back inside the band right after a point outside it.
         </p>
         <Sources>
           <L href="https://xmrit.com/articles/plot-xmr-chart-instructions/">Xmrit: How to Plot an XmR Chart</L>, <L href="https://xmrit.com/articles/why-you-need-to-lock-limits/">Xmrit: Why Locking Limits is Essential</L>, <L href="https://xmrit.com/articles/seasonality-and-trend-launch/">Xmrit: Trend and Seasonality Features</L>, <L href="https://www.qualitydigest.com/march97/html/spctool.html">Quality Digest: Good Limits From Bad Data</L>, <L href="https://xmrit.com/articles/how-often-measure-business-processes/">Xmrit: How Often Should You Measure Your Business Processes?</L>, <L href="https://xmrit.com/articles/saas-metrics-for-xmr-charts/">Xmrit: SaaS Metrics for XmR Charts</L>
@@ -503,7 +503,7 @@ export default function NoiseSignal() {
           {[
             [1, 'Strong', 'An outlier',
               'One point landed outside the normal range, or the jump between two points was bigger than normal.',
-              'Red triangles. A solid triangle sits outside the shaded band. A hollow triangle marks a week that jumped unusually far from the week before, even if it is inside the band.',
+              'Red triangles. A solid triangle sits outside the shaded band. A hollow triangle marks a week that jumped unusually far from the week before, even if it is inside the band. The week right after a point outside the band is not marked when it falls back inside, because that jump is the spike ending, not a new change.',
               'The week of Jun 29 hit 108, well above the upper limit.',
               'Find the cause. It is often a one-time event, so look into it before reacting.'],
             [2, 'Moderate', 'A short run',
@@ -624,7 +624,8 @@ export default function NoiseSignal() {
           1. A plain-English verdict on your latest data point: within the noise, possible shift, or investigate.<br />
           2. A findings list that groups every signal by date range and rule.<br />
           3. A growth toggle for teams that expect to grow, with a prompt to turn it on when your data is trending up.<br />
-          4. Built for marketing metrics, with a weekly sample dataset and channel guidance.
+          4. Built for marketing metrics, with a weekly sample dataset and channel guidance.<br />
+          5. A single spike is flagged once. The point that falls back inside the band right after it is not marked as a second big jump.
         </p>
       </Accordion>
     </div>

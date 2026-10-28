@@ -109,7 +109,9 @@ export function analyze(V, B0, B1, trend) {
   }
   R.forEach(r => r.sort());
   const mr = V.map((v, i) => (i ? Math.abs(v - V[i - 1]) : null));
-  const mrHigh = mr.map((x, i) => x !== null && i > B0 && x > url);
+  // A big jump is not flagged when the point is only falling back inside the band right after a point outside it.
+  // That jump is the spike ending, which Rule 1 already flagged. This skip is a judgment call, not a standard XmR rule.
+  const mrHigh = mr.map((x, i) => x !== null && i > B0 && x > url && !(R[i - 1].includes(1) && !R[i].includes(1)));
   return { c, w, url, mrb, slope, R, mr, mrHigh };
 }
 
