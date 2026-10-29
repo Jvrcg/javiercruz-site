@@ -1,0 +1,633 @@
+import { useMemo, useState } from 'react';
+import {
+  parseCsv, decimalsOf, unitOf, analyze, topRule, groupsOf, shouldNudge,
+  MIN_POINTS, MIN_TREND_POINTS, DEFAULT_BASE,
+} from './noiseSignalMath.js';
+
+// Noise vs Signal
+// Privacy rules:
+// 1. Uploaded files are read in the browser only (FileReader). Nothing the user uploads is sent anywhere.
+// 2. Data lives in React state only. No localStorage, sessionStorage or IndexedDB.
+// 3. Nothing from the file is pushed to the dataLayer.
+// 4. The template download is built client-side with a Blob URL.
+// The only network request is loading the public Syncflow sample file from this site.
+
+const SAMPLE_URL = '/data/syncflow_noise_vs_signal.csv';
+const SAMPLE_NAME = 'Syncflow Noise vs. Signal';
+const TEMPLATE = 'date,value,last_year\n2026-01-05,64,42\n2026-01-12,58,43\n2026-01-19,63,49\n';
+
+const C = { 0: '#888780', 1: '#E24B4A', 2: '#D85A30', 3: '#EF9F27' };
+const NAME = { 0: 'Noise', 1: 'Process Limit Rule', 2: 'Quartile Limit Rule', 3: 'Runs of Eight' };
+const BADGE = { 1: ['#fee2e2', '#991b1b'], 2: ['#ffedd5', '#9a3412'], 3: ['#fef3c7', '#92400e'] };
+const LY_COLOR = '#85B7EB';
+
+const f2 = x => x.toFixed(2);
+const parseISO = d => { const [y, m, dd] = d.split('-').map(Number); return new Date(y, m - 1, dd); };
+const fmtShort = (d, unit) => parseISO(d).toLocaleDateString('en-US', unit === 'month' ? { month: 'short', year: 'numeric' } : { month: 'short', day: 'numeric' });
+const fmtLong = d => parseISO(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+function Chevron({ open }) {
+  return (
+    <svg width="10" height="10" viewBox="0 0 12 12" style={{ flexShrink: 0, transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.15s ease' }}>
+      <path d="M2 4l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function L({ href, children }) {
+  return <a href={href} target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB' }}>{children}</a>;
+}
+
+function Accordion({ title, isOpen, onToggle, children }) {
+  return (
+    <div style={{ border: '1px solid #e5e7eb', borderRadius: 6, overflow: 'hidden', marginTop: 12 }}>
+      <button
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f8f8f7', border: 'none', padding: '12px 16px', fontSize: 13, fontWeight: 600, color: '#1a1a19', cursor: 'pointer', textAlign: 'left' }}
+      >
+        <span>{title}</span>
+        <Chevron open={isOpen} />
+      </button>
+      {isOpen && <div style={{ padding: '14px 16px', fontSize: 13, color: '#4b5563', lineHeight: 1.7 }}>{children}</div>}
+    </div>
+  );
+}
+
+function Sources({ children }) {
+  return <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>Sources: {children}</p>;
+}
+
+// Marker shapes: circle = noise, triangle = Rule 1, hollow triangle = big jump (Rule 1 on the moving range), diamond = Rule 2, square = Rule 3
+function Mark({ x, y, t, ring = '#fff' }) {
+  const c = C[t];
+  if (t === 'j') return <path d={`M${x},${y - 6} L${x + 6},${y + 5} L${x - 6},${y + 5} Z`} fill="#fff" stroke={C[1]} strokeWidth="1.75" />;
+  if (t === 1) return <path d={`M${x},${y - 6} L${x + 6},${y + 5} L${x - 6},${y + 5} Z`} fill={c} stroke={ring} strokeWidth="1.5" />;
+  if (t === 2) return <path d={`M${x},${y - 6} L${x + 6},${y} L${x},${y + 6} L${x - 6},${y} Z`} fill={c} stroke={ring} strokeWidth="1.5" />;
+  if (t === 3) return <rect x={x - 4.5} y={y - 4.5} width="9" height="9" rx="1" fill={c} stroke={ring} strokeWidth="1.5" />;
+  return <circle cx={x} cy={y} r="4" fill={c} stroke={ring} strokeWidth="1.5" />;
+}
+
+const S = {
+  card: { border: '1px solid #e5e7eb', borderRadius: 10, padding: '18px 20px', marginTop: 16 },
+  eyebrow: { fontSize: 12, fontWeight: 600, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.04em', margin: '0 0 4px' },
+  title: { fontSize: 17, fontWeight: 600, color: '#111827', margin: '0 0 10px' },
+  hint: { fontSize: 12, color: '#6b7280', margin: 0 },
+  muted: { fontSize: 13, color: '#6b7280' },
+  link: { color: '#2563eb', textDecoration: 'underline', cursor: 'pointer', fontSize: 13, background: 'none', border: 0, padding: 0, fontFamily: 'inherit' },
+  primary: { fontSize: 13, background: '#2563eb', border: '1px solid #2563eb', color: '#fff', borderRadius: 8, padding: '8px 16px', cursor: 'pointer' },
+  select: { fontSize: 13, padding: '4px 6px', border: '1px solid #d1d5db', borderRadius: 6, background: '#fff' },
+  stat: { background: '#f5f5f4', borderRadius: 8, padding: '14px 16px' },
+  statLabel: { fontSize: 12, color: '#4b5563', margin: '0 0 8px' },
+  statValue: { fontSize: 22, fontWeight: 600, margin: 0, color: '#111827' },
+  nudge: { background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a', borderRadius: 8, padding: '10px 14px', fontSize: 13, margin: '0 0 12px' },
+  th: { padding: '7px 10px', fontWeight: 600, width: '34%', verticalAlign: 'top', color: '#111827' },
+  td: { padding: '7px 10px' },
+  sep: { border: 0, borderTop: '1px solid #e5e7eb', margin: '16px 0' },
+  sec: { fontSize: 12, fontWeight: 700, color: '#2563eb', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '14px 0 4px' },
+};
+
+function XChart({ data, A, B0, B1, trend, unit, hover, setHover }) {
+  const { values: V, lastYear: LY, labels } = data;
+  const { c, w, R } = A;
+  const n = V.length;
+  const W = 700, X0 = 44, X1 = 600, Y0 = 20, Y1 = 300;
+  const all = V.concat(LY || [], c.map(x => x + w), c.map(x => x - w));
+  const lo = Math.min(...all) - 4, hi = Math.max(...all) + 4;
+  const sx = i => X0 + (n === 1 ? 0 : (i * (X1 - X0)) / (n - 1));
+  const sy = v => Y1 - ((v - lo) / (hi - lo)) * (Y1 - Y0);
+  const shown = labelIdx(n, labels);
+  const gridStep = Math.max(1, Math.pow(10, Math.floor(Math.log10((hi - lo) / 4))));
+  const grid = [];
+  for (let g = Math.ceil(lo / gridStep) * gridStep; g < hi; g += gridStep) grid.push(g);
+  const band = [...c.map((v, i) => `${sx(i)},${sy(v + w)}`), ...c.map((v, i) => `${sx(i)},${sy(v - w)}`).reverse()].join(' ');
+  const line = off => c.map((v, i) => `${sx(i)},${sy(v + off)}`).join(' ');
+  const e = n - 1;
+  const fd = x => x.toFixed(data.dec);
+  const tx = { fill: '#6b7280', fontSize: 11 };
+  const tip = hover !== null && hover < n ? hover : null;
+  const tipX = tip === null ? 0 : (sx(tip) > W - 250 ? sx(tip) - 240 : sx(tip) + 10);
+  const tipLabel = i => (unit === 'week' ? `Week of ${labels[i]}` : labels[i]);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <svg viewBox={`0 0 ${W} 340`} width="100%" role="img" aria-label={`Chart of ${n} data points with the noise band and flagged points`} onMouseLeave={() => setHover(null)}>
+        <polygon points={band} fill="#888780" opacity="0.10" />
+        <rect x={sx(B0)} y={Y0} width={Math.max(0, sx(B1 - 1) - sx(B0))} height={Y1 - Y0} fill="#378ADD" opacity="0.04" />
+        <text x={sx(B0) + 6} y={Y0 + 12} style={tx}>Baseline (limits locked)</text>
+        {[w, 0, -w].map(off => <polyline key={off} points={line(off)} fill="none" stroke="#888780" strokeWidth="1" />)}
+        {[w / 2, -w / 2].map(off => <polyline key={`h${off}`} points={line(off)} fill="none" stroke="#B4B2A9" strokeWidth="1" strokeDasharray="2,3" />)}
+        {[[c[e] + w, 'Upper limit'], [c[e], trend ? 'Trend line' : 'Average'], [c[e] - w, 'Lower limit']].map(([v, t]) => (
+          <g key={t}>
+            <text x={X1 + 6} y={Math.min(sy(v), Y1 - 8) - 2} style={{ fill: '#374151', fontSize: 11 }}>{t}</text>
+            <text x={X1 + 6} y={Math.min(sy(v), Y1 - 8) + 11} style={{ fill: '#111827', fontSize: 11 }}>{fd(v)}</text>
+          </g>
+        ))}
+        {grid.map(g => <text key={g} x={X0 - 8} y={sy(g) + 4} textAnchor="end" style={tx}>{g}</text>)}
+        {V.map((_, i) => (shown.has(i) ? <text key={i} x={sx(i)} y={Y1 + 20} textAnchor="middle" style={tx}>{labels[i]}</text> : null))}
+        {LY && <polyline points={LY.map((v, i) => `${sx(i)},${sy(v)}`).join(' ')} fill="none" stroke={LY_COLOR} strokeWidth="1.5" strokeDasharray="3,4" opacity="0.7" />}
+        <polyline points={V.map((v, i) => `${sx(i)},${sy(v)}`).join(' ')} fill="none" stroke="#B4B2A9" strokeWidth="1.5" strokeLinejoin="round" />
+        {V.map((v, i) => (
+          <g key={i} style={{ cursor: 'pointer' }} onMouseEnter={() => setHover(i)} onClick={() => setHover(i)}>
+            <Mark x={sx(i)} y={sy(v)} t={markOf(A, i)} />
+            <rect x={sx(i) - 6} y={Y0} width="12" height={Y1 - Y0} fill="transparent" />
+          </g>
+        ))}
+      </svg>
+      {tip !== null && (
+        <div style={{ position: 'absolute', pointerEvents: 'none', left: `${(tipX / W) * 100}%`, top: `${(sy(V[tip]) / 340) * 100}%`, background: '#fff', border: '1px solid #d1d5db', borderRadius: 8, padding: '8px 10px', fontSize: 12, maxWidth: 240, lineHeight: 1.5, color: '#111827' }}>
+          <b>{tipLabel(tip)}: {V[tip]}</b>
+          {R[tip].length || A.mrHigh[tip]
+            ? <>{R[tip].map(k => <div key={k}>Rule {k}: {NAME[k]}</div>)}{A.mrHigh[tip] && <div>Rule 1: big jump from the {unit === 'point' ? 'point' : unit} before</div>}<div>Investigate.</div></>
+            : <div>Within the noise. No action.</div>}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function buildFindings(data, A, trend, unit) {
+  const { values: V, labels: lab } = data;
+  const { c, w, R, mr, mrHigh, url } = A;
+  const ref = trend ? 'your trend line' : 'the average';
+  const U = unit === 'point' ? 'point' : unit;
+  const rng = (a, b, f) => { const xs = []; for (let k = a; k <= b; k++) xs.push(f(k)); const lo = Math.min(...xs), hi = Math.max(...xs); return lo === hi ? f2(lo) : `${f2(lo)} to ${f2(hi)}`; };
+  const vr = (a, b) => { const xs = V.slice(a, b + 1); const lo = Math.min(...xs), hi = Math.max(...xs); return lo === hi ? `${lo}` : `${lo} to ${hi}`; };
+  const when = i => (unit === 'week' ? `the week of ${lab[i]}` : lab[i]);
+  const MEAN = {
+    p: 'Strong signal. This is outside the range routine variation produces, so look for a specific cause on these dates, or any other event that could have affected the result.',
+    m: `Strong signal. A change this big from one ${U} to the next is outside routine variation, so look for a specific cause on this date, or any other event that could have affected the result.`,
+    2: 'Moderate signal. Points are bunching up near one limit, which is often an early sign of a shift.',
+    3: 'Weak signal on its own, but a run this long points to a sustained change in level.',
+  };
+  const rows = [];
+  groupsOf(A, V, 1).forEach(([a, b]) => {
+    const up = V[a] > c[a], side = up ? 'upper' : 'lower', lim = k => (up ? c[k] + w : c[k] - w);
+    const t = a === b
+      ? `${V[a]} in ${when(a)}, ${up ? 'above' : 'below'} the ${side} limit of ${f2(lim(a))} by ${f2(Math.abs(V[a] - lim(a)))}.`
+      : `${b - a + 1} ${U}s in a row ${up ? 'above' : 'below'} the noise band, from ${lab[a]} to ${lab[b]}. Values ranged from ${vr(a, b)}, and the ${side} limit was ${rng(a, b, lim)}.`;
+    rows.push({ s: a, d: a === b ? lab[a] : `${lab[a]} to ${lab[b]}`, k: 1, t, m: a === b ? MEAN.p.replace('these dates', 'this date') : MEAN.p });
+  });
+  mrHigh.forEach((h, k) => {
+    if (h) rows.push({ s: k, d: lab[k], k: 1, t: `A jump of ${Number.isInteger(mr[k]) ? mr[k] : f2(mr[k])} from ${when(k - 1)} (${V[k - 1]}) to ${when(k)} (${V[k]}), above the upper range limit of ${f2(url)}.`, m: MEAN.m });
+  });
+  groupsOf(A, V, 2).forEach(([a, b]) => {
+    const up = V[a] > c[a];
+    let cnt = 0;
+    for (let k = a; k <= b; k++) if (R[k].includes(2)) cnt++;
+    rows.push({ s: a, d: a === b ? lab[a] : `${lab[a]} to ${lab[b]}`, k: 2, t: `${cnt} ${U}${cnt > 1 ? 's' : ''} from ${lab[a]} to ${lab[b]} sat closer to the ${up ? 'upper' : 'lower'} limit (${rng(a, b, k => (up ? c[k] + w : c[k] - w))}) than to ${ref}. Values ranged from ${vr(a, b)}.`, m: MEAN[2] });
+  });
+  groupsOf(A, V, 3).forEach(([a, b]) => {
+    const up = V[a] > c[a];
+    const ctx = trend ? `The gap to your trend line ranged from ${rng(a, b, k => Math.abs(V[k] - c[k]))}.` : `Values ranged from ${vr(a, b)}, against an average of ${f2(c[a])}.`;
+    rows.push({ s: a, d: `${lab[a]} to ${lab[b]}`, k: 3, t: `${b - a + 1} ${U}s in a row ${up ? 'above' : 'below'} ${ref}, from ${lab[a]} to ${lab[b]}. ${ctx}`, m: MEAN[3] });
+  });
+  rows.sort((x, y) => x.s - y.s || x.k - y.k);
+  return rows;
+}
+
+// What the main chart shows for a point: a solid Rule 1 triangle wins, then a hollow triangle for a big jump, then Rule 2, then Rule 3.
+function markOf(A, i) {
+  const t = topRule(A.R[i]);
+  if (t === 1) return 1;
+  if (A.mrHigh[i]) return 'j';
+  return t;
+}
+
+// Axis labels: every step-th point, plus the latest point. Labels are centered on their point, like the first one.
+// The label just before the latest is dropped only if the two would touch. 556 is the plotted width (X1 - X0),
+// and 6 units per character is a safe width estimate for 11px text.
+function labelIdx(n, labels) {
+  const step = Math.max(1, Math.ceil(n / 7));
+  const out = [];
+  for (let i = 0; i < n; i += step) out.push(i);
+  if (out[out.length - 1] !== n - 1) {
+    const prev = out[out.length - 1];
+    const gap = ((n - 1 - prev) * 556) / (n - 1);
+    const room = ((labels[prev].length + labels[n - 1].length) * 6) / 2 + 6;
+    if (gap < room) out.pop();
+    out.push(n - 1);
+  }
+  return new Set(out);
+}
+
+export default function NoiseSignal() {
+  const [data, setData] = useState(null); // { name, dates, values, lastYear, labels, longLabels, dec, unit }
+  const [base, setBase] = useState({ f: 0, t: DEFAULT_BASE - 1 });
+  const [trend, setTrend] = useState(false);
+  const [downNote, setDownNote] = useState(false);
+  const [error, setError] = useState('');
+  const [pending, setPending] = useState(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [hover, setHover] = useState(null);
+  const [open, setOpen] = useState({});
+  const toggle = k => setOpen(o => ({ ...o, [k]: !o[k] }));
+
+  function load(parsed, name) {
+    setError('');
+    const { dates, values, lastYear } = parsed;
+    if (values.length < MIN_POINTS) { setError(`Add at least ${MIN_POINTS} data points. That is the minimum for reliable limits.`); return false; }
+    const unit = unitOf(dates);
+    const n = values.length;
+    const f = 0, t = Math.min(DEFAULT_BASE, n) - 1;
+    const next = { name, dates, values, lastYear, unit, dec: decimalsOf(values), labels: dates.map(d => fmtShort(d, unit)), longLabels: dates.map(fmtLong) };
+    // Growth defaults to on only when the baseline clearly trends up. It stays off for a flat baseline, and for a
+    // baseline that clearly trends down (a steady decline should be flagged, not treated as normal), which also shows a note.
+    let tr = false, down = false;
+    if (t - f + 1 >= MIN_TREND_POINTS) {
+      const slope = analyze(values, f, t + 1, true).slope;
+      const halfBand = analyze(values, f, t + 1, false).w;
+      // Flat: across the baseline, the trend line moves less than half the noise band's full width
+      // (that is, less than the distance from the average to one limit). This cutoff is a judgment call, not a sourced number.
+      const flat = Math.abs(slope) * (t - f) < halfBand;
+      tr = !flat && slope > 0;
+      down = !flat && slope < 0;
+    }
+    setData(next);
+    setPending(null);
+    setBase({ f, t });
+    setTrend(tr);
+    setDownNote(down);
+    setHover(null);
+    return true;
+  }
+
+  function fromText(text, name) {
+    const p = parseCsv(text);
+    if (!p.values.length) { setError("We couldn't find any rows. Each row needs a date (YYYY-MM-DD) and a number."); return; }
+    if (load(p, name) && p.bad.length) setError(`Skipped ${p.bad.length} row(s) we couldn't read: row ${p.bad.slice(0, 5).join(', ')}.`);
+  }
+
+  function pick(file) { setPending(file || null); setError(''); }
+
+  function submit() {
+    if (!pending) { setError('Choose a CSV first, then press Submit.'); return; }
+    if (!/\.csv$/i.test(pending.name)) { setError("That file isn't a CSV. Export your data as .csv and try again."); return; }
+    const reader = new FileReader();
+    reader.onload = () => fromText(String(reader.result || ''), pending.name);
+    reader.readAsText(pending);
+  }
+
+  async function loadSample() {
+    try {
+      const res = await fetch(SAMPLE_URL);
+      if (!res.ok) throw new Error('fetch failed');
+      fromText(await res.text(), SAMPLE_NAME);
+    } catch {
+      setError("We couldn't load the sample file. Refresh the page and try again.");
+    }
+  }
+
+  function downloadTemplate() {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([TEMPLATE], { type: 'text/csv;charset=utf-8' }));
+    a.download = 'noise_vs_signal_template.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+
+  // Baseline dropdowns. If "from" moves past "to" (or the reverse), the other end moves to keep up to 20 points.
+  function changeBase(which, idx) {
+    const n = data.values.length;
+    let f = which === 'f' ? idx : base.f;
+    let t = which === 't' ? idx : base.t;
+    if (t < f) { if (which === 'f') t = Math.min(f + DEFAULT_BASE - 1, n - 1); else f = Math.max(t - DEFAULT_BASE + 1, 0); }
+    let msg = '';
+    if (t - f + 1 < MIN_POINTS) {
+      if (f + MIN_POINTS - 1 <= n - 1) t = f + MIN_POINTS - 1; else { t = n - 1; f = n - MIN_POINTS; }
+      msg = `The baseline needs at least ${MIN_POINTS} points, so we widened it.`;
+    }
+    setError(msg);
+    setBase({ f, t });
+    if (t - f + 1 < MIN_TREND_POINTS) setTrend(false);
+  }
+
+  const B0 = base.f, B1 = base.t + 1, BASE = B1 - B0;
+  const trendAllowed = BASE >= MIN_TREND_POINTS;
+  const useTrend = trend && trendAllowed;
+  const A = useMemo(() => (data ? analyze(data.values, B0, B1, useTrend) : null), [data, B0, B1, useTrend]);
+  const findings = useMemo(() => (data && A ? buildFindings(data, A, useTrend, data.unit) : []), [data, A, useTrend]);
+
+  let results = null;
+  if (data && A) {
+    const V = data.values, n = V.length, li = n - 1, lab = data.labels;
+    const { c, w, R, mrHigh, slope } = A;
+    const jumpOnly = mrHigh[li] && topRule(R[li]) !== 1;
+    const lt = mrHigh[li] ? 1 : topRule(R[li]);
+    const fd = x => x.toFixed(data.dec);
+    const tie = [c[li] - w, c[li] + w].some(x => fd(x) === fd(V[li]));
+    const bf = tie ? f2 : fd;
+    const flagged = R.filter((r, i) => r.length || mrHigh[i]).length;
+    const ref = useTrend ? 'your trend line' : 'the average';
+    const unitWord = data.unit === 'point' ? 'point' : data.unit;
+    const latestLabel = data.unit === 'week' ? `week of ${lab[li]}` : lab[li];
+    const dir = V[li] > c[li] ? 'above' : 'below';
+    const stat = { 0: ['Noise', '#4b5563'], 1: ['Rule 1', '#b91c1c'], 2: ['Rule 2', '#c2410c'], 3: ['Rule 3', '#b45309'] };
+    let verdict;
+    if (lt === 1) verdict = { bg: '#fef2f2', b: '#fecaca', t: '#991b1b', h: 'Signal: investigate', p: jumpOnly ? `The ${latestLabel} came in at ${V[li]}, a jump of ${Number.isInteger(A.mr[li]) ? A.mr[li] : f2(A.mr[li])} from the ${unitWord} before (${V[li - 1]}). That is above the upper range limit of ${f2(A.url)}, so it is not routine variation, even though the value is inside the noise band.` : `The ${latestLabel} came in at ${V[li]}, ${dir} the noise band of ${f2(c[li] - w)} to ${f2(c[li] + w)}${useTrend ? ' around your trend line' : ''}. This is not routine variation.`, r: 'Check what changed before reacting: tracking, budget, launches, platform changes, or outside factors like industry events or other campaigns.' };
+    else if (lt) verdict = { bg: '#fffbeb', b: '#fde68a', t: '#92400e', h: 'Possible shift: confirm what changed', p: `The ${latestLabel} came in at ${V[li]}, inside the noise band, but it is part of a pattern ${dir} ${ref}.`, r: 'Confirm what changed at the start of the pattern.' };
+    else verdict = { bg: '#f0fdf4', b: '#bbf7d0', t: '#166534', h: 'Within the noise', p: `The ${latestLabel} came in at ${V[li]}, inside the noise band, with no pattern rules triggered.`, r: 'Keep monitoring' };
+    const nudge = shouldNudge(A, V, B1, useTrend);
+
+    results = (
+      <div style={{ marginTop: 22 }}>
+        <p style={S.eyebrow}>Step 4</p>
+        <h3 style={S.title}>Read the verdict</h3>
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 14, margin: '0 0 12px', color: trendAllowed ? '#111827' : '#9ca3af' }}>
+          <input type="checkbox" checked={useTrend} disabled={!trendAllowed} onChange={e => { setTrend(e.target.checked); setDownNote(false); }} />
+          Account for growth (fit a trend line)
+        </label>
+        {downNote && !useTrend && <div style={S.nudge}>Your baseline is trending down, so we left "Account for growth" off. A steady decline gets flagged instead of treated as normal.</div>}
+        {nudge && (
+          <div style={S.nudge}>
+            Your data is trending up. Try turning on "Account for growth."
+            <button onClick={() => { setTrend(true); setDownNote(false); }} style={{ marginLeft: 8, fontSize: 12, border: '1px solid #93c5fd', background: '#fff', color: '#1e3a8a', borderRadius: 6, padding: '3px 8px', cursor: 'pointer' }}>Turn it on</button>
+          </div>
+        )}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, margin: '0 0 8px', fontSize: 12, color: '#374151' }}>
+          {[0, 1, 2, 3].map(t => (
+            <span key={t} style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <svg width="14" height="14" viewBox="-7 -7 14 14"><Mark x={0} y={0} t={t} /></svg>{t ? `Rule ${t}: ` : ''}{NAME[t]}
+            </span>
+          ))}
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <svg width="14" height="14" viewBox="-7 -7 14 14"><Mark x={0} y={0} t="j" /></svg>Big jump (Rule 1)
+          </span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <svg width="22" height="10"><line x1="1" y1="5" x2="21" y2="5" stroke="#B4B2A9" strokeWidth="1" strokeDasharray="2,3" /></svg>Halfway line (Rule 2)
+          </span>
+          {data.lastYear && (
+            <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+              <svg width="22" height="10"><line x1="1" y1="5" x2="21" y2="5" stroke={LY_COLOR} strokeWidth="1.5" strokeDasharray="3,4" /></svg>Last year
+            </span>
+          )}
+        </div>
+        <XChart data={data} A={A} B0={B0} B1={B1} trend={useTrend} unit={data.unit} hover={hover} setHover={setHover} />
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, margin: '28px 0 20px' }}>
+          {useTrend
+            ? <div style={S.stat}><p style={S.statLabel}>Trend</p><p style={S.statValue}>{slope >= 0 ? '+' : ''}{f2(slope)} / {unitWord}</p></div>
+            : <div style={S.stat}><p style={S.statLabel}>Average (locked)</p><p style={S.statValue}>{fd(c[0])}</p></div>}
+          <div style={S.stat}><p style={S.statLabel}>Noise band at latest {unitWord}</p><p style={S.statValue}>{bf(c[li] - w)} to {bf(c[li] + w)}</p></div>
+          <div style={S.stat}><p style={S.statLabel}>Latest ({latestLabel})</p><p style={{ ...S.statValue, color: stat[lt][1] }}>{V[li]} <span style={{ fontSize: 13 }}>{stat[lt][0]}</span></p></div>
+          <div style={S.stat}><p style={S.statLabel}>Flagged since baseline start</p><p style={S.statValue}>{flagged} of {n - B0}</p></div>
+        </div>
+
+        <div style={{ borderRadius: 8, padding: '16px 20px', border: `1px solid ${verdict.b}`, background: verdict.bg, color: verdict.t, margin: '0 0 20px' }}>
+          <h3 style={{ margin: '0 0 8px', fontSize: 17, fontWeight: 600 }}>{verdict.h}</h3>
+          <p style={{ margin: '0 0 8px', fontSize: 14, lineHeight: 1.6 }}>{verdict.p}</p>
+          {useTrend && <p style={{ margin: '0 0 8px', fontSize: 14, lineHeight: 1.6 }}>Trend on: only departures from your growth line are flagged.</p>}
+          <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6 }}><b>Recommendation:</b> {verdict.r}</p>
+        </div>
+
+        <div>
+          <h4 style={{ fontSize: 14, fontWeight: 600, margin: '0 0 8px', color: '#111827' }}>Findings ({findings.length})</h4>
+          {findings.map((x, i) => (
+            <div key={i} style={{ display: 'grid', gridTemplateColumns: '150px 1fr', gap: 12, padding: '10px 0', borderTop: '1px solid #e5e7eb', fontSize: 13, lineHeight: 1.5 }}>
+              <div style={{ color: '#111827' }}>{x.d}</div>
+              <div>
+                <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 600, padding: '2px 8px', borderRadius: 999, marginBottom: 4, background: BADGE[x.k][0], color: BADGE[x.k][1] }}>Rule {x.k}: {NAME[x.k]}</span>
+                <b style={{ display: 'block', fontWeight: 500, color: '#111827' }}>{x.t}</b>
+                <span style={{ display: 'block', color: '#6b7280', fontSize: 12, marginTop: 2 }}>{x.m}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const opts = data ? data.dates.map((d, i) => <option key={i} value={i}>{data.longLabels[i]}</option>) : null;
+
+  return (
+    <div>
+      <Accordion title="How to use this tool, step by step" isOpen={!!open.guide} onToggle={() => toggle('guide')}>
+        <ol style={{ margin: 0, paddingLeft: 20, listStyleType: 'decimal' }}>
+          <li style={{ marginBottom: 6 }}>Pick one metric to check, such as weekly demo requests or weekly MQLs (The tool looks at one metric at a time). Export it from your reporting tool or spreadsheet as a CSV with two columns: the date (YYYY-MM-DD) and the value.
+            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20, listStyleType: 'lower-alpha' }}>
+              <li>Recommended: add a third column with last year's value for the same week. It shows up as a light dotted line.</li>
+              <li>For low-volume metrics, use weekly totals, not daily numbers or rolling averages.</li>
+              <li>Include at least 6 rows. 20 or more gives you limits you can trust.</li>
+            </ol>
+          </li>
+          <li style={{ marginBottom: 6 }}>Choose your CSV, then press Submit. Or press Load sample to see how it works with Syncflow Noise vs. Signal.</li>
+          <li>After your data loads, choose the dates to lock the limits on.
+            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20, listStyleType: 'lower-alpha' }}>
+              <li>Aim for 15 to 20 points from a recent stretch with no known changes, like a launch or a budget shift.</li>
+            </ol>
+          </li>
+        </ol>
+        <p style={{ background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e', borderRadius: 8, padding: '8px 12px', margin: '10px 0' }}><b>IMPORTANT:</b> If your numbers are growing on purpose (think of YoY growth), turn on "Account for growth." The tool will suggest it when your data is trending up.</p>
+        <ol start={4} style={{ margin: 0, paddingLeft: 20, listStyleType: 'decimal' }}>
+          <li>Read the verdict. It tells you whether your latest data point is within the noise or needs a closer look. The findings list shows every signal and when it happened.
+            <ol type="a" style={{ margin: '6px 0 0', paddingLeft: 20, listStyleType: 'lower-alpha' }}>
+              <li>Recommendation: Take maturity windows into account. If you are digging into MQLs or metrics that relate to attribution, check how long they take to fully land. If it takes about 4 weeks and each point is a week, treat your latest 4 points as still filling in/maturing.</li>
+              <li>Once you take the above (data maturity or lag) into account, wait for 6 to 8 mature points after a change before deciding it’s real. I recommend 8.</li>
+            </ol>
+          </li>
+        </ol>
+      </Accordion>
+
+      <section style={S.card}>
+        <p style={S.eyebrow}>Step 1</p>
+        <h3 style={S.title}>Prepare your CSV</h3>
+        <p style={S.hint}>Columns: date (YYYY-MM-DD), value, last year (recommended)</p>
+        <p style={{ margin: '6px 0 0' }}><button style={S.link} onClick={downloadTemplate}>Download template</button></p>
+        <hr style={S.sep} />
+        <p style={S.eyebrow}>Step 2</p>
+        <h3 style={S.title}>Upload and submit</h3>
+        <div
+          onDragEnter={e => { e.preventDefault(); setDragOver(true); }}
+          onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+          onDragLeave={e => { e.preventDefault(); setDragOver(false); }}
+          onDrop={e => { e.preventDefault(); setDragOver(false); pick(e.dataTransfer.files[0]); }}
+          style={{ border: `2px dashed ${dragOver ? '#2563eb' : '#cbd5e1'}`, borderRadius: 10, padding: '22px 16px', textAlign: 'center', background: dragOver ? '#eff6ff' : '#f8fafc' }}
+        >
+          <p style={{ fontSize: 15, fontWeight: 600, margin: '0 0 6px', color: '#111827' }}>Drag your CSV here</p>
+          <p style={{ ...S.muted, margin: '0 0 6px' }}>or <label style={S.link}>choose a file<input type="file" accept=".csv" style={{ display: 'none' }} onChange={e => { pick(e.target.files[0]); e.target.value = ''; }} /></label></p>
+          {pending && <p style={{ ...S.muted, margin: '8px 0 0' }}>Selected: {pending.name}</p>}
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 14 }}>
+          <button style={S.primary} onClick={submit}>Submit</button>
+        </div>
+        {error && <p style={{ color: '#b91c1c', fontSize: 13, margin: '8px 0 0' }}>{error}</p>}
+        <p style={{ ...S.muted, margin: '10px 0 0' }}>No data yet? <button style={S.link} onClick={loadSample}>Load the sample (Syncflow Noise vs. Signal)</button></p>
+        {data && (
+          <p style={{ fontSize: 12, color: '#9b9a97', marginTop: 12 }}>
+            Loaded: {data.name} ({data.values.length} points{data.lastYear ? ', with last year' : ''}). Limits locked from {data.longLabels[B0]} to {data.longLabels[B1 - 1]}.
+            {!trendAllowed && ` Lock ${MIN_TREND_POINTS} or more points to use "Account for growth."`}
+          </p>
+        )}
+        <hr style={S.sep} />
+        <p style={S.eyebrow}>Step 3</p>
+        <h3 style={S.title}>Lock your limits (set your baseline)</h3>
+        <div>
+          {data ? (
+            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, fontSize: 13 }}>
+              <label htmlFor="ns-b0">Lock limits from</label>
+              <select id="ns-b0" style={S.select} value={base.f} onChange={e => changeBase('f', Number(e.target.value))}>{opts}</select>
+              <span>to</span>
+              <select id="ns-b1" aria-label="Lock limits to" style={S.select} value={base.t} onChange={e => changeBase('t', Number(e.target.value))}>{opts}</select>
+              <span style={{ fontSize: 12, fontWeight: 600, color: '#1e3a8a', background: '#eff6ff', borderRadius: 999, padding: '2px 8px' }}>{BASE} points selected</span>
+            </div>
+          ) : (
+            <p style={S.hint}>Limits lock on your first 20 data points by default. You can change the dates once your data loads.</p>
+          )}
+        </div>
+        <p style={{ ...S.hint, margin: '6px 0 0' }}>Aim for 15 to 20 points from a recent stretch with no known changes, like a launch, a budget shift, or a tracking fix. Limits get reliable between 12 and 20 points, and more than 20 adds little.</p>
+        <Sources>
+          <L href="https://xmrit.com/manual/">Xmrit: User Manual</L>, <L href="https://xmrit.com/articles/why-you-need-to-lock-limits/">Xmrit: Why Locking Limits is Essential</L>, <L href="https://www.spcforexcel.com/knowledge/control-chart-basics/when-calculate-lock-and-recalculate-control-limits">SPC for Excel: When to Calculate, Lock, and Recalculate Control Limits</L>, <L href="https://www.wsh.nhs.uk/asset-library/making-data-count-the-essentials.pdf">NHS England: Making Data Count, The Essentials</L>
+        </Sources>
+      </section>
+
+      {results}
+
+      <Accordion title="How this is calculated" isOpen={!!open.calc} onToggle={() => toggle('calc')}>
+        <p style={{ margin: 0 }}>
+          1. Moving range: the absolute difference between each point and the one prior.<br />
+          2. Limits lock to your selected baseline (first 20 points by default) to keep new data from skewing your results.<br />
+          3. Average: the mean of the baseline points. With "Account for growth" on, a straight trend line fit to the baseline replaces the average. Baseline points outside the untrended limits are left out of the fit.<br />
+          4. Noise band: a variance threshold (what is considered normal based on your historical data) set at 2.66 times the average moving range above and below your baseline average (or trend line).<br />
+          5. Upper range limit: 3.268 times the average moving range. Volatility jumps are flagged, excluding false positives when data transitions directly back inside the noise band.
+        </p>
+        <Sources>
+          <L href="https://xmrit.com/articles/plot-xmr-chart-instructions/">Xmrit: How to Plot an XmR Chart</L>, <L href="https://xmrit.com/articles/why-you-need-to-lock-limits/">Xmrit: Why Locking Limits is Essential</L>, <L href="https://xmrit.com/articles/seasonality-and-trend-launch/">Xmrit: Trend and Seasonality Features</L>, <L href="https://www.qualitydigest.com/march97/html/spctool.html">Quality Digest: Good Limits From Bad Data</L>, <L href="https://xmrit.com/articles/how-often-measure-business-processes/">Xmrit: How Often Should You Measure Your Business Processes?</L>, <L href="https://xmrit.com/articles/saas-metrics-for-xmr-charts/">Xmrit: SaaS Metrics for XmR Charts</L>
+        </Sources>
+      </Accordion>
+
+      <Accordion title="How to read the signals & terminology" isOpen={!!open.signals} onToggle={() => toggle('signals')}>
+        <p style={{ ...S.sec, marginTop: 0 }}>How to read the signals</p>
+        <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 8px' }}>Flagged points use assigned visual markers. The alerts indicate the certainty of a real shift, not the magnitude of the change. When multiple rules are triggered at once, the system automatically surfaces the strongest alert.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: '0 0 6px' }}>
+          {[
+            [1, 'Strong', 'An outlier',
+              'One data point has broken outside the normal range, or the variation between consecutive points has exceeded normal thresholds.',
+              'A solid triangle indicates a data point has fallen entirely outside the shaded noise band. A hollow triangle marks a week that experienced an unusually large week-over-week shift, even if it remains within the normal band. To prevent redundant alerts, the week immediately following an out-of-band spike is not marked when it returns to the normal range, as this represents a stabilization rather than a new change.',
+              'The week of Jun 29 hit 108, well above the upper limit.',
+              'Find the cause. This is typically an isolated, one-time anomaly, so verify the root cause before taking corrective action.'],
+            [2, 'Moderate', 'A short run',
+              'Several points in a short stretch are hugging one edge of the normal range. No single point broke a limit, but together they are leaning one way.',
+              'Orange diamonds. Look at the dotted halfway lines between the average and each limit. When 3 of any 4 points in a row land past the same halfway line, they get flagged.',
+              'From Sep 7 to Oct 5, 5 weeks sat past the lower halfway line.',
+              'Treat it as an early warning. Find what changed at the start of the stretch.'],
+            [3, 'Weak', 'A long run',
+              'The metric stayed on one side of the average for 8 or more points in a row. Each point looks normal on its own, but the streak means the level moved.',
+              'Yellow squares. A streak of them above or below the center line.',
+              'From Aug 17 to Oct 5, 8 weeks in a row sat below the trend line.',
+              'Performance has likely shifted up or down. Find what changed when the streak began.'],
+          ].map(([k, lvl, aka, plain, where, sample, todo]) => (
+            <div key={k} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '10px 12px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6 }}>
+                <svg width="14" height="14" viewBox="-7 -7 14 14"><Mark x={0} y={0} t={k} ring="none" /></svg>
+                <b style={{ color: '#111827' }}>Rule {k}: {NAME[k]}</b>
+                <span style={{ fontSize: 11, fontWeight: 600, borderRadius: 999, padding: '1px 8px', background: BADGE[k][0], color: BADGE[k][1] }}>{lvl} signal</span>
+                <span style={{ fontSize: 12, color: '#6b7280', fontStyle: 'italic' }}>{aka}</span>
+              </div>
+              <dl style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: '4px 12px', margin: '8px 0 0', lineHeight: 1.5 }}>
+                {[['In plain terms', plain], ['Where to find it', where], ['In the sample', sample], ['What to do', todo]].map(([dt, dd]) => (
+                  <div key={dt} style={{ display: 'contents' }}>
+                    <dt style={{ fontWeight: 600, color: '#374151' }}>{dt}</dt>
+                    <dd style={{ margin: 0 }}>{dd}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
+          ))}
+        </div>
+        <p style={{ fontSize: 12, color: '#6b7280', margin: '6px 0 0' }}>Examples use the Syncflow Noise vs. Signal sample with "Account for growth" on.</p>
+        <p style={{ ...S.sec, paddingTop: 12, borderTop: '1px solid #e5e7eb' }}>Terminology</p>
+        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
+          <tbody>
+            {[
+              ['Noise', 'Typical ups and downs a metric shows when nothing has changed. Also called common cause variation. Think of weekend site traffic to a B2B page versus Tuesday 10:00 am traffic. Visible fluctuations, but the changes are expected/normal.'],
+              ['Signal', "A change that noise doesn't explain, so something likely happened. Also called special cause variation. Noteworthy change and should be investigated. Site traffic dropped by a large volume on a Tuesday at 10:00 am. Visible fluctuation that doesn’t match or resemble expected fluctuations."],
+              ['Noise band', 'The shaded band between your limits. Points within this area are standard background noise. They are expected, routine movements of a stable system.'],
+              ['Baseline', "The selected period of performance used to anchor your limits. By locking limits to this baseline, new data points can't shift your historical benchmarks."],
+              ['Locking limits', 'Freezing the average and the noise band at the values from your baseline. New points get judged against those fixed lines instead of moving them. Without locking, every new point shifts the limits, so a slow change can get absorbed into what looks normal.'],
+              ['Upper and lower limits', 'The edges of the noise band. The area you would consider “normal”'],
+              ['Average', 'The center line: the mean of the baseline points.'],
+              ['Trend line', 'Replaces the average when "Account for growth" is on. A straight line fit to the baseline.'],
+              ['Moving range', 'How much the metric changed from one point to the next.'],
+              ['Upper range limit', 'The largest point-to-point change that noise explains.'],
+              ['Last year', "The dotted line. Shown for context only. It doesn't affect the limits or the signals."],
+            ].map(([t, d]) => <tr key={t} style={{ borderTop: '1px solid #e5e7eb' }}><td style={S.th}>{t}</td><td style={S.td}>{d}</td></tr>)}
+          </tbody>
+        </table>
+        <Sources>
+          <L href="https://xmrit.com/manual/">Xmrit: User Manual</L>, <L href="https://xmrit.com/articles/why-you-need-to-lock-limits/">Xmrit: Why Locking Limits is Essential</L>, <L href="https://asq.org/quality-resources/variation">ASQ: What is the Law of Variation?</L>, <L href="https://staceybarr.com/?p=2746">Stacey Barr: 3 Essential Signals to Look for in Your KPIs</L>
+        </Sources>
+      </Accordion>
+
+      <Accordion title="10 things you should know about this analysis" isOpen={!!open.ten} onToggle={() => toggle('ten')}>
+        {[
+          ['Core Strategic Principles', [
+            'It separates "Signal" from "Noise": Daily shifts in digital marketing metrics (traffic, conversions, platform spend) are completely normal. This analysis draws a hard mathematical line so executives stop treating expected daily noise as a crisis.',
+            'It uses your X-Matrix as an operational shield: An X-Matrix maps your exact daily tasks (North Quadrant) to your primary 1-year goals (West Quadrant). It gives you a clear visual workflow to prove to executives exactly what high-impact work will stop if you are forced to pivot to an ad-hoc investigation.',
+            'It introduces "Common Cause" vs. "Special Cause" variation: Common cause variation is standard, everyday fluctuation (e.g., lower traffic on a Tuesday). Special cause variation is a massive, unexpected change (e.g., broken conversion pixels). You should only investigate special cause variations.',
+          ]],
+          ['Technical & Platform Execution', [
+            'Volatility depends entirely on the platform: Search engine traffic is typically stable, but paid ad platforms like Meta Ads are highly volatile. This analysis teaches leadership what normal fluctuation looks like for each channel, based on its own history.',
+            'The "Triage Window" must match your optimization cadence: You cannot optimize long-term marketing campaigns on a 24-hour horizon. This framework forces executives to move away from daily panic and focus on rolling 7-day, 14-day, or monthly averages.',
+            'Custom data guardrails can be built into your dashboards: You don\'t have to calculate this manually every day. You can use this logic to build shaded "control limits" directly into your reporting platforms (like Google Looker Studio) so charts visually show when data is in a safe zone.',
+          ]],
+          ['Team Dynamics & Executive Communication', [
+            'It changes the operational conversation to strategic trade-offs: Instead of answering a frantic question with "it could be anything, it\'s just noise," you pivot the conversation to focus on resource management: "We can audit this Tuesday drop, but it means pausing our high-impact Q3 landing page optimization."',
+            'Pre-written automation saves mental energy: Having a standard, automated triage script ready to go removes the anxiety of pushing back against leadership. It transforms a defensive reaction into a standardized, professional protocol.',
+            'It establishes a pre-approved "Threshold Rule": By getting executive buy-in on standard volatility ranges before the data drops, leadership agrees ahead of time that they will not request deep dives unless the data breaks outside its noise band.',
+            'It protects your team\'s most valuable asset velocity: Constantly shifting a digital marketing team back and forth between long-term campaign builds and daily data debugging kills momentum. Standardizing this boundary keeps your team focused on execution that drives real business pipeline.',
+          ]],
+        ].reduce((acc, [head, items]) => {
+          acc.out.push(
+            <div key={head}>
+              <h4 style={{ margin: '12px 0 6px', fontSize: 14, fontWeight: 600, color: '#111827' }}>{head}</h4>
+              <ul style={{ margin: 0, paddingLeft: 0, listStyle: 'none' }}>
+                {items.map((t, j) => (
+                  <li key={j} style={{ display: 'grid', gridTemplateColumns: '26px 1fr', margin: '0 0 6px' }}>
+                    <b style={{ color: '#111827' }}>{acc.i + j + 1}.</b><span>{t}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>,
+          );
+          acc.i += items.length;
+          return acc;
+        }, { i: 0, out: [] }).out}
+        <Sources>
+          <L href="https://docs.cloud.google.com/looker/docs/studio/add-reference-lines-and-reference-bands-to-charts">Looker Studio Help: Add reference lines and reference bands to charts</L>, <L href="https://umbrex.com/resources/frameworks/marketing-frameworks/leading-vs-lagging-indicators-framework/">Umbrex: Leading vs Lagging Indicators Framework</L>
+        </Sources>
+      </Accordion>
+
+      <Accordion title="Common noise culprits by channel" isOpen={!!open.channel} onToggle={() => toggle('channel')}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
+            <thead>
+              <tr style={{ textAlign: 'left', background: '#e7e5e4' }}>
+                <th style={{ padding: '8px 10px', fontWeight: 600, color: '#111827' }}>Channel Category</th>
+                <th style={{ padding: '8px 10px', fontWeight: 600, color: '#111827' }}>Typical "Noise" Culprit</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[
+                ['Brand Search & Direct', "Reporting delays, holiday shifts (yes, seasonality is a real thing even when some leadership may say 'seasonality doesn't affect us')"],
+                ['Generic Paid Search', 'Competitor budget changes, bidding strategy adjustments'],
+                ['Paid Social (Meta/LinkedIn)', 'Algorithm pacing, ad fatigue, creative testing pauses'],
+                ['Organic Content (SEO)', 'Broken tracking code, server downtime, major algorithm rollout'],
+              ].map(([a, b]) => <tr key={a} style={{ borderTop: '1px solid #e5e7eb' }}><td style={S.td}>{a}</td><td style={S.td}>{b}</td></tr>)}
+            </tbody>
+          </table>
+        </div>
+      </Accordion>
+
+      <Accordion title="What this tool adds" isOpen={!!open.adds} onToggle={() => toggle('adds')}>
+        <p style={{ margin: 0 }}>
+          1. A plain-English verdict on your latest data point: within the noise, possible shift, or investigate.<br />
+          2. A findings list that groups every signal by date range and rule.<br />
+          3. A growth toggle for teams that expect to grow, with a prompt to turn it on when your data is trending up.<br />
+          4. Built for marketing metrics, with a weekly sample dataset and channel guidance.<br />
+          5. A single spike is flagged once. The point that falls back inside the band right after it is not marked as a second big jump.
+        </p>
+      </Accordion>
+    </div>
+  );
+}
