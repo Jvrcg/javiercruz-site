@@ -48,7 +48,7 @@ export const tools = [
     label: 'Analytics',
     title: 'Noise vs Signal Calculator',
     description:
-      'Prevent overreacting to normal performance fluctuations.',
+      'Is the change within the data noise, or do you need to investigate it? Upload a CSV of any marketing metric and get a plain-English verdict, flagged signals, and limits locked to your baseline.',
     href: '/tools/noise-vs-signal',
     addedDate: '2026-10-23',
     linkText: 'Open the tool',
