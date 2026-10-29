@@ -155,8 +155,8 @@ function buildFindings(data, A, trend, unit) {
   const vr = (a, b) => { const xs = V.slice(a, b + 1); const lo = Math.min(...xs), hi = Math.max(...xs); return lo === hi ? `${lo}` : `${lo} to ${hi}`; };
   const when = i => (unit === 'week' ? `the week of ${lab[i]}` : lab[i]);
   const MEAN = {
-    p: 'Strong signal. This is outside the range routine variation produces, so look for a specific cause on these dates.',
-    m: `Strong signal. A change this big from one ${U} to the next is outside routine variation.`,
+    p: 'Strong signal. This is outside the range routine variation produces, so look for a specific cause on these dates, or any other event that could have affected the result.',
+    m: `Strong signal. A change this big from one ${U} to the next is outside routine variation, so look for a specific cause on this date, or any other event that could have affected the result.`,
     2: 'Moderate signal. Points are bunching up near one limit, which is often an early sign of a shift.',
     3: 'Weak signal on its own, but a run this long points to a sustained change in level.',
   };
@@ -461,7 +461,7 @@ export default function NoiseSignal() {
         )}
         <hr style={S.sep} />
         <p style={S.eyebrow}>Step 3</p>
-        <h3 style={S.title}>Lock your limits</h3>
+        <h3 style={S.title}>Lock your limits (set your baseline)</h3>
         <div>
           {data ? (
             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 6, fontSize: 13 }}>
@@ -485,11 +485,11 @@ export default function NoiseSignal() {
 
       <Accordion title="How this is calculated" isOpen={!!open.calc} onToggle={() => toggle('calc')}>
         <p style={{ margin: 0 }}>
-          1. Moving range: the absolute difference between each point and the one before it.<br />
-          2. Limits are locked on the points you choose (the baseline, the first 20 by default), so new points can't drag them around.<br />
+          1. Moving range: the absolute difference between each point and the one prior.<br />
+          2. Limits lock to your selected baseline (first 20 points by default) to keep new data from skewing your results.<br />
           3. Average: the mean of the baseline points. With "Account for growth" on, a straight trend line fit to the baseline replaces the average. Baseline points outside the untrended limits are left out of the fit.<br />
-          4. Noise band: the average (or trend line) plus or minus 2.66 times the average moving range.<br />
-          5. Upper range limit: 3.268 times the average moving range. A jump above it is flagged, except when a point is only falling back inside the band right after a point outside it.
+          4. Noise band: A variance threshold (what is considered normal based on your historical data) set at 2.66 times the average moving range above and below your baseline trend.<br />
+          5. Upper range limit: 3.268 times the average moving range. Volatility jumps are flagged, excluding false positives when data transitions directly back inside the baseline band.
         </p>
         <Sources>
           <L href="https://xmrit.com/articles/plot-xmr-chart-instructions/">Xmrit: How to Plot an XmR Chart</L>, <L href="https://xmrit.com/articles/why-you-need-to-lock-limits/">Xmrit: Why Locking Limits is Essential</L>, <L href="https://xmrit.com/articles/seasonality-and-trend-launch/">Xmrit: Trend and Seasonality Features</L>, <L href="https://www.qualitydigest.com/march97/html/spctool.html">Quality Digest: Good Limits From Bad Data</L>, <L href="https://xmrit.com/articles/how-often-measure-business-processes/">Xmrit: How Often Should You Measure Your Business Processes?</L>, <L href="https://xmrit.com/articles/saas-metrics-for-xmr-charts/">Xmrit: SaaS Metrics for XmR Charts</L>
@@ -498,14 +498,14 @@ export default function NoiseSignal() {
 
       <Accordion title="How to read the signals & terminology" isOpen={!!open.signals} onToggle={() => toggle('signals')}>
         <p style={{ ...S.sec, marginTop: 0 }}>How to read the signals</p>
-        <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 8px' }}>Each flagged point on the chart uses one of these markers. The strength tells you how sure you can be that something changed, not how big the change is. When a point trips more than one rule, it shows the strongest one.</p>
+        <p style={{ fontSize: 12, color: '#6b7280', margin: '0 0 8px' }}>Flagged points use assigned visual markers. The alerts indicate the certainty of a real shift, not the magnitude of the change. When multiple rules are triggered at once, the system automatically surfaces the strongest alert.</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10, margin: '0 0 6px' }}>
           {[
             [1, 'Strong', 'An outlier',
-              'One point landed outside the normal range, or the jump between two points was bigger than normal.',
-              'Red triangles. A solid triangle sits outside the shaded band. A hollow triangle marks a week that jumped unusually far from the week before, even if it is inside the band. The week right after a point outside the band is not marked when it falls back inside, because that jump is the spike ending, not a new change.',
+              'One data point has broken outside the normal range, or the variation between consecutive points has exceeded normal thresholds.',
+              'A solid triangle indicates a data point has fallen entirely outside the shaded baseline band. A hollow triangle marks a week that experienced an unusually large week-over-week shift, even if it remains within the normal band. (Note: This often highlights a data correction following a previous spike). To prevent redundant alerts, the week immediately following an out-of-band spike is not marked when it returns to the normal range, as this represents a stabilization rather than a new change.',
               'The week of Jun 29 hit 108, well above the upper limit.',
-              'Find the cause. It is often a one-time event, so look into it before reacting.'],
+              'Find the cause. this is typically an isolated, one-time anomaly, verify the root cause before taking corrective action.'],
             [2, 'Moderate', 'A short run',
               'Several points in a short stretch are hugging one edge of the normal range. No single point broke a limit, but together they are leaning one way.',
               'Orange diamonds. Look at the dotted halfway lines between the average and each limit. When 3 of any 4 points in a row land past the same halfway line, they get flagged.',
@@ -540,10 +540,10 @@ export default function NoiseSignal() {
         <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
           <tbody>
             {[
-              ['Noise', 'Typical ups and downs a metric shows when nothing has changed. Also called common cause variation. Think of weekend site traffic to a B2B page, versus Tuesday 10:00 am traffic.'],
-              ['Signal', "A change that noise doesn't explain, so something likely happened. Also called special cause variation. note worthy change and should be investigated. Site traffic dropped by a large volume on a Tuesday 10:00 am"],
-              ['Noise band', 'The shaded area between the lower and upper limits. Points inside it are noise.'],
-              ['Baseline', "The points the limits are locked on. New points can't move the limits."],
+              ['Noise', 'Typical ups and downs a metric shows when nothing has changed. Also called common cause variation. Think of weekend site traffic to a B2B page versus Tuesday 10:00 am traffic. Visible fluctuations, but the changes are expected/normal.'],
+              ['Signal', "A change that noise doesn't explain, so something likely happened. Also called special cause variation. Noteworthy change and should be investigated. Site traffic dropped by a large volume on a Tuesday at 10:00 am. Visible fluctuation that doesn’t match or resemble expected fluctuations."],
+              ['Noise band', 'The shaded baseline band between your limits. Points within this area are standard background noise, they are expected, routine movements of a stable system.'],
+              ['Baseline', "The selected period of performance used to anchor your limits. By locking limits to this baseline, new data points can't shift your historical benchmarks."],
               ['Locking limits', 'Freezing the average and the noise band at the values from your baseline. New points get judged against those fixed lines instead of moving them. Without locking, every new point shifts the limits, so a slow change can get absorbed into what looks normal.'],
               ['Upper and lower limits', 'The edges of the noise band. The area you would consider “normal”'],
               ['Average', 'The center line: the mean of the baseline points.'],
