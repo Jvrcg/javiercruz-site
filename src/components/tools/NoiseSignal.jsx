@@ -488,8 +488,8 @@ export default function NoiseSignal() {
           1. Moving range: the absolute difference between each point and the one prior.<br />
           2. Limits lock to your selected baseline (first 20 points by default) to keep new data from skewing your results.<br />
           3. Average: the mean of the baseline points. With "Account for growth" on, a straight trend line fit to the baseline replaces the average. Baseline points outside the untrended limits are left out of the fit.<br />
-          4. Noise band: A variance threshold (what is considered normal based on your historical data) set at 2.66 times the average moving range above and below your baseline trend.<br />
-          5. Upper range limit: 3.268 times the average moving range. Volatility jumps are flagged, excluding false positives when data transitions directly back inside the baseline band.
+          4. Noise band: a variance threshold (what is considered normal based on your historical data) set at 2.66 times the average moving range above and below your baseline average (or trend line).<br />
+          5. Upper range limit: 3.268 times the average moving range. Volatility jumps are flagged, excluding false positives when data transitions directly back inside the noise band.
         </p>
         <Sources>
           <L href="https://xmrit.com/articles/plot-xmr-chart-instructions/">Xmrit: How to Plot an XmR Chart</L>, <L href="https://xmrit.com/articles/why-you-need-to-lock-limits/">Xmrit: Why Locking Limits is Essential</L>, <L href="https://xmrit.com/articles/seasonality-and-trend-launch/">Xmrit: Trend and Seasonality Features</L>, <L href="https://www.qualitydigest.com/march97/html/spctool.html">Quality Digest: Good Limits From Bad Data</L>, <L href="https://xmrit.com/articles/how-often-measure-business-processes/">Xmrit: How Often Should You Measure Your Business Processes?</L>, <L href="https://xmrit.com/articles/saas-metrics-for-xmr-charts/">Xmrit: SaaS Metrics for XmR Charts</L>
@@ -503,9 +503,9 @@ export default function NoiseSignal() {
           {[
             [1, 'Strong', 'An outlier',
               'One data point has broken outside the normal range, or the variation between consecutive points has exceeded normal thresholds.',
-              'A solid triangle indicates a data point has fallen entirely outside the shaded baseline band. A hollow triangle marks a week that experienced an unusually large week-over-week shift, even if it remains within the normal band. (Note: This often highlights a data correction following a previous spike). To prevent redundant alerts, the week immediately following an out-of-band spike is not marked when it returns to the normal range, as this represents a stabilization rather than a new change.',
+              'A solid triangle indicates a data point has fallen entirely outside the shaded noise band. A hollow triangle marks a week that experienced an unusually large week-over-week shift, even if it remains within the normal band. To prevent redundant alerts, the week immediately following an out-of-band spike is not marked when it returns to the normal range, as this represents a stabilization rather than a new change.',
               'The week of Jun 29 hit 108, well above the upper limit.',
-              'Find the cause. this is typically an isolated, one-time anomaly, verify the root cause before taking corrective action.'],
+              'Find the cause. This is typically an isolated, one-time anomaly, so verify the root cause before taking corrective action.'],
             [2, 'Moderate', 'A short run',
               'Several points in a short stretch are hugging one edge of the normal range. No single point broke a limit, but together they are leaning one way.',
               'Orange diamonds. Look at the dotted halfway lines between the average and each limit. When 3 of any 4 points in a row land past the same halfway line, they get flagged.',
@@ -542,7 +542,7 @@ export default function NoiseSignal() {
             {[
               ['Noise', 'Typical ups and downs a metric shows when nothing has changed. Also called common cause variation. Think of weekend site traffic to a B2B page versus Tuesday 10:00 am traffic. Visible fluctuations, but the changes are expected/normal.'],
               ['Signal', "A change that noise doesn't explain, so something likely happened. Also called special cause variation. Noteworthy change and should be investigated. Site traffic dropped by a large volume on a Tuesday at 10:00 am. Visible fluctuation that doesn’t match or resemble expected fluctuations."],
-              ['Noise band', 'The shaded baseline band between your limits. Points within this area are standard background noise, they are expected, routine movements of a stable system.'],
+              ['Noise band', 'The shaded band between your limits. Points within this area are standard background noise. They are expected, routine movements of a stable system.'],
               ['Baseline', "The selected period of performance used to anchor your limits. By locking limits to this baseline, new data points can't shift your historical benchmarks."],
               ['Locking limits', 'Freezing the average and the noise band at the values from your baseline. New points get judged against those fixed lines instead of moving them. Without locking, every new point shifts the limits, so a slow change can get absorbed into what looks normal.'],
               ['Upper and lower limits', 'The edges of the noise band. The area you would consider “normal”'],
