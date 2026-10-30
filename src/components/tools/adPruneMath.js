@@ -93,6 +93,25 @@ export function num(v) {
   return Number.isFinite(n) ? n : 0;
 }
 
+// True when a cell reads as a number (blank and "-" count as numeric zero, the way exports show no data).
+export function isNumericCell(v) {
+  const s = String(v ?? '').replace(/[$€£,%\s]/g, '');
+  if (s === '' || s === '-' || s === '--') return true;
+  return Number.isFinite(Number(s));
+}
+
+// Share of non-blank cells in a column that are not numbers.
+export function textShare(rows, col) {
+  let filled = 0, bad = 0;
+  rows.forEach(r => {
+    const v = String(r[col] ?? '').trim();
+    if (v === '') return;
+    filled++;
+    if (!isNumericCell(v)) bad++;
+  });
+  return { filled, bad, share: filled ? bad / filled : 0 };
+}
+
 // Suggests a column for each field from header keywords. The user confirms every pick in the mapper.
 const GUESS = {
   adName: [/^ad name$/i, /creative name/i, /^ad$/i, /ad name/i, /^asset$/i, /asset text/i],

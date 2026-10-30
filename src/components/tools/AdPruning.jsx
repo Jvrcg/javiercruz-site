@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import {
-  decodeBuffer, parseCsv, num, guessMapping, analyze, whatToDo, stageVolume, toCsv, fmtN, kFor,
+  decodeBuffer, parseCsv, num, textShare, guessMapping, analyze, whatToDo, stageVolume, toCsv, fmtN, kFor,
   DEFAULT_FLOOR_IMPRESSIONS, DEFAULT_CONFIDENCE, DEFAULT_MIN_CLICKS, MIN_STAGE_VOLUME,
 } from './adPruneMath.js';
+import { PLATFORM_OBJECTIVES, objectiveNames, canonicalObjective, normKey } from './platformObjectives.js';
 
 // Ad Pruning Tool
 // Privacy rules:
@@ -16,12 +17,6 @@ const PLATFORMS = {
   linkedin: { label: 'LinkedIn Ads', type: 'social' },
   meta: { label: 'Meta Ads', type: 'social' },
   google: { label: 'Google Ads (Search)', type: 'search' },
-};
-
-// Objective names from each platform's own pages (sources listed under "How this is calculated").
-const OBJECTIVES = {
-  linkedin: ['Brand awareness', 'Website visits', 'Engagement', 'Video views', 'Lead generation', 'Website conversions', 'Job applicants'],
-  meta: ['Awareness', 'Traffic', 'Engagement', 'Leads', 'App promotion', 'Sales'],
 };
 
 const SAMPLES = {
@@ -103,6 +98,8 @@ const S = {
   seg: on => ({ fontSize: 13, padding: '6px 12px', border: '1px solid', borderColor: on ? '#2563eb' : '#d1d5db', background: on ? '#eff6ff' : '#fff', color: on ? '#1e3a8a' : '#374151', borderRadius: 8, cursor: 'pointer', fontWeight: on ? 600 : 400 }),
 };
 
+const NUMERIC = new Set(['impressions', 'clicks', 'spend', 'opens']);
+
 function fieldsFor(mode) {
   const F = [
     { k: 'adName', label: mode === 'assets' ? 'Asset text' : 'Ad name', req: true },
@@ -110,10 +107,8 @@ function fieldsFor(mode) {
     { k: 'campaign', label: 'Campaign', req: true },
     { k: 'group', label: mode === 'social' ? 'Ad set' : 'Ad group', req: false },
   ];
-  if (mode === 'social') {
-    F.push({ k: 'objective', label: 'Objective', req: false });
-    F.push({ k: 'audience', label: 'Audience (e.g. prospecting, retargeting)', req: false });
-  }
+  if (mode !== 'assets') F.push({ k: 'objective', label: mode === 'search' ? 'Campaign objective' : 'Objective', req: false });
+  if (mode === 'social') F.push({ k: 'audience', label: 'Audience (e.g. prospecting, retargeting)', req: false });
   if (mode === 'assets') F.push({ k: 'assetType', label: 'Asset type (headline or description)', req: true });
   F.push({ k: 'impressions', label: 'Impressions', req: true });
   F.push({ k: 'clicks', label: 'Clicks', req: true });
@@ -251,6 +246,16 @@ export default function AdPruning() {
 
   const missing = map ? fields.filter(f => f.req && !map[f.k]).map(f => f.label) : [];
   if (map && !(map.results || []).length) missing.push(mode === 'search' ? 'At least one conversion column' : 'At least one result column');
+  // Live check: numeric fields must hold numbers. Over half text in a column blocks the run.
+  const numChecks = useMemo(() => {
+    if (!raw || !map) return {};
+    const out = {};
+    fields.filter(f => NUMERIC.has(f.k) && map[f.k]).forEach(f => { out[f.k] = textShare(raw.rows, map[f.k]); });
+    (map.results || []).forEach(c => { out[`result:${c}`] = textShare(raw.rows, c); });
+    return out;
+  }, [raw, map, mode]);
+  const textBlocked = Object.entries(numChecks).filter(([, t]) => t.share > 0.5).map(([k]) => (k.startsWith('result:') ? k.slice(7) : fields.find(f => f.k === k)?.label || k));
+  if (textBlocked.length) missing.push(`Number columns that look like text: ${textBlocked.join(', ')}`);
   const mapped = !!map && missing.length === 0;
 
   // Normalized rows for every ad in the upload (all objectives).
@@ -275,13 +280,31 @@ export default function AdPruning() {
 
   const campaigns = useMemo(() => [...new Set(allRows.map(r => r.campaign))], [allRows]);
   const needAssign = mode === 'social' && mapped && !map.objective;
-  const objectiveOf = r => (mode !== 'social' ? 'All campaigns' : map.objective ? r.objective || '(no objective)' : assign[r.campaign] || '');
+  // Objective values are matched to the platform's official names (casing, spacing and API-style quirks).
+  // Unknown values are grouped by their normalized form and shown as first written.
+  const objInfo = useMemo(() => {
+    const seen = new Map();
+    const unofficial = new Set();
+    if (map?.objective) allRows.forEach(r => {
+      const c = canonicalObjective(platform, r.objective);
+      if (!c.name) return;
+      const k = normKey(c.name);
+      if (!seen.has(k)) seen.set(k, c.name);
+      if (!c.official) unofficial.add(seen.get(k));
+    });
+    return { seen, unofficial: [...unofficial] };
+  }, [allRows, map, platform]);
+  const objectiveOf = r => {
+    if (mode === 'assets') return 'All campaigns';
+    if (map.objective) { const c = canonicalObjective(platform, r.objective); return c.name ? objInfo.seen.get(normKey(c.name)) : '(no objective)'; }
+    return mode === 'search' ? 'All campaigns' : assign[r.campaign] || '';
+  };
   const objectives = useMemo(() => {
     if (!mapped) return [];
     return [...new Set(allRows.map(objectiveOf).filter(Boolean))];
-  }, [allRows, assign, mapped, mode]);
+  }, [allRows, assign, mapped, mode, objInfo]);
   const obj = objectives[Math.min(objIdx, Math.max(0, objectives.length - 1))];
-  const objRows = useMemo(() => allRows.filter(r => objectiveOf(r) === obj), [allRows, obj, assign]);
+  const objRows = useMemo(() => allRows.filter(r => objectiveOf(r) === obj), [allRows, obj, assign, objInfo]);
 
   const convLabel = resultCol || 'conversions';
   const analysis = useMemo(() => {
@@ -517,6 +540,39 @@ export default function AdPruning() {
                 </label>
               ))}
             </div>
+            {(() => {
+              const first = raw.rows.find(r => Object.values(r).some(v => String(v).trim() !== '')) || raw.rows[0];
+              const cols = fields.filter(f => map[f.k]).map(f => ({ key: f.k, label: f.label.replace(/ \(.*\)$/, ''), col: map[f.k], numeric: NUMERIC.has(f.k) }))
+                .concat((map.results || []).map(c => ({ key: `result:${c}`, label: c, col: c, numeric: true })));
+              if (!cols.length) return null;
+              return (
+                <div style={{ marginTop: 14 }}>
+                  <p style={{ fontSize: 13, color: '#111827', margin: '0 0 4px', fontWeight: 600 }}>Live preview: first row, as the tool reads it</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8 }}>
+                    {cols.map(c => {
+                      const rawV = String(first[c.col] ?? '');
+                      const chk = c.numeric ? numChecks[c.key] : null;
+                      const bad = c.numeric && chk && chk.bad > 0;
+                      const isText = c.numeric && rawV.trim() !== '' && !Number.isFinite(Number(rawV.replace(/[$€£,%\s]/g, '')));
+                      let shown = rawV || '(blank)';
+                      if (c.numeric) shown = isText ? `"${rawV}" is text` : num(rawV).toLocaleString('en-US');
+                      if (c.key === 'objective' && rawV) {
+                        const co = canonicalObjective(platform, rawV);
+                        shown = co.official && co.name !== rawV ? `${co.name} (from "${rawV}")` : co.official ? co.name : `${rawV} (not official)`;
+                      }
+                      return (
+                        <div key={c.key} style={{ border: `1px solid ${bad ? '#fecaca' : '#e5e7eb'}`, background: bad ? '#fef2f2' : '#fff', borderRadius: 8, padding: '6px 8px', fontSize: 12, minWidth: 0 }}>
+                          <span style={{ display: 'block', fontSize: 11, color: bad ? '#991b1b' : '#6b7280' }}>{c.label}{c.numeric ? ' (#)' : ''} <span style={{ color: '#9b9a97' }}>| {c.col}</span></span>
+                          <span style={{ display: 'block', color: bad ? '#991b1b' : '#111827', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={shown}>{shown}</span>
+                          {bad && <span style={{ display: 'block', fontSize: 11, color: '#991b1b' }}>{chk.bad} of {chk.filled} rows are text</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <p style={{ ...S.hint, margin: '4px 0 0' }}>(#) = read as a number. Red means a number field is pulling in text, so the column is probably mapped wrong.</p>
+                </div>
+              );
+            })()}
             {missing.length > 0 && <p style={{ color: '#b91c1c', fontSize: 13, margin: '10px 0 0' }}>Still needed: {missing.join(', ')}.</p>}
           </div>
         ) : (
@@ -534,7 +590,7 @@ export default function AdPruning() {
                 <span style={{ flex: '1 1 260px', color: '#111827' }}>{c}</span>
                 <select style={S.select} value={assign[c] || ''} onChange={e => { setAssign(a => ({ ...a, [c]: e.target.value })); setObjIdx(0); }}>
                   <option value="">(skip)</option>
-                  {OBJECTIVES[platform].map(opt)}
+                  {objectiveNames(platform).map(opt)}
                 </select>
               </div>
             ))}
@@ -547,7 +603,7 @@ export default function AdPruning() {
             <p style={S.eyebrow}>Step 4</p>
             <h3 style={S.title}>Set the analysis</h3>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 24px', fontSize: 13, color: '#111827' }}>
-              {mode === 'social' && (
+              {(mode === 'social' || objectives.length > 1) && (
                 <label style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
                   Objective
                   <select style={S.select} value={obj} onChange={e => { setObjIdx(objectives.indexOf(e.target.value)); setHover(null); }}>
@@ -588,6 +644,11 @@ export default function AdPruning() {
                 </label>
               )}
             </div>
+            {objInfo.unofficial.length > 0 && (
+              <div style={{ ...S.warn, marginTop: 10 }}>
+                Not on {PLATFORM_OBJECTIVES[platform].label}'s official objective list, so kept exactly as written: {objInfo.unofficial.join(', ')}. Check that the platform and the objective column are right.
+              </div>
+            )}
             <p style={{ ...S.hint, margin: '8px 0 0' }}>
               {mode === 'social'
                 ? "Floor default: 10,000 impressions per ad and audience. This is Javier Cruz Galera's practitioner rule, not an industry benchmark. Change it to match your own."
@@ -620,7 +681,7 @@ export default function AdPruning() {
           8. Account average: every ad in your upload, across objectives. It is context only and never decides a verdict.
         </p>
         <Sources>
-          <L href="https://opteo.com/docs/en/articles/11769301-pause-keyword">Opteo: Pause Keyword (3-conversion minimum)</L>, <L href="https://support.google.com/google-ads/answer/10285843?hl=en">Google Ads Help: Smart Bidding guidance</L>, <L href="https://www.understoryagency.com/blog/google-ads-optimization-b2b-saas">Understory: Google Ads optimization for B2B SaaS</L>, <L href="https://lionelz.com/en/blog/google-ads-b2b-conversiones-offline/">Lionel Fenestraz: Google Ads B2B lead quality and offline conversions</L>, <L href="https://support.google.com/google-ads/answer/9564897">Google Ads Help: Ad-level asset report for responsive search ads</L>, <L href="https://www.linkedin.com/help/linkedin/answer/107773">LinkedIn Help: Reports available to export in Campaign Manager</L>, <L href="https://business.linkedin.com/advertise/ads/how-to-advertise-on-linkedin">LinkedIn: How to advertise on LinkedIn (objectives)</L>, <L href="https://www.jonloomer.com/meta-campaign-objectives-best-practices/">Jon Loomer: Meta campaign objectives</L>
+          <L href="https://opteo.com/docs/en/articles/11769301-pause-keyword">Opteo: Pause Keyword (3-conversion minimum)</L>, <L href="https://support.google.com/google-ads/answer/10285843?hl=en">Google Ads Help: Smart Bidding guidance</L>, <L href="https://www.understoryagency.com/blog/google-ads-optimization-b2b-saas">Understory: Google Ads optimization for B2B SaaS</L>, <L href="https://lionelz.com/en/blog/google-ads-b2b-conversiones-offline/">Lionel Fenestraz: Google Ads B2B lead quality and offline conversions</L>, <L href="https://support.google.com/google-ads/answer/9564897">Google Ads Help: Ad-level asset report for responsive search ads</L>, <L href="https://www.linkedin.com/help/linkedin/answer/107773">LinkedIn Help: Reports available to export in Campaign Manager</L>, <L href="https://business.linkedin.com/advertise/ads/how-to-advertise-on-linkedin">LinkedIn: How to advertise on LinkedIn (objectives)</L>, <L href="https://www.jonloomer.com/meta-campaign-objectives-best-practices/">Jon Loomer: Meta campaign objectives</L>, <L href="https://support.google.com/google-ads/answer/7450050">Google Ads Help: About campaign objectives</L>, <L href="https://www.linkedin.com/help/lms/answer/a424570">LinkedIn Help: Marketing objectives</L>
         </Sources>
       </Accordion>
     </div>
