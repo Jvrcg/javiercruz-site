@@ -55,4 +55,15 @@ export const tools = [
     secondaryHref: null,
     secondaryText: null,
   },
+  {
+    label: 'Paid Media',
+    title: 'Ad Pruning Tool',
+    description:
+      'Upload an ad platform export and see which ads to turn off, which to keep, and which need more volume before anyone makes a call. Built for LinkedIn, Meta, and Google Ads exports. 100% client-side.',
+    href: '/tools/ad-pruning',
+    addedDate: '2026-10-30',
+    linkText: 'Open the tool',
+    secondaryHref: null,
+    secondaryText: null,
+  },
 ];

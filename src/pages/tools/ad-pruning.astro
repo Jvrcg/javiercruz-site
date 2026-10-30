@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import AdPruning from '../../components/tools/AdPruning.jsx';
+
+const subheading = 'Know which ads to turn off, and which ones still need time';
+const description = 'Upload an ad platform export. The tool flags ads to turn off, ads to keep, and ads that do not have enough volume yet to judge, so nothing gets cut on a hunch.';
+
+const softwareSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: 'Ad Pruning Tool',
+  description,
+  applicationCategory: 'BusinessApplication',
+  operatingSystem: 'Web',
+  url: 'https://jjcruzgalera.com/tools/ad-pruning',
+  author: {
+    '@type': 'Person',
+    name: 'Javier Cruz Galera',
+    url: 'https://jjcruzgalera.com',
+  },
+  offers: {
+    '@type': 'Offer',
+    price: '0',
+    priceCurrency: 'USD',
+  },
+};
+---
+
+<BaseLayout
+  title="Ad Pruning Tool: Which Ads to Turn Off, Keep, or Wait On"
+  description={description}
+>
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(softwareSchema)} />
+  </Fragment>
+  <article class="max-w-4xl mx-auto px-6 py-20">
+    <header class="mb-10">
+      <p class="text-blue-600 font-medium text-sm tracking-wide uppercase mb-3">Tools</p>
+      <h1 class="text-4xl font-bold text-gray-900 leading-tight mb-4">
+        Ad Pruning Tool
+      </h1>
+      <h2 class="text-xl font-normal text-gray-700 leading-snug mb-4">
+        {subheading}
+      </h2>
+      <p class="text-gray-600 leading-relaxed">
+        {description}
+      </p>
+    </header>
+
+    <AdPruning client:load />
+  </article>
+</BaseLayout>
