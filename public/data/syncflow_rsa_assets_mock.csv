@@ -1,15 +1,15 @@
 Campaign,Ad group,Ad ID,Asset,Asset type,Impressions,Clicks,Cost,Conversions
-Syncflow | Search | ETL Tools,ETL tool,71200313,Automate Your Data Pipelines,Headline,18400,1178,11544.40,100
-Syncflow | Search | ETL Tools,ETL tool,71200313,500+ Prebuilt Connectors,Headline,17100,1129,11064.20,94
-Syncflow | Search | ETL Tools,ETL tool,71200313,Start a Free 14-Day Trial,Headline,15900,970,9506.00,87
-Syncflow | Search | ETL Tools,ETL tool,71200313,Enterprise-Grade Data Platform,Headline,14800,888,8702.40,21
-Syncflow | Search | ETL Tools,ETL tool,71200313,Syncflow Official Site,Headline,4100,238,2332.40,19
-Syncflow | Search | ETL Tools,ETL tool,71200313,Move data from any source to your warehouse in minutes. No code required.,Description,19800,1247,12220.60,102
-Syncflow | Search | ETL Tools,ETL tool,71200313,SOC 2 Type II certified. Trusted by data teams at fast-growing companies.,Description,17300,1073,10515.40,86
-Syncflow | Search | Data Pipeline,Data pipeline software,71200378,Data Pipelines Without the Upkeep,Headline,22600,1175,13160.00,87
-Syncflow | Search | Data Pipeline,Data pipeline software,71200378,Connect Any Source in Minutes,Headline,20900,1045,11704.00,74
-Syncflow | Search | Data Pipeline,Data pipeline software,71200378,See Pricing and Plans,Headline,19300,1042,11670.40,30
-Syncflow | Search | Data Pipeline,Data pipeline software,71200378,Built for Data Engineers,Headline,17800,872,9766.40,63
-Syncflow | Search | Data Pipeline,Data pipeline software,71200378,Book a 20-Minute Demo,Headline,5200,244,2732.80,20
-Syncflow | Search | Data Pipeline,Data pipeline software,71200378,Stop maintaining brittle scripts. Syncflow keeps every pipeline running.,Description,23400,1193,13361.60,87
-Syncflow | Search | Data Pipeline,Data pipeline software,71200378,"Pricing that scales with usage. Start free, upgrade when you need to.",Description,21800,1134,12700.80,45
+Syncflow | Search | Approval Workflow,Approval workflow software,71200313,"Approvals in Minutes, Not Days",Headline,19100,1242,11053.80,107
+Syncflow | Search | Approval Workflow,Approval workflow software,71200313,Route Every Request Automatically,Headline,17800,1139,10137.10,95
+Syncflow | Search | Approval Workflow,Approval workflow software,71200313,Start a Free 14-Day Trial,Headline,16400,1017,9051.30,92
+Syncflow | Search | Approval Workflow,Approval workflow software,71200313,Enterprise Workflow Platform,Headline,15200,927,8250.30,23
+Syncflow | Search | Approval Workflow,Approval workflow software,71200313,Syncflow Official Site,Headline,4300,249,2216.10,20
+Syncflow | Search | Approval Workflow,Approval workflow software,71200313,"Build approval flows for spend, contracts, and vendors without writing code.",Description,20500,1312,11676.80,108
+Syncflow | Search | Approval Workflow,Approval workflow software,71200313,Audit-ready logs for every approval. Built for finance and operations teams.,Description,18100,1140,10146.00,91
+Syncflow | Search | Purchase Orders,Purchase order software,71200378,Purchase Orders Without the Back-and-Forth,Headline,23300,1212,12604.80,91
+Syncflow | Search | Purchase Orders,Purchase order software,71200378,Match POs to Invoices Automatically,Headline,21600,1080,11232.00,78
+Syncflow | Search | Purchase Orders,Purchase order software,71200378,See Pricing and Plans,Headline,19900,1075,11180.00,31
+Syncflow | Search | Purchase Orders,Purchase order software,71200378,Built for Procurement Teams,Headline,18400,902,9380.80,66
+Syncflow | Search | Purchase Orders,Purchase order software,71200378,Book a 20-Minute Demo,Headline,5400,254,2641.60,21
+Syncflow | Search | Purchase Orders,Purchase order software,71200378,Stop chasing approvals by email. Syncflow routes every PO to the right approver.,Description,24100,1229,12781.60,91
+Syncflow | Search | Purchase Orders,Purchase order software,71200378,"Pricing that scales with your team. Start free, upgrade when you need to.",Description,22500,1170,12168.00,48

@@ -1,16 +1,18 @@
 Campaign,Objective,Ad set,Audience,Ad name,Ad ID,Impressions,Clicks,Spend,Conversions,Form opens
-Syncflow | Lead Gen | Data Engineers,Lead generation,Data Eng | Job Titles,Prospecting,ELT benchmark report | Static,9100107,48200,299,1831.60,48,126
-Syncflow | Lead Gen | Data Engineers,Lead generation,Data Eng | Job Titles,Prospecting,ELT benchmark report | Carousel,9100114,41800,242,1630.20,36,99
-Syncflow | Lead Gen | Data Engineers,Lead generation,Data Eng | Job Titles,Prospecting,Pipeline cost calculator | Static,9100121,36500,77,1460.00,12,31
-Syncflow | Lead Gen | Data Engineers,Lead generation,Data Eng | Job Titles,Prospecting,Schema drift guide | Video,9100128,6200,30,229.40,4,12
-Syncflow | Lead Gen | Data Engineers,Lead generation,Data Eng | Skills,Prospecting,ELT benchmark report | Static,9100135,29400,162,1205.40,23,68
-Syncflow | Lead Gen | Data Engineers,Lead generation,Data Eng | Skills,Prospecting,Connector checklist | Document,9100142,27100,163,1138.20,6,65
-Syncflow | Lead Gen | Data Engineers,Lead generation,Data Eng | Skills,Prospecting,Connector checklist | Static,9100149,3100,14,124.00,1,6
-Syncflow | Lead Gen | Retargeting,Lead generation,Site Visitors 90d,Retargeting,Free trial | Static,9100156,15800,144,821.60,35,69
-Syncflow | Lead Gen | Retargeting,Lead generation,Site Visitors 90d,Retargeting,Free trial | Testimonial video,9100163,14200,124,752.60,27,58
-Syncflow | Lead Gen | Retargeting,Lead generation,Site Visitors 90d,Retargeting,Demo request | Static,9100170,12100,97,665.50,16,44
-Syncflow | Lead Gen | Retargeting,Lead generation,Site Visitors 90d,Retargeting,Customer story | Carousel,9100177,4400,31,224.40,6,14
-Syncflow | Website Conversions | Analytics Leaders,Website conversions,Analytics Leaders | Seniority,Prospecting,Demo page | Static,9100184,38900,198,1711.60,12,
-Syncflow | Website Conversions | Analytics Leaders,Website conversions,Analytics Leaders | Seniority,Prospecting,Demo page | Thought leader ad,9100191,33600,242,1512.00,16,
-Syncflow | Website Conversions | Analytics Leaders,Website conversions,Analytics Leaders | Seniority,Prospecting,ROI calculator | Static,9100198,30200,148,1389.20,2,
-Syncflow | Website Conversions | Analytics Leaders,Website conversions,Analytics Leaders | Seniority,Prospecting,ROI calculator | Video,9100205,8700,41,382.80,2,
+Syncflow | Lead Gen | Finance Leaders,Lead generation,Finance | Job Titles,Prospecting,Month-end close checklist | Static,9100107,52400,320,2148.40,55,144
+Syncflow | Lead Gen | Finance Leaders,Lead generation,Finance | Job Titles,Prospecting,Month-end close checklist | Carousel,9100114,44100,251,1852.20,40,110
+Syncflow | Lead Gen | Finance Leaders,Lead generation,Finance | Job Titles,Prospecting,Approval bottlenecks report | Static,9100121,38800,74,1590.80,12,33
+Syncflow | Lead Gen | Finance Leaders,Lead generation,Finance | Job Titles,Prospecting,CFO roundtable recap | Video,9100128,6400,33,256.00,5,14
+Syncflow | Lead Gen | Finance Leaders,Lead generation,Finance | Skills,Prospecting,Spend policy template | Static,9100135,31200,181,1341.60,30,81
+Syncflow | Lead Gen | Finance Leaders,Lead generation,Finance | Skills,Prospecting,Spend policy template | Document,9100142,28900,173,1271.60,7,76
+Syncflow | Lead Gen | Finance Leaders,Lead generation,Finance | Skills,Prospecting,AP automation calculator | Static,9100149,3300,16,138.60,2,7
+Syncflow | Lead Gen | Retargeting,Lead generation,Site Visitors 90d,Retargeting,Free trial | Static,9100156,16900,159,912.60,42,80
+Syncflow | Lead Gen | Retargeting,Lead generation,Site Visitors 90d,Retargeting,Free trial | Customer video,9100163,15300,136,841.50,33,67
+Syncflow | Lead Gen | Retargeting,Lead generation,Site Visitors 90d,Retargeting,Demo request | Static,9100170,13400,111,750.40,19,52
+Syncflow | Lead Gen | Retargeting,Lead generation,Site Visitors 90d,Retargeting,Customer story | Carousel,9100177,4700,33,249.10,7,15
+Syncflow | Website Conversions | Operations Leaders,Website conversions,Ops Leaders | Seniority,Prospecting,Book a demo | Static,9100184,41200,214,1895.20,13,
+Syncflow | Website Conversions | Operations Leaders,Website conversions,Ops Leaders | Seniority,Prospecting,Book a demo | Thought leader ad,9100191,35800,254,1682.60,17,
+Syncflow | Website Conversions | Operations Leaders,Website conversions,Ops Leaders | Seniority,Prospecting,Pricing page | Static,9100198,32400,162,1490.40,2,
+Syncflow | Website Conversions | Operations Leaders,Website conversions,Ops Leaders | Seniority,Prospecting,Book a demo | Conversation ad,9100205,18600,99,2194.80,6,
+Syncflow | Website Conversions | Operations Leaders,Website conversions,Ops Leaders | Seniority,Prospecting,Workflow template gallery | Video,9100212,8900,43,400.50,2,
+Syncflow | Website Conversions | Operations Leaders,Website conversions,Ops Leaders | Company Size,Prospecting,Approval audit | Static,9100219,24600,135,1082.40,8,
